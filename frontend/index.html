@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Home server</title>
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
+    <link rel="apple-touch-icon-precomposed" type="image/png" href="images/favicon.png"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="js/components/Spinner.component.css" rel="stylesheet">
+</head>
+<body>
+    <div id="page">
+        <div class="navbar navbar-default navbar-static-top navbar-inverse">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-menu">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">Home Server</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu">
+                    <nav>
+                        <ul class="nav navbar-nav">
+                            <li><router-link :to="{name: 'movies'}">Movies</router-link></li>
+                            <li><router-link :to="{name: 'dashboard'}">Status</router-link></li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <router-view></router-view>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/accounting.js/0.4.1/accounting.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.1/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.5.3/vue-router.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="js/components/JsonService.js"></script>
+    <script src="js/components/Currency.filter.js"></script>
+    <script src="js/components/Date.filter.js"></script>
+    <script src="js/components/Habit.model.js"></script>
+    <script src="js/components/Account.model.js"></script>
+    <script src="js/components/Transaction.model.js"></script>
+    <script src="js/components/SavingsTarget.model.js"></script>
+    <script src="js/components/AccountsService.js"></script>
+    <script src="js/components/HabitsService.js"></script>
+    <script src="js/components/TransactionsService.js"></script>
+    <script src="js/components/Spinner.component.js"></script>
+    <script src="js/components/AccountListItem.component.js"></script>
+    <script src="js/components/AccountList.component.js"></script>
+    <script src="js/components/TransactionList.component.js"></script>
+    <script src="js/components/AccountVariation.component.js"></script>
+    <script src="js/components/AccountsBalanceGraph.component.js"></script>
+    <script src="js/components/Movie.model.js"></script>
+    <script src="js/components/MoviesService.js"></script>
+    <script src="js/components/MovieActions.component.js"></script>
+    <script src="js/components/MovieCover.component.js"></script>
+    <script src="js/components/Dashboard.component.js"></script>
+    <script src="js/components/HabitsPanel.component.js"></script>
+    <script src="js/components/FinancesPanel.component.js"></script>
+    <script src="js/components/Movies.component.js"></script>
+    <script src="js/routes.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
