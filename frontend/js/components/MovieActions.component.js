@@ -7,7 +7,7 @@ const MovieActionsComponent = Vue.component('movie-actions', {
   },
   methods: {
     play: function(part) {
-      window.location.href = part.playbackUrl;
+      this.$router.push({ name: 'movies', params: { partId: part.id } });
     },
     markAsWatched: function(part) {
       new MoviesService().markAsWatched(part.id).then(() => {

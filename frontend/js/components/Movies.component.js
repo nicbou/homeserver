@@ -8,6 +8,16 @@ const MoviesComponent = Vue.component('movies', {
     }
   },
   computed: {
+    selectedPart: function() {
+      console.log(this.movies, this.$route.params.partId, this.movies
+        .map(movie => movie.parts)
+        .reduce((allParts, parts) => allParts.concat(parts), [])
+        .find(part => part.id == this.$route.params.partId))
+      return this.movies
+        .map(movie => movie.parts)
+        .reduce((allParts, parts) => allParts.concat(parts), [])
+        .find(part => part.id == this.$route.params.partId);
+    },
     trimmedQuery: function() {
       return this.query.trim().toLocaleLowerCase();
     },
@@ -17,7 +27,6 @@ const MoviesComponent = Vue.component('movies', {
           return movie.title.toLocaleLowerCase().includes(this.trimmedQuery)
             || movie.description.toLocaleLowerCase().includes(this.trimmedQuery)
         });
-        console.log(movies);
         return movies
       }
       return this.movies;
@@ -39,6 +48,7 @@ const MoviesComponent = Vue.component('movies', {
   },
   template: `
     <div id="movies">
+        <player v-if="selectedPart" :part="selectedPart"></player>
         <h2 v-if="unfinishedMovies.length > 0">Unfinished movies</h2>
         <div class="row" v-if="unfinishedMovies.length > 0">
             <div class="col-md-3 col-xs-6" v-for="movie in unfinishedMovies">
