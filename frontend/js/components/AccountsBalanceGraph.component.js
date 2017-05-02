@@ -136,20 +136,22 @@ const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
       } else {
         this.$emit('date-selected', moment());
       } 
-    }
-  },
-  mounted: function() {
-    // Load the Visualization API and the piechart package.
-    google.load('visualization', '1.0', {'packages':['corechart']});
-
-    // Set a callback to run when the Google Visualization API is loaded.
-    google.setOnLoadCallback(() => {
+    },
+    drawChart() {
       this.chart = new google.visualization.AreaChart(this.$el);
 
       google.visualization.events.addListener(this.chart, 'select', () => {
         this.dateSelected();
       });
-    });
+    }
+  },
+  mounted: function() {
+    if (google.visualization) {
+      this.drawChart();
+    } else {
+      google.load('visualization', '1.0', {'packages':['corechart']});
+      google.setOnLoadCallback(this.drawChart);
+    }
 
     this.$nextTick(function() {
       window.addEventListener('resize', () => { this.updateChart(true); });
