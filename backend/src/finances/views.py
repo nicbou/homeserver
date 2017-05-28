@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from models import Account
 from django.core.serializers.json import DjangoJSONEncoder
+from utils.views import LoginRequiredMixin, JsonResponse
 
 
 class JSONAccountListView(LoginRequiredMixin, View):
