@@ -1,8 +1,8 @@
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, '/srv/static/').replace('\\','/')
-MEDIA_ROOT = os.path.join(BASE_DIR, '/srv/media/').replace('\\','/')
+STATIC_ROOT = os.path.join(BASE_DIR, '/srv/static/').replace('\\', '/')
+MEDIA_ROOT = os.path.join(BASE_DIR, '/srv/media/').replace('\\', '/')
 
 
 # Quick-start development settings - unsuitable for production
@@ -39,7 +39,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -57,7 +57,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database

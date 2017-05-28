@@ -1,0 +1,11 @@
+from django.conf.urls import include, url
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib import admin
+from finances.views import JSONAccountListView
+
+urlpatterns = [
+    url(r'^accounts$', JSONAccountListView.as_view(), name='accounts_json'),
+    url(r'^transactions$', JSONTransactionListView.as_view(), name='transactions_json'),
+    url(r'^admin/', include(admin.site.urls)),
+]
+urlpatterns += staticfiles_urlpatterns()

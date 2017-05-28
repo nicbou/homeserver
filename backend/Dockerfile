@@ -7,9 +7,9 @@ RUN apt-get install -y python python-pip
 
 # Set env variables used in this Dockerfile (add a unique prefix, such as DOCKYARD)
 # Local directory with project source
-ENV DOCKYARD_SRC=code
+ENV DOCKYARD_SRC=src
 ENV DOCKYARD_SRVHOME=/srv
-ENV DOCKYARD_SRVPROJ=/srv/code
+ENV DOCKYARD_SRVPROJ=/srv/src
 
 # Create application subdirectories
 WORKDIR $DOCKYARD_SRVHOME
