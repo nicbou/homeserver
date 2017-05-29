@@ -21,3 +21,20 @@ class JSONHabitListView(LoginRequiredMixin, View):
             })
 
         return JsonResponse(json.dumps({'habits': json_habits}, cls=DjangoJSONEncoder))
+
+
+class JSONHabitToggleView(View):
+    def post(self, request, *args, **kwargs):
+        habit = get_object_or_404(Habit, pk=kwargs.get('id'))
+        date = datetime.strptime(kwargs.get('date'), "%Y-%m-%d")
+        next_day = date + timedelta(1)
+        occurence = habit.occurences.filter(date__gte=date, date__lt=next_day)
+
+        day_successful = False
+        if occurence:
+            occurence.delete()
+        else:
+            day_successful = True
+            habit.occurences.create(date=date)
+
+        return JsonResponse(json.dumps({'status': day_successful}))
