@@ -1,7 +1,7 @@
 class MoviesService extends JsonService {
   getMovies() {
     return new Promise((resolve, reject) => {
-      this.getJson('http://home.nicolasbouliane.com/player/movies').then(
+      this.getJson(`${API_URL}/movies`).then(
         (responseJson) => {
           const movies = responseJson.movies.map(movie => new Movie(movie));
           resolve(movies);
@@ -15,7 +15,7 @@ class MoviesService extends JsonService {
 
   markAsWatched(id) {
     return new Promise((resolve, reject) => {
-      this.post(`http://home.nicolasbouliane.com/player/movies/${id}/watched/`).then(
+      this.post(`${API_URL}/movies/${id}/watched/`).then(
         (responseJson) => { resolve(); },
         (responseJson) => { reject(); }
       );
@@ -24,7 +24,7 @@ class MoviesService extends JsonService {
 
   markAsUnwatched(id) {
     return new Promise((resolve, reject) => {
-      this.post(`http://home.nicolasbouliane.com/player/movies/${id}/unwatched/`).then(
+      this.post(`${API_URL}/movies/${id}/unwatched/`).then(
         (responseJson) => { resolve(); },
         (responseJson) => { reject(); }
       );
@@ -33,7 +33,7 @@ class MoviesService extends JsonService {
 
   delete(id) {
     return new Promise((resolve, reject) => {
-      this.post(`http://home.nicolasbouliane.com/player/delete/${id}/`).then(
+      this.post(`${API_URL}/player/delete/${id}/`).then(
         (responseJson) => { resolve(); },
         (responseJson) => { reject(); }
       );

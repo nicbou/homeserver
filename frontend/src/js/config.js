@@ -1,0 +1,1 @@
+const API_URL = 'http://home.nicolasbouliane.com/api';
