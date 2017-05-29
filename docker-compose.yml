@@ -1,0 +1,22 @@
+version: '2'
+services:
+  db:
+    image: postgres
+    #volumes:
+    #  - /var/homeserver/database:/var/lib/postgresql/data
+  backend:
+    build: backend
+    depends_on:
+      - db
+    environment:
+      - BACKEND_DEBUG
+      - BACKEND_SECRET_KEY
+  frontend:
+    build: frontend
+  proxy:
+    build: proxy
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from utils.views import LoginRequiredMixin, JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from models import Habit, HabitOccurence
+from django.views import View
 
 
 class JSONHabitListView(LoginRequiredMixin, View):
