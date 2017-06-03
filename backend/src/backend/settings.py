@@ -7,7 +7,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, '/srv/media/').replace('\\', '/')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
-DEBUG = os.environ.get('BACKEND_DEBUG', False)
+DEBUG = os.environ.get('BACKEND_DEBUG', False) == '1'
 
 ALLOWED_HOSTS = ['*']
 

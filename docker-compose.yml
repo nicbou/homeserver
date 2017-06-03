@@ -2,8 +2,10 @@ version: '2'
 services:
   db:
     image: postgres
-    #volumes:
-    #  - /var/homeserver/database:/var/lib/postgresql/data
+    environment:
+      - DB_PERSISTENCE_PATH
+    volumes:
+      - ${DB_PERSISTENCE_PATH}:/var/lib/postgresql/data
   backend:
     build: backend
     depends_on:
