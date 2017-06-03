@@ -37,7 +37,7 @@ class Balance(models.Model):
 class Transaction(models.Model):
     transaction_id = models.CharField(max_length=50, unique=True)
     account = models.ForeignKey(Account)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField()
     date = models.DateField()
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=True)

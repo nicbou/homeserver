@@ -2,3 +2,5 @@ Django==1.11
 gunicorn==19.3.0
 psycopg2
 django-tokenapi
+requests==2.17.3
+selenium==2.43.0

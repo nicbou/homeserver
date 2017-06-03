@@ -1,10 +1,13 @@
 import os
 
+# ==================================================
+# Django stuff
+# ==================================================
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, '/srv/static/').replace('\\', '/')
 MEDIA_ROOT = os.path.join(BASE_DIR, '/srv/media/').replace('\\', '/')
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
 DEBUG = os.environ.get('BACKEND_DEBUG', False) == '1'
@@ -61,18 +64,24 @@ AUTHENTICATION_BACKENDS = [
 
 ROOT_URLCONF = 'backend.urls'
 WSGI_APPLICATION = 'backend.wsgi.application'
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'mydatabase',
     },
 }
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
 STATIC_URL = '/static/'
+
+# ==================================================
+# App-specific stuff
+# ==================================================
+
+COMMERZBANK_ACCOUNT_NUMBER = os.environ.get('COMMERZBANK_ACCOUNT_NUMBER')
+COMMERZBANK_PASSWORD = os.environ.get('COMMERZBANK_PASSWORD')
+N26_USERNAME = os.environ.get('N26_USERNAME')
+N26_PASSWORD = os.environ.get('N26_PASSWORD')
