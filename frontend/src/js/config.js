@@ -1,1 +1,1 @@
-const API_URL = 'http://home.nicolasbouliane.com/api';
+const API_URL = '/api';
