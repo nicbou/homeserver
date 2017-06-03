@@ -5,9 +5,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, '/srv/static/').replace('\\', '/')
 MEDIA_ROOT = os.path.join(BASE_DIR, '/srv/media/').replace('\\', '/')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', False)
+SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('BACKEND_DEBUG', False)
 
 ALLOWED_HOSTS = ['*']
 
@@ -21,6 +21,7 @@ INSTALLED_APPS = (
     'habits',
     'finances',
     'utils',
+    'tokenapi',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -34,17 +35,38 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'tokenapi.backends.TokenBackend',
+]
+
 ROOT_URLCONF = 'backend.urls'
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
-    }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase',
+    },
 }
 
 LANGUAGE_CODE = 'en-us'

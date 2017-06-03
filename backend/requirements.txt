@@ -1,2 +1,4 @@
 Django==1.11
 gunicorn==19.3.0
+psycopg2
+django-tokenapi

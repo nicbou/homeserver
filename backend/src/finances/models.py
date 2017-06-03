@@ -35,15 +35,18 @@ class Balance(models.Model):
 
 
 class Transaction(models.Model):
-    transaction_id = models.CharField(max_length=200, unique=True)
+    transaction_id = models.CharField(max_length=50, unique=True)
     account = models.ForeignKey(Account)
     title = models.CharField(max_length=200)
     description = models.TextField()
     date = models.DateField()
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=True)
 
-    # When the currencies fluctuate, get_or_create sees the same transaction as different because the amounts differ
-    original_currency_amount = models.DecimalField(max_digits=8, decimal_places=2, null=True)
+    # When the currencies fluctuate, get_or_create sees the same transaction
+    # as different because the amounts differ
+    original_currency_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, null=True
+    )
 
     def __unicode__(self):
         return self.title

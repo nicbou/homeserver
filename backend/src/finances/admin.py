@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Account, Balance, Transaction
+from .models import Account, Balance, Transaction
 
 
 @admin.register(Account)

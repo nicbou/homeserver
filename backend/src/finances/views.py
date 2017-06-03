@@ -1,8 +1,8 @@
-from django.shortcuts import render
-from models import Account
+from .models import Account, Transaction
 from django.core.serializers.json import DjangoJSONEncoder
 from utils.views import LoginRequiredMixin, JsonResponse
 from django.views import View
+import json
 
 
 class JSONAccountListView(LoginRequiredMixin, View):
