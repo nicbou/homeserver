@@ -6,8 +6,7 @@ const HabitsPanelComponent = Vue.component('habits-panel', {
     };
   },
   created: function () {
-    const habitsService = new HabitsService();
-    habitsService.getHabits().then(
+    HabitsService.getHabits().then(
       (habits) => {
         this.habits = habits;
       },
@@ -37,7 +36,7 @@ const HabitsPanelComponent = Vue.component('habits-panel', {
   methods: {
     toggleHabit: function(habit, date) {
       habit.toggleDate(date);
-      return new HabitsService().toggleDate(habit, date);
+      HabitsService.toggleDate(habit, date);
     }
   },
   template: `

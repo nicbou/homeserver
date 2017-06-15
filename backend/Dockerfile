@@ -3,7 +3,7 @@ MAINTAINER Nicolas Bouliane
 
 # Update the default application repository sources list
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y python python-pip netcat
+RUN apt-get install -y python python-pip netcat git
 
 # Set env variables used in this Dockerfile (add a unique prefix, such as DOCKYARD)
 # Local directory with project source

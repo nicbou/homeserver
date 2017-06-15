@@ -1,15 +1,9 @@
-class TransactionsService extends JsonService {
-  getTransactions() {
-    return new Promise((resolve, reject) => {
-      this.getJson(`${API_URL}/transactions`).then(
-        (responseJson) => {
-          const transactions = responseJson.transactions.map((transaction) => new Transaction(transaction));
-          resolve(transactions);
-        },
-        (responseJson) => {
-          reject(responseJson)
-        }
-      );
-    });
+class TransactionsService {
+  static getTransactions() {
+    return Api.request.get('/transactions')
+      .then((response) => {
+        const transactions = response.data.transactions.map((transaction) => new Transaction(transaction));
+        resolve(transactions);
+      });
   }
 }

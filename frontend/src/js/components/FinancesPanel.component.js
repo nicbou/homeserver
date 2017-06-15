@@ -25,8 +25,7 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
     }
   },
   created: function () {
-    const accountsService = new AccountsService();
-    accountsService.getAccounts().then(
+    AccountsService.getAccounts().then(
       (accounts) => {
         this.accounts = accounts;
       },
@@ -35,8 +34,7 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
       }
     )
 
-    const transactionsService = new TransactionsService();
-    transactionsService.getTransactions().then(
+    TransactionsService.getTransactions().then(
       (transactions) => {
         this.transactions = transactions;
       },

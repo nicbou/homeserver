@@ -3,16 +3,11 @@ const MoviesComponent = Vue.component('movies', {
     return {
       movies: [],
       onlyShowConvertedMovies: false,
-      moviesService: new MoviesService(),
       query: ''
     }
   },
   computed: {
     selectedPart: function() {
-      console.log(this.movies, this.$route.params.partId, this.movies
-        .map(movie => movie.parts)
-        .reduce((allParts, parts) => allParts.concat(parts), [])
-        .find(part => part.id == this.$route.params.partId))
       return this.movies
         .map(movie => movie.parts)
         .reduce((allParts, parts) => allParts.concat(parts), [])
@@ -36,13 +31,10 @@ const MoviesComponent = Vue.component('movies', {
     }
   },
   created: function () {
-    this.moviesService.getMovies().then(
+    MoviesService.getMovies().then(
       (movies) => {
         movies.sort(movieSorter);
         this.movies = movies;
-      },
-      () => {
-        this.movies = [];
       }
     )
   },

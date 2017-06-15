@@ -1,6 +1,6 @@
 Django==1.11
 gunicorn==19.3.0
 psycopg2
-django-tokenapi
+git+git://github.com/jpulgarin/django-tokenapi.git@6837cd62ed0400fc3913bbcced7fa3e03d0012a7#egg=django-tokenapi
 requests==2.17.3
 selenium==2.43.0

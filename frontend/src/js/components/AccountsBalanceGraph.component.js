@@ -149,7 +149,10 @@ const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
     if (google.visualization) {
       this.drawChart();
     } else {
-      google.load('visualization', '1.0', {'packages':['corechart']});
+      google.load('visualization', '1.0', {
+        packages:['corechart'],
+        callback: function() {} // Fixes blank page, somehow
+      });
       google.setOnLoadCallback(this.drawChart);
     }
 

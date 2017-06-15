@@ -2,8 +2,6 @@ from utils.views import LoginRequiredMixin, JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from .models import Habit
 from django.views import View
-from django.conf import settings
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 import json
@@ -11,9 +9,6 @@ import json
 
 class JSONHabitListView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        if not settings.FEATURES['dashboard']['finances']:
-            return HttpResponse(status=404)
-
         json_habits = []
         for habit in Habit.objects.all():
             json_habits.append({

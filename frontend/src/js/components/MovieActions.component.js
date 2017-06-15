@@ -10,18 +10,17 @@ const MovieActionsComponent = Vue.component('movie-actions', {
       this.$router.push({ name: 'movies', params: { partId: part.id } });
     },
     markAsWatched: function(part) {
-      new MoviesService().markAsWatched(part.id).then(() => {
+      MoviesService.markAsWatched(part.id).then(() => {
         part.lastWatched = moment();
       });
     },
     markAsUnwatched: function(part) {
-      new MoviesService().markAsUnwatched(part.id).then(() => {
+      MoviesService.markAsUnwatched(part.id).then(() => {
         part.lastWatched = null;
       });
     },
     deleteMovie: function(movie) {
-      const moviesService = new MoviesService();
-      const deletionPromises = movie.parts.map(part => moviesService.delete(part.id));
+      const deletionPromises = movie.parts.map(part => MoviesService.delete(part.id));
       Promise.all(deletionPromises).then(() => {
         this.$emit('movieDeleted');
       });
