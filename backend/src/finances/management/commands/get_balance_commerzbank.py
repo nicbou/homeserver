@@ -17,6 +17,7 @@ class Command(BaseCommand):
         '0-Euro-Konto': 'Commerzbank debit',
         'MasterCard Classic': 'Commerzbank credit',
         'DirektDepot': 'Commerzbank securities',
+        'TagesgeldKonto': 'Commerzbank savings'
     }
 
     def login(self):
@@ -159,6 +160,7 @@ class Command(BaseCommand):
             self.get_account_balances()
 
             self.get_transactions('0-Euro-Konto')
+            self.get_transactions('TagesgeldKonto')
             self.get_transactions('MasterCard Classic')
 
             self.logout()

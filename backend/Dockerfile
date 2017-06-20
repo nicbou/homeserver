@@ -3,7 +3,17 @@ MAINTAINER Nicolas Bouliane
 
 # Update the default application repository sources list
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y python python-pip netcat git
+# libfreetype is for phantomjs
+RUN apt-get install -y python python-pip netcat git wget
+
+# PhantomJS
+WORKDIR /usr/local/share
+RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x86_64.tar.bz2 && \
+    tar xjf phantomjs-1.9.7-linux-x86_64.tar.bz2 && \
+    ln -s /usr/local/share/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs && \
+    ln -s /usr/local/share/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs && \
+    ln -s /usr/local/share/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
+RUN apt-get install -y libfontconfig1-dev libfreetype6
 
 # Set env variables used in this Dockerfile (add a unique prefix, such as DOCKYARD)
 # Local directory with project source
