@@ -2,8 +2,7 @@ class MoviesService {
   static getMovies() {
     return Api.request.get('/movies')
       .then((response) => {
-        const movies = response.data.movies.map(movie => new Movie(movie));
-        resolve(movies);
+        return response.data.movies.map(movie => new Movie(movie));
       });
   }
 

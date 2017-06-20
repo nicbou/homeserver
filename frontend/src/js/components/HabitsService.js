@@ -2,8 +2,7 @@ class HabitsService {
   static getHabits() {
     return Api.request.get('/habits')
       .then((response) => {
-        const habits = response.data.habits.map((habit) => new Habit(habit));
-        resolve(habits);
+        return response.data.habits.map((habit) => new Habit(habit));
       });
   }
 
