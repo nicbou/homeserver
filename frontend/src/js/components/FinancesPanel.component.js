@@ -11,8 +11,8 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
       return new SavingsTarget(
         this.accounts,
         7500,
-        moment(new Date(2016, 3, 20)), // 0-based month
-        moment(new Date(2017, 3, 20))
+        moment(new Date(2017, 4, 15)), // 0-based month
+        moment(new Date(2018, 4, 15))
       );
     },
     selectedDateIsToday: function() {
