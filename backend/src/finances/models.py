@@ -8,6 +8,7 @@ class Account(models.Model):
     display_name = models.CharField(max_length=40)
     name = models.CharField(max_length=40)
     is_credit = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.display_name
@@ -35,10 +36,10 @@ class Balance(models.Model):
 
 
 class Transaction(models.Model):
-    transaction_id = models.CharField(max_length=50, unique=True)
+    transaction_id = models.CharField(max_length=50, unique=True, null=True)
     account = models.ForeignKey(Account)
     title = models.CharField(max_length=200, blank=True, null=True)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     date = models.DateField()
     amount = models.DecimalField(max_digits=8, decimal_places=2, null=True)
 

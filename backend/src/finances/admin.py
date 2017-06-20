@@ -4,7 +4,7 @@ from .models import Account, Balance, Transaction
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ('display_name', 'balance',)
+    list_display = ('display_name',)
 
 
 @admin.register(Balance)
