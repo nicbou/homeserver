@@ -49,7 +49,7 @@ class Command(BaseCommand):
             )
             .json()
             .get('account')
-            .get('bankBalance')
+            .get('availableBalance')
         )
         Balance(account=account, balance=Decimal(balance)).save()
 
