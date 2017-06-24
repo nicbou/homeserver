@@ -9,7 +9,7 @@ class Habit {
 
   _findOccurence(date) {
     date = date.startOf('day');
-    return this.occurences.findIndex(o => date.isSame(o));
+    return this.occurences.findIndex(o => date.isSame(o, 'day'));
   }
 
   isSuccessful() {

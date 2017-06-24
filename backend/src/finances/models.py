@@ -23,7 +23,7 @@ class Balance(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
 
     def __unicode__(self):
-        return "{account}, {balance:.0f}€ on {date}".format(
+        return u"{account}, {balance:.0f}€ on {date}".format(
             account=self.account.display_name,
             balance=self.balance,
             date=self.date_added,

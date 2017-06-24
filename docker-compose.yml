@@ -13,10 +13,13 @@ services:
     environment:
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
+      - BACKEND_FIXTURES_PATH
       - COMMERZBANK_ACCOUNT_NUMBER
       - COMMERZBANK_PASSWORD
       - N26_USERNAME
       - N26_PASSWORD
+    volumes:
+      - ${BACKEND_FIXTURES_PATH}:/fixtures
   frontend:
     build: frontend
   proxy:
