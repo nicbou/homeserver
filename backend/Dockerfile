@@ -4,7 +4,7 @@ MAINTAINER Nicolas Bouliane
 # Update the default application repository sources list
 RUN apt-get update && apt-get -y upgrade
 # libfreetype is for phantomjs
-RUN apt-get install -y python python-pip netcat git wget
+RUN apt-get install -y python python-pip netcat git wget cron
 
 # PhantomJS
 WORKDIR /usr/local/share
@@ -32,6 +32,9 @@ RUN pip install -r $DOCKYARD_SRVHOME/requirements.txt
 
 # Copy application source code to SRCDIR
 COPY $DOCKYARD_SRC $DOCKYARD_SRVPROJ
+
+# Set up cron
+COPY crontab /etc/cron.d/crontab
 
 # Port to expose
 EXPOSE 80

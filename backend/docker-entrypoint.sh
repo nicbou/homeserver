@@ -21,6 +21,10 @@ touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
 tail -n 0 -f /srv/logs/*.log &
 
+# Activate cron
+crontab /etc/cron.d/crontab
+service cron start
+
 # Start Gunicorn processes
 echo Starting Gunicorn.
 exec gunicorn backend.wsgi:application \
