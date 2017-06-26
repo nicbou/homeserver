@@ -12,5 +12,6 @@
     * `N26_USERNAME`
     * `N26_PASSWORD`
 1. Put your fixtures in the BACKEND_FIXTURES_PATH
-2. Run `docker-compose up --build` to build and start all the components
-3. If necessary, run `docker-compose exec backend createsuperuser` to generate your first user.
+2. Run `docker-compose build` to build all the components
+3. Run `docker-compose up` to start all the components
+4. If necessary, run `docker-compose exec backend createsuperuser` to generate your first user.
