@@ -2,7 +2,8 @@ class Account {
   constructor(jsonResponse) {
     this.name = jsonResponse.name;
     this.displayName = jsonResponse.displayName;
-    this.isCredit = jsonResponse.isCredit;
+    this.isCredit = !!jsonResponse.isCredit;
+    this.isActive = !!jsonResponse.isActive;
     this.balances = jsonResponse.balances;
 
     this.balances.forEach((balance) => {

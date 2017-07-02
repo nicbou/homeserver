@@ -13,6 +13,7 @@ class JSONAccountListView(LoginRequiredMixin, View):
                 'id': account.name,
                 'displayName': account.display_name,
                 'isCredit': account.is_credit,
+                'isActive': account.active,
                 'balances': [
                     {
                         'balance': float(balance.balance),
