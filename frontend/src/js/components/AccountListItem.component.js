@@ -29,8 +29,10 @@ const AccountListItemComponent = Vue.component('account-list-item', {
       <div class="status-details">
         <span class="balance" :title="variationString">
           {{ balance }}
-          <i class="glyphicon text-muted"
+          <i class="glyphicon"
             :class="{
+              'text-muted': variationDay >= -1,
+              'text-danger': variationDay < -1,
               'glyphicon-triangle-top': variationDay > 1,
               'glyphicon-triangle-bottom': variationDay < -1,
               'glyphicon-minus': variationDay >= -1 && variationDay <= 1,
