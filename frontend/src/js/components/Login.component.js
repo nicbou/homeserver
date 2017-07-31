@@ -20,12 +20,17 @@ const LoginComponent = Vue.component('login', {
   },
   template: `
     <div class="col-md-push-4 col-md-4">
-      <div class="panel panel-default" id="login-panel">
+      <div id="login-panel" class="panel"
+        :class="{
+          'panel-default': !invalidCredentials,
+          'panel-danger': invalidCredentials
+        }">
         <div class="panel-heading">
           <h3 class="panel-title">Home server login</h3>
         </div>
         <div class="panel-body">
           <div class="form-horizontal" action="{% url 'login' %}">
+            <p class="text-danger" v-if='invalidCredentials'>Invalid login credentials</p>
             <label class='control-label' for='username'>Username</label>
             <input v-model='username' type='text' class='form-control' name='username'>
             <label class='control-label' for='password'>Password</label>
