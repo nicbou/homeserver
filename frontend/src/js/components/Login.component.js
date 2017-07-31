@@ -26,8 +26,7 @@ const LoginComponent = Vue.component('login', {
         </div>
         <div class="panel-body">
           <div class="form-horizontal" action="{% url 'login' %}">
-            <label class='control-label' for='username'>
-            </label>
+            <label class='control-label' for='username'>Username</label>
             <input v-model='username' type='text' class='form-control' name='username'>
             <label class='control-label' for='password'>Password</label>
             <input v-model='password' type='password' class='form-control' name='password'>

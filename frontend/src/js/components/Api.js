@@ -30,7 +30,7 @@ class ApiService {
           localStorage.removeItem('token');
           this.userId = undefined;
           this.token = undefined;
-          return response;
+          throw(response);
         });
     }
     return Promise.reject()
