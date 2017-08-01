@@ -55,10 +55,16 @@ class Command(BaseCommand):
 
     def get_transactions(self, access_token, account):
         transactions_request = requests.get(
-            'https://api.tech26.de/api/smrt/transactions?sort=visibleTS&dir=DESC&limit=50',
+            'https://api.tech26.de/api/smrt/transactions?sort=visibleTS&dir=DESC&limit=300',
             headers=self.get_headers(access_token)
         )
         transactions = transactions_request.json()
+
+        # Unfortunately, N26 randomly "moves" transactions, changing
+        # their ID, date and sometimes merchant name (e.g. to uppercase
+        # Because of that, we can't really save them without
+        # getting random duplicates, so we overwrite them.
+        Transaction.objects.all().delete()
 
         for transaction in transactions:
             amount = Decimal(transaction.get('amount', 0))
