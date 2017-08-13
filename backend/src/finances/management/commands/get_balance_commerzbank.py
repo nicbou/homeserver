@@ -7,6 +7,10 @@ from selenium import webdriver
 from finances.models import Balance, Account, Transaction
 from datetime import datetime
 import re
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -157,13 +161,18 @@ class Command(BaseCommand):
         try:
             self.driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true', '--ssl-protocol=any'])
             self.login()
+
+            logger.info('Getting Commerzbank account balances')
             self.get_account_balances()
 
-            self.get_transactions('0-Euro-Konto')
-            self.get_transactions('TagesgeldKonto')
-            self.get_transactions('MasterCard Classic')
+            for account in ['0-Euro-Konto', 'TagesgeldKonto', 'MasterCard Classic']:
+                logger.info('Getting Commerzbank transactions for %s', account)
+                self.get_transactions(account)
 
             self.logout()
             self.driver.quit()
+            logger.info("Commerzbank balance and transactions retrieved")
+        except:
+            logger.exception("Could not retrieve Commerzbank balance and transactions")
         finally:
             self.driver.quit()

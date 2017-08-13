@@ -6,6 +6,10 @@ from django.core.management.base import BaseCommand
 from finances.models import Balance, Account, Transaction
 from datetime import datetime
 import requests
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -98,5 +102,10 @@ class Command(BaseCommand):
 
         account = Account.objects.get_or_create(name='n26', is_credit=False)[0]
 
-        self.get_balance(access_token, account)
-        self.get_transactions(access_token, account)
+        try:
+            self.get_balance(access_token, account)
+            self.get_transactions(access_token, account)
+            logger.info("N26 balance and transactions retrieved")
+        except:
+            logger.exception("Could not retrieve N26 balance and transactions")
+

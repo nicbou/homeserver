@@ -5,6 +5,9 @@ from django.views import View
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class JSONHabitListView(LoginRequiredMixin, View):
