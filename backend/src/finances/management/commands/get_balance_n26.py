@@ -68,7 +68,7 @@ class Command(BaseCommand):
         # their ID, date and sometimes merchant name (e.g. to uppercase
         # Because of that, we can't really save them without
         # getting random duplicates, so we overwrite them.
-        Transaction.objects.all().delete()
+        Transaction.objects.filter(account=account).delete()
 
         for transaction in transactions:
             amount = Decimal(transaction.get('amount', 0))
@@ -108,4 +108,3 @@ class Command(BaseCommand):
             logger.info("N26 balance and transactions retrieved")
         except:
             logger.exception("Could not retrieve N26 balance and transactions")
-
