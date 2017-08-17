@@ -35,6 +35,7 @@ COPY $DOCKYARD_SRC $DOCKYARD_SRVPROJ
 
 # Set up cron
 COPY crontab /etc/cron.d/crontab
+RUN chmod 600 /etc/cron.d/crontab
 
 # Port to expose
 EXPOSE 80
