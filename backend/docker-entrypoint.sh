@@ -19,10 +19,12 @@ fi
 # Prepare log files and start outputting logs to stdout
 touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
+touch /srv/logs/cron.log
 tail -n 0 -f /srv/logs/*.log &
+service rsyslog start
 
 # Activate cron
-crontab /etc/cron.d/crontab
+crontab /srv/crontab
 service cron start
 
 # Start Gunicorn processes

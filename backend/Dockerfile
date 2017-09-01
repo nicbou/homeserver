@@ -13,7 +13,7 @@ RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x
     ln -s /usr/local/share/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs && \
     ln -s /usr/local/share/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs && \
     ln -s /usr/local/share/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
-RUN apt-get install -y libfontconfig1-dev libfreetype6
+RUN apt-get install -y libfontconfig1-dev libfreetype6 rsyslog
 
 # Set env variables used in this Dockerfile (add a unique prefix, such as DOCKYARD)
 # Local directory with project source
@@ -34,8 +34,8 @@ RUN pip install -r $DOCKYARD_SRVHOME/requirements.txt
 COPY $DOCKYARD_SRC $DOCKYARD_SRVPROJ
 
 # Set up cron
-COPY crontab /etc/cron.d/crontab
-RUN chmod 600 /etc/cron.d/crontab
+COPY crontab $DOCKYARD_SRVHOME/crontab
+RUN chmod 600 $DOCKYARD_SRVHOME/crontab
 
 # Port to expose
 EXPOSE 80

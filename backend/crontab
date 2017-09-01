@@ -1,2 +1,2 @@
-0 */6 * * * root /usr/bin/python /srv/src/manage.py get_balance_commerzbank
-0 * * * * root /usr/bin/python /srv/src/manage.py get_balance_n26
+0 */6 * * * /usr/bin/python /srv/src/manage.py get_balance_commerzbank >> /srv/logs/cron.log 2>&1
+0 * * * * /usr/bin/python /srv/src/manage.py get_balance_n26 >> /srv/logs/cron.log 2>&1
