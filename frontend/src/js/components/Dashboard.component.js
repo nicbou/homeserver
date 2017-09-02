@@ -32,6 +32,20 @@ const DashboardComponent = Vue.component('dashboard', {
                   <img class="stock-chart" src="https://kunden.commerzbank.de/marktdaten/wp-services/minichart.php?ID_NOTATION=100766162&amp;LANGUAGE=EN&amp;TIMESPAN=5D">
                 </div>
               </div>
+
+              <h4>SAP <small>last 5 days</small></h4>
+              <div class="status">
+                <div class="status-details">
+                  <img class="stock-chart" src="https://kunden.commerzbank.de/marktdaten/wp-services/minichart.php?ID_NOTATION=163500&amp;LANGUAGE=EN&amp;TIMESPAN=5D">
+                </div>
+              </div>
+
+              <h4>Allianz fund <small>last 5 days</small></h4>
+              <div class="status">
+                <div class="status-details">
+                  <img class="stock-chart" src="https://kunden.commerzbank.de/marktdaten/wp-services/minichart.php?ID_NOTATION=3229625&amp;LANGUAGE=EN&amp;TIMESPAN=5D">
+                </div>
+              </div>
             </div>
           </div>
         </div>
