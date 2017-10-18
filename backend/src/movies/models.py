@@ -53,67 +53,56 @@ class Movie(models.Model):
 
     @property
     def original_path(self):
-        return os.path.join(settings.ORIGINAL_MOVIES_PATH, self.filename(self.original_extension))
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename(self.original_extension))
 
     @property
     def converted_path(self):
-        if self.status == Movie.CONVERTED:
-            return os.path.join(settings.CONVERTED_MOVIES_PATH, self.filename('mp4'))
-        return None
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('converted.mp4'))
 
     @property
     def srt_subtitles_path(self):
-        path = os.path.join(settings.CONVERTED_MOVIES_PATH, self.filename('srt'))
-        return path if os.file.exists(path) else None
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('srt'))
 
     @property
     def vtt_subtitles_path(self):
-        path = os.path.join(settings.CONVERTED_MOVIES_PATH, self.filename('vtt'))
-        return path if os.file.exists(path) else None
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('vtt'))
 
     @property
     def cover_path(self):
-        path = os.path.join(settings.CONVERTED_MOVIES_PATH, self.filename('jpg'))
-        return path if os.file.exists(path) else None
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('jpg'))
 
     @property
     def original_url(self):
         return "{url}/{file}".format(
-            url=settings.ORIGINAL_MOVIES_URL,
+            url=settings.MOVIE_LIBRARY_URL,
             file=urllib.urlencode(self.filename(self.original_extension))
         )
 
     @property
     def converted_url(self):
-        if self.status == Movie.CONVERTED:
-            return "{url}/{file}".format(
-                url=settings.CONVERTED_MOVIES_URL,
-                file=urllib.urlencode(self.filename('mp4'))
-            )
-        return None
+        return "{url}/{file}".format(
+            url=settings.MOVIE_LIBRARY_URL,
+            file=urllib.urlencode(self.filename('converted.mp4'))
+        )
 
     @property
     def srt_subtitles_url(self):
-        if self.srt_subtitles_path:
-            return "{url}/{file}".format(
-                url=settings.CONVERTED_MOVIES_URL,
-                file=urllib.urlencode(self.filename('srt'))
-            )
-        return None
+        return "{url}/{file}".format(
+            url=settings.MOVIE_LIBRARY_URL,
+            file=urllib.urlencode(self.filename('srt'))
+        )
 
     @property
     def vtt_subtitles_url(self):
-        if self.vtt_subtitles_path:
-            return "{url}/{file}".format(
-                url=settings.CONVERTED_MOVIES_URL,
-                file=urllib.urlencode(self.filename('vtt'))
-            )
-        return None
+        return "{url}/{file}".format(
+            url=settings.MOVIE_LIBRARY_URL,
+            file=urllib.urlencode(self.filename('vtt'))
+        )
 
     @property
     def cover_url(self):
         return "{url}/{file}".format(
-            url=settings.CONVERTED_MOVIES_URL,
+            url=settings.MOVIE_LIBRARY_URL,
             file=urllib.urlencode(self.filename('jpg'))
         )
 

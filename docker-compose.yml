@@ -6,6 +6,7 @@ services:
       - DB_PERSISTENCE_PATH
     volumes:
       - ${DB_PERSISTENCE_PATH}:/var/lib/postgresql/data
+
   backend:
     build: backend
     depends_on:
@@ -18,17 +19,19 @@ services:
       - COMMERZBANK_PASSWORD
       - N26_USERNAME
       - N26_PASSWORD
-      - ORIGINAL_MOVIES_PATH=/movies/original
-      - CONVERTED_MOVIES_PATH=/movies/converted
-      - ORIGINAL_MOVIES_URL=/movies/original
-      - CONVERTED_MOVIES_URL=/movies/converted
+      - MOVIE_LIBRARY_PATH=/movies
+      - MOVIE_LIBRARY_URL=/movies
+      - TRIAGE_PATH=/triage
     volumes:
       - ${BACKEND_FIXTURES_PATH}:/fixtures
       - ${MOVIE_LIBRARY_PATH}:/movies
+      - ${TRIAGE_PATH}:/triage
+
   frontend:
     build: frontend
     depends_on:
       - torrents
+
   torrents:
     build: torrents
     privileged: true
@@ -36,13 +39,16 @@ services:
       - OPENVPN_PROVIDER
       - OPENVPN_USERNAME
       - OPENVPN_PASSWORD
+      - TRANSMISSION_DOWNLOAD_DIR=/triage
     volumes:
-      - ${TORRENTS_PATH}:/data
+      - ${TRANSMISSION_DATA_PATH}:/data
+      - ${TRIAGE_PATH}:/triage
     dns:
       - 8.8.8.8
       - 8.8.4.4
     cap_add:
       - NET_ADMIN
+
   proxy:
     build: proxy
     ports:

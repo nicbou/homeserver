@@ -13,8 +13,9 @@ Home server backend and frontend. The backend is built with Django and the front
     * `COMMERZBANK_PASSWORD`: Commerzbank login password.
     * `N26_USERNAME`
     * `N26_PASSWORD`
-    * `TORRENTS_PATH`: Local path that will be mounted as Transmission's download folder
-    * `MOVIE_LIBRARY_PATH`: The directory where the sorted movies are stored.
+    * `TRANSMISSION_DATA_PATH`: Local path that will be mounted as Transmission's data folder (for incomplete torrents, settings etc)
+    * `TRIAGE_PATH`: Local path that will be mounted as Transmission's finished downloads folder.
+    * `MOVIE_LIBRARY_PATH`: The directory where the organized movies, covers and subtitles are stored.
     * OpenVPN configuration for [the Transmission/OpenVPN image](https://hub.docker.com/r/haugene/transmission-openvpn/):
         * `OPENVPN_PROVIDER`: See documentation for `haugene/transmission-openvpn`
         * `OPENVPN_USERNAME`

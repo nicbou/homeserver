@@ -29,6 +29,7 @@ class Movie {
         originalVideoUrl: part.originalVideoUrl,
         vttSubtitlesUrl: part.vttSubtitlesUrl,
         srtSubtitlesUrl: part.srtSubtitlesUrl,
+        releaseYear: part.releaseYear,
         progress: part.progress,
         dateAdded: moment(part.dateAdded),
         get watchStatus() {
