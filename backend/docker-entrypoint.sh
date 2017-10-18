@@ -36,6 +36,10 @@ echo "export BACKEND_FIXTURES_PATH=\"${BACKEND_FIXTURES_PATH}\"" >> /srv/cronenv
 crontab /srv/crontab
 service cron start
 
+# Make sure the correct directories exist under /movies
+mkdir -p /movies/converted
+mkdir -p /movies/original
+
 # Start Gunicorn processes
 echo Starting Gunicorn.
 exec gunicorn backend.wsgi:application \

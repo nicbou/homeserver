@@ -2,6 +2,7 @@ const router = new VueRouter({
   routes: [
     { path: '/login', name: 'login', component: LoginComponent },
     { path: '/dashboard', name: 'dashboard', component: DashboardComponent },
+    { path: '/torrents', name: 'torrents', component: TorrentsComponent },
     { path: '/movies/:partId?', name: 'movies', component: MoviesComponent },
     { path: '/', redirect: { name: 'dashboard' }},
   ]

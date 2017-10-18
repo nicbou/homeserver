@@ -131,3 +131,5 @@ dd,dt{text-align:left!important}
 #tooltip{position:absolute;display:none;padding:2px;background:#fee;}
 .balance{text-align:right!important}
 .balance .glyphicon {margin-left:5px;}
+
+#torrents{width: calc(100vw - 45px);height: calc(100vh - 90px);padding: 0;margin: 0;border: 0;transform: translateX(-50%);left: 50%;position: relative;}

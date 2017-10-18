@@ -18,10 +18,17 @@ services:
       - COMMERZBANK_PASSWORD
       - N26_USERNAME
       - N26_PASSWORD
+      - ORIGINAL_MOVIES_PATH=/movies/original
+      - CONVERTED_MOVIES_PATH=/movies/converted
+      - ORIGINAL_MOVIES_URL=/movies/original
+      - CONVERTED_MOVIES_URL=/movies/converted
     volumes:
       - ${BACKEND_FIXTURES_PATH}:/fixtures
+      - ${MOVIE_LIBRARY_PATH}:/movies
   frontend:
     build: frontend
+    depends_on:
+      - torrents
   torrents:
     build: torrents
     privileged: true
@@ -44,3 +51,5 @@ services:
       - frontend
       - backend
       - torrents
+    volumes:
+      - ${MOVIE_LIBRARY_PATH}:/movies

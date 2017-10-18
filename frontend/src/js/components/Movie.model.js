@@ -25,7 +25,10 @@ class Movie {
         conversionStatus: part.conversionStatus,
         lastWatched: part.lastWatched ? moment(part.lastWatched) : null,
         playbackUrl: `/player/play/${ part.id }/`,
-        videoUrl: part.videoUrl,
+        convertedVideoUrl: part.convertedVideoUrl,
+        originalVideoUrl: part.originalVideoUrl,
+        vttSubtitlesUrl: part.vttSubtitlesUrl,
+        srtSubtitlesUrl: part.srtSubtitlesUrl,
         progress: part.progress,
         dateAdded: moment(part.dateAdded),
         get watchStatus() {
