@@ -31,8 +31,6 @@ services:
       - OPENVPN_PASSWORD
     volumes:
       - ${TORRENTS_PATH}:/data
-    ports:
-      - "9091:9091"
     dns:
       - 8.8.8.8
       - 8.8.4.4
@@ -45,3 +43,4 @@ services:
     depends_on:
       - frontend
       - backend
+      - torrents
