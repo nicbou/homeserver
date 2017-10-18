@@ -13,6 +13,11 @@ Home server backend and frontend. The backend is built with Django and the front
     * `COMMERZBANK_PASSWORD`: Commerzbank login password.
     * `N26_USERNAME`
     * `N26_PASSWORD`
+    * OpenVPN configuration for [the Transmission/OpenVPN image](https://hub.docker.com/r/haugene/transmission-openvpn/):
+    	* `OPENVPN_PROVIDER`: See documentation for `haugene/transmission-openvpn`
+    	* `OPENVPN_USERNAME`
+    	* `OPENVPN_PASSWORD`
+    	* `TORRENTS_PATH`: Local path that will be mounted as Transmission's download folder
 2. Put your fixtures in the BACKEND_FIXTURES_PATH.
 3. Run `docker-compose build` to build all the components.
 4. Run `docker-compose up` to start all the components.

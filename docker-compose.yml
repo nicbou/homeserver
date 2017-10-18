@@ -22,6 +22,22 @@ services:
       - ${BACKEND_FIXTURES_PATH}:/fixtures
   frontend:
     build: frontend
+  torrents:
+    build: torrents
+    privileged: true
+    environment:
+      - OPENVPN_PROVIDER
+      - OPENVPN_USERNAME
+      - OPENVPN_PASSWORD
+    volumes:
+      - ${TORRENTS_PATH}:/data
+    ports:
+      - "9091:9091"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    cap_add:
+      - NET_ADMIN
   proxy:
     build: proxy
     ports:
