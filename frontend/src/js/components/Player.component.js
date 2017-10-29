@@ -1,5 +1,5 @@
 const PlayerComponent = Vue.component('player', {
-  props: ['part'],
+  props: ['episode'],
   methods: {
     close: function() {
       this.$router.push({ name: 'movies' });
@@ -8,8 +8,8 @@ const PlayerComponent = Vue.component('player', {
   template: `
     <div class="text-center player" v-on:click.self="close">
       <video id="video" controls autoplay>
-        <source :src="part.convertedVideoUrl" type="video/mp4">
-        <track label="English" kind="captions" srclang="en" :src="part.vttSubtitlesUrl" default>
+        <source :src="episode.convertedVideoUrl" type="video/mp4">
+        <track label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrl" default>
       </video>
     </div>
   `,

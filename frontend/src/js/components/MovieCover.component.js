@@ -13,7 +13,7 @@ const MovieCoverComponent = Vue.component('movie-cover', {
   template: `
     <div class="movie" :class="{ watched: movie.watched, deleted: deleted }">
       <span class="deleted-icon" v-if="deleted"></span>
-      <img v-if="!deleted" class="cover" :src="movie.coverUrl">
+      <img v-if="!deleted && movie.coverUrl" class="cover" :src="movie.coverUrl">
       <div v-if="!deleted" class="movie-info">
         <h2 class="hidden-sm hidden-xs">
           {{ movie.title }}

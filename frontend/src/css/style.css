@@ -2,7 +2,7 @@ html, body, #page {height: 100%;}
 #page, body{background:#333;}
     #movies input[type=search]{border:none;box-shadow:none;background:#222;}
     #movies input[type=search]::-webkit-input-placeholder{color:#444;}
-    #movies>h2, #movies>.row>h2{color:#777;font-weight:100;letter-spacing:2px; margin:0 0 15px;}
+    h2{color:#777;font-weight:100;letter-spacing:2px; margin:0 0 15px;}
     #movies>hr{height:0;border:0;border-bottom:1px solid #444;}
     #login-panel{margin-top:50px;}
     .panel{border-color:#000;box-shadow: 0 3px 10px rgba(0,0,0,0.5);}
@@ -17,30 +17,34 @@ table{font-size:inherit}
 
 .progress-bar{text-shadow:1px 2px 3px rgba(0,0,0,0.3);}
 
-/* Renamer and covers */
-#rename-list{table-layout:fixed}
-    #rename-list .file-name{word-wrap:break-word;}
-    #rename-list .part-column{width:70px;padding-right:10px;}
-    #rename-list .date-column{width:110px;}
-    #rename-list .actions-column{width:65px;}
-    #rename-list .title-column{width:150px;}
-#side-panels{position:relative;}
-    #movie-info img{max-width:100%}
+/* Triage */
+.triage{display:flex;flex-direction:row;background:#fff;margin-bottom:20px;}
+    .triage .cover-wrapper{flex:1 0.25;max-width:350px;background:#444;}
+    .triage .movie-info{flex:1 0.75;padding:15px;position:relative;}
+        .triage .movie-info ul.suggestions{list-style: none;margin: 0;padding: 0;background: #fff;border: 1px solid #ccc;border-radius: 4px;position: absolute;z-index: 100;width:calc(100% - 30px);margin-top:5px;}
+            .triage .movie-info ul.suggestions li{margin:0;padding:5px 12px;}
+            .triage .movie-info ul.suggestions li.highlighted{background:#eee;cursor:pointer;}
+            .triage .movie-info ul.suggestions li small{margin:2px 0 0 5px;}
+    .triage .no-cover{width:100%;background:#ddd;font-size:72px;display:flex;align-items:center;}
+        .triage .no-cover-icon{text-align:center;width:100%;}
+        .triage .no-cover-icon::before{content:"\e009";color:#ccc;font-family:'Glyphicons Halflings';}
+    .triage .control-label{text-align:left;}
 
 
+/* Covers */
 .col-md-3{overflow:hidden;position:relative;}
     .col-md-3 .movie{background:#fff;position:relative;margin:0 0 30px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.5);}
         .col-md-3 .movie:before{content:"";display:block;padding-top:145%;display:inline-block;height:100%;vertical-align:middle}
         .movie>.cover,.movie>.movie-info{position: absolute;top: 0;left: 0;bottom: 0;right: 0;}
-    .movie>.cover{z-index:100;width:100%;min-height:100%}
+    .movie>.cover{z-index:100;width:100%;min-height:100%;background:#444;}
         .movie:hover>.cover{display:none;}
     .movie.deleted{background-color:#444;box-shadow:none;text-align:center}
     .movie.deleted .deleted-icon{font-size:72px;vertical-align:middle}
         .movie.deleted .deleted-icon::before{content:"\e020";font-family:'Glyphicons Halflings';}
-    .movie-info{padding:15px;box-sizing:border-box;width:100%;}
-        .movie-info h2{margin-top:0;}
-        .movie-info .part{position:absolute;z-index:101;top:20px;left:20px;color:#fff;-webkit-text-stroke: 1px black;font-size:20px;font-weight:bold}
-        .movie-info .actions{margin:0 0 10px;}
+    .movie>.movie-info{padding:15px;box-sizing:border-box;width:100%;}
+        .movie>.movie-info h2{margin-top:0;}
+        .movie>.movie-info .episode{position:absolute;z-index:101;top:20px;left:20px;color:#fff;-webkit-text-stroke: 1px black;font-size:20px;font-weight:bold}
+        .movie>.movie-info .actions{margin:0 0 10px;}
 
 .movie .title{max-width:165px;overflow:hidden;text-overflow:ellipsis;}
 .play-in-browser{color:#5cb85c;}
@@ -72,7 +76,7 @@ table{font-size:inherit}
     .status-details .balance{float:right;}
     .panel-danger .panel-heading{background:#d9534f;color:#fff;}
     .panel-warning .panel-heading{background:#f0ad4e;color:#fff;}
-    .panel>table{margin-top:-15px;}
+    #finances>table{margin-top:-15px;}
     .panel>table tr>td:first-child{padding-left:15px;}
     .panel>table tr>td:last-child{padding-right:15px;}
 
@@ -132,4 +136,4 @@ dd,dt{text-align:left!important}
 .balance{text-align:right!important}
 .balance .glyphicon {margin-left:5px;}
 
-#torrents{width: calc(100vw - 45px);height: calc(100vh - 90px);padding: 0;margin: 0;border: 0;transform: translateX(-50%);left: 50%;position: relative;}
+#torrents{border-radius:4px;width: calc(100vw - 45px);height: calc(100vh - 90px);padding: 0;margin: 0;border: 0;transform: translateX(-50%);left: 50%;position: relative;}

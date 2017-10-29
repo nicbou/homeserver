@@ -24,14 +24,14 @@ ENV DOCKYARD_SRVPROJ=/srv/src
 # Create application subdirectories
 WORKDIR $DOCKYARD_SRVHOME
 RUN mkdir media static logs
-VOLUME ["$DOCKYARD_SRVHOME/media/", "$DOCKYARD_SRVHOME/logs/"]
+VOLUME ["$DOCKYARD_SRVHOME/media/", "$DOCKYARD_SRVHOME/logs/", "$DOCKYARD_SRVPROJ"]
 
 # Install Python dependencies
 COPY requirements.txt $DOCKYARD_SRVHOME/requirements.txt
 RUN pip install -r $DOCKYARD_SRVHOME/requirements.txt
 
 # Copy application source code to SRCDIR
-COPY $DOCKYARD_SRC $DOCKYARD_SRVPROJ
+# COPY $DOCKYARD_SRC $DOCKYARD_SRVPROJ
 
 # Set up cron
 COPY crontab $DOCKYARD_SRVHOME/crontab

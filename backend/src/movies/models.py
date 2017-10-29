@@ -3,7 +3,6 @@
 from django.db import models
 from django.conf import settings
 import os
-import urllib
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 
@@ -13,15 +12,24 @@ class Movie(models.Model):
     CONVERTING = 1
     CONVERSION_FAILED = 2
     CONVERTED = 3
+    TV_SHOW = 1
+    MOVIE = 2
     status_choices = (
         (NOT_CONVERTED, 'not-converted'),
         (CONVERTING, 'converting'),
         (CONVERSION_FAILED, 'conversion-failed'),
         (CONVERTED, 'converted'),
     )
+    type_choices = (
+        (TV_SHOW, 'tv'),
+        (MOVIE, 'movie'),
+        (CONVERSION_FAILED, 'conversion-failed'),
+        (CONVERTED, 'converted'),
+    )
 
     # File
     original_extension = models.CharField(max_length=12, null=True)
+    triage_path = models.CharField(max_length=200, null=True)
     conversion_status = models.SmallIntegerField(default=NOT_CONVERTED, choices=status_choices)
 
     # Movie
@@ -29,8 +37,10 @@ class Movie(models.Model):
     description = models.TextField(blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)
     release_year = models.CharField(max_length=4, blank=True)
-    imdb_id = models.CharField(max_length=12, null=True)
-    part = models.SmallIntegerField(null=True, blank=True)
+    tmdb_id = models.CharField(max_length=12, null=True)
+    media_type = models.SmallIntegerField(default=MOVIE, choices=type_choices)
+    season = models.SmallIntegerField(null=True, blank=True)
+    episode = models.SmallIntegerField(null=True, blank=True)
 
     # Library
     date_added = models.DateField(auto_now_add=True)
@@ -40,19 +50,21 @@ class Movie(models.Model):
     def __unicode__(self):
         return self.title
 
-    def filename(self, extension='mp4'):
+    def filename(self, extension='mp4', show_season=True):
         filename = u'{title} ({year}).{extension}'
-        if self.part:
-            filename = u'{title} ({year}) part {part}.{extension}'
+        if show_season and (self.season or self.episode):
+            filename = u'{title} ({year}) {season}{episode}.{extension}'
+
         return filename.format(
             extension=extension,
-            part=self.part,
+            season='S{}'.format(self.season) if self.season else '',
+            episode='E{}'.format(self.episode) if self.episode else '',
             year=self.release_year,
-            title=self.title.replace('/', '-'),
+            title=self.title.replace('/', '-').replace(':', ','),
         )
 
     @property
-    def original_path(self):
+    def library_path(self):
         return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename(self.original_extension))
 
     @property
@@ -69,53 +81,57 @@ class Movie(models.Model):
 
     @property
     def cover_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('jpg'))
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('jpg', show_season=False))
 
     @property
-    def original_url(self):
-        return "{url}/{file}".format(
+    def library_url(self):
+        return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=urllib.urlencode(self.filename(self.original_extension))
+            file=self.filename(self.original_extension)
         )
 
     @property
     def converted_url(self):
-        return "{url}/{file}".format(
+        return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=urllib.urlencode(self.filename('converted.mp4'))
+            file=self.filename('converted.mp4')
         )
 
     @property
     def srt_subtitles_url(self):
-        return "{url}/{file}".format(
+        return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=urllib.urlencode(self.filename('srt'))
+            file=self.filename('srt')
         )
 
     @property
     def vtt_subtitles_url(self):
-        return "{url}/{file}".format(
+        return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=urllib.urlencode(self.filename('vtt'))
+            file=self.filename('vtt')
         )
 
     @property
     def cover_url(self):
-        return "{url}/{file}".format(
+        """All episodes of a movie/show share the same cover."""
+        return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=urllib.urlencode(self.filename('jpg'))
+            file=self.filename('jpg', show_season=False)
         )
 
 
 @receiver(pre_delete, sender=Movie)
 def movie_delete(sender, instance, **kwargs):
     files_to_delete = [
-        instance.original_path,
+        instance.library_path,
         instance.converted_path,
         instance.srt_subtitles_path,
         instance.vtt_subtitles_path,
-        instance.cover_path,
     ]
+
+    episode_count = Movie.objects.filter(tmdb_id=instance.tmdb_id).count()
+    if episode_count == 1:
+        files_to_delete.append(instance.cover_path)  # All episodes share the same cover
 
     # Delete the renamed movie
     for path in files_to_delete:

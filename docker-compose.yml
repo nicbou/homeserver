@@ -19,16 +19,18 @@ services:
       - COMMERZBANK_PASSWORD
       - N26_USERNAME
       - N26_PASSWORD
-      - MOVIE_LIBRARY_PATH=/movies
+      - MOVIE_LIBRARY_PATH=/movies/library
       - MOVIE_LIBRARY_URL=/movies
-      - TRIAGE_PATH=/triage
+      - TRIAGE_PATH=/movies/triage
     volumes:
+      - ./backend/src:/srv/src
       - ${BACKEND_FIXTURES_PATH}:/fixtures
       - ${MOVIE_LIBRARY_PATH}:/movies
-      - ${TRIAGE_PATH}:/triage
 
   frontend:
     build: frontend
+    volumes:
+      - ./frontend/src:/var/www
     depends_on:
       - torrents
 
@@ -42,7 +44,7 @@ services:
       - TRANSMISSION_DOWNLOAD_DIR=/triage
     volumes:
       - ${TRANSMISSION_DATA_PATH}:/data
-      - ${TRIAGE_PATH}:/triage
+      - ${MOVIE_LIBRARY_PATH}/triage:/triage
     dns:
       - 8.8.8.8
       - 8.8.4.4

@@ -38,12 +38,14 @@ service cron start
 
 # Make sure the data directories exist
 mkdir -p /movies
-mkdir -p /triage
+mkdir -p /movies/triage
+mkdir -p /movies/library
 
 # Start Gunicorn processes
 echo Starting Gunicorn.
 exec gunicorn backend.wsgi:application \
     --name backend \
+    --reload \
     --bind 0.0.0.0:80 \
     --workers 3 \
     --log-level=info \

@@ -29,10 +29,13 @@ LOGGING = {
             'filename': '/srv/logs/django.log',
             'formatter': 'verbose'
         },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         '': {
-            'handlers': ['file'],
+            'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -48,6 +51,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'habits',
     'finances',
+    'movies',
     'utils',
     'tokenapi',
 )
@@ -113,6 +117,6 @@ COMMERZBANK_PASSWORD = os.environ.get('COMMERZBANK_PASSWORD')
 N26_USERNAME = os.environ.get('N26_USERNAME')
 N26_PASSWORD = os.environ.get('N26_PASSWORD')
 
-MOVIE_LIBRARY_PATH = os.environ.get('MOVIE_LIBRARY_PATH')
+MOVIE_LIBRARY_PATH = os.environ.get('MOVIE_LIBRARY_PATH')  # The renamed, triaged movies and their artifacts go here
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')
-TRIAGE_PATH = os.environ.get('TRIAGE_PATH')
+TRIAGE_PATH = os.environ.get('TRIAGE_PATH')  # The completed torrents go here until they are triaged

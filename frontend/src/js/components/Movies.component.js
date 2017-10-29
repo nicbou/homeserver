@@ -7,11 +7,11 @@ const MoviesComponent = Vue.component('movies', {
     }
   },
   computed: {
-    selectedPart: function() {
+    selectedEpisode: function() {
       return this.movies
-        .map(movie => movie.parts)
-        .reduce((allParts, parts) => allParts.concat(parts), [])
-        .find(part => part.id == this.$route.params.partId);
+        .map(movie => movie.episodes)
+        .reduce((allEpisodes, episodes) => allEpisodes.concat(episodes), [])
+        .find(episode => episode.id == this.$route.params.episodeId);
     },
     trimmedQuery: function() {
       return this.query.trim().toLocaleLowerCase();
@@ -40,7 +40,7 @@ const MoviesComponent = Vue.component('movies', {
   },
   template: `
     <div id="movies">
-        <player v-if="selectedPart" :part="selectedPart"></player>
+        <player v-if="selectedEpisode" :episode="selectedEpisode"></player>
         <h2 v-if="unfinishedMovies.length > 0">Unfinished movies</h2>
         <div class="row" v-if="unfinishedMovies.length > 0">
             <div class="col-md-3 col-xs-6" v-for="movie in unfinishedMovies">
