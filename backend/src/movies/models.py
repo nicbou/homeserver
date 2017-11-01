@@ -26,6 +26,7 @@ class Movie(models.Model):
         (CONVERSION_FAILED, 'conversion-failed'),
         (CONVERTED, 'converted'),
     )
+    status_map = {status[1]: status[0] for status in status_choices}
 
     # File
     original_extension = models.CharField(max_length=12, null=True)
@@ -64,24 +65,44 @@ class Movie(models.Model):
         )
 
     @property
+    def library_filename(self):
+        return self.filename(self.original_extension)
+
+    @property
     def library_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename(self.original_extension))
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.library_filename)
+
+    @property
+    def converted_filename(self):
+        return self.filename('converted.mp4')
 
     @property
     def converted_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('converted.mp4'))
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.converted_filename)
+
+    @property
+    def srt_subtitles_filename(self):
+        return self.filename('srt')
 
     @property
     def srt_subtitles_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('srt'))
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.srt_subtitles_filename)
+
+    @property
+    def vtt_subtitles_filename(self):
+        return self.filename('vtt')
 
     @property
     def vtt_subtitles_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('vtt'))
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.vtt_subtitles_filename)
+
+    @property
+    def cover_filename(self):
+        return self.filename('jpg', show_season=False)
 
     @property
     def cover_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.filename('jpg', show_season=False))
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.cover_filename)
 
     @property
     def library_url(self):

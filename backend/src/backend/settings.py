@@ -5,8 +5,8 @@ import os
 # ==================================================
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, '/srv/static/').replace('\\', '/')
-MEDIA_ROOT = os.path.join(BASE_DIR, '/srv/media/').replace('\\', '/')
+STATIC_ROOT = '/srv/static'
+MEDIA_ROOT = '/srv/media'
 
 SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
@@ -111,6 +111,8 @@ STATIC_URL = '/static/'
 # ==================================================
 # App-specific stuff
 # ==================================================
+
+VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
 
 COMMERZBANK_ACCOUNT_NUMBER = os.environ.get('COMMERZBANK_ACCOUNT_NUMBER')
 COMMERZBANK_PASSWORD = os.environ.get('COMMERZBANK_PASSWORD')

@@ -1,10 +1,9 @@
-from utils.views import LoginRequiredMixin, JsonResponse
-from django.core.serializers.json import DjangoJSONEncoder
+from utils.views import LoginRequiredMixin
+from django.http import JsonResponse
 from .models import Habit
 from django.views import View
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
-import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,9 +21,7 @@ class JSONHabitListView(LoginRequiredMixin, View):
                 'daysPerPeriod': habit.days_per_period,
             })
 
-        return JsonResponse(
-            json.dumps({'habits': json_habits}, cls=DjangoJSONEncoder)
-        )
+        return JsonResponse({'habits': json_habits})
 
 
 class JSONHabitToggleView(View):
@@ -41,4 +38,4 @@ class JSONHabitToggleView(View):
             day_successful = True
             habit.occurences.create(date=date)
 
-        return JsonResponse(json.dumps({'status': day_successful}))
+        return JsonResponse({'status': day_successful})

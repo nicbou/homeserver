@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
-from utils.views import LoginRequiredMixin, JsonResponse
-from django.core.serializers.json import DjangoJSONEncoder
+from utils.views import LoginRequiredMixin
+from django.http import JsonResponse
 from .models import Movie
 from django.views import View
 from django.conf import settings
 from django.db import transaction
+from django.utils.crypto import salted_hmac
 import json
 import logging
 import os
 import requests
 
 logger = logging.getLogger(__name__)
+
+
+def movie_conversion_callback_token(movie):
+    return salted_hmac(movie.tmdb_id, movie.id).hexdigest()
 
 
 class JSONMovieListView(LoginRequiredMixin, View):
@@ -52,7 +57,7 @@ class JSONMovieListView(LoginRequiredMixin, View):
 
             json_movies.append(json_movie)
 
-        return JsonResponse(json.dumps({'movies': json_movies}, cls=DjangoJSONEncoder))
+        return JsonResponse({'movies': json_movies})
 
     def post(self, request, *args, **kwargs):
         """Create or update a movie with a list of episodes."""
@@ -124,17 +129,23 @@ class JSONMovieListView(LoginRequiredMixin, View):
 
             # Download the cover URL if necessary
             new_cover_url = payload.get('coverUrl')
-            logger.error(new_cover_url)
-            logger.error(episodes[0].cover_url)
             if new_cover_url and new_cover_url != episodes[0].cover_url:
                 self.download_image(new_cover_url, episodes[0].cover_path)
 
             # Queue movies for conversion
             for episode in conversion_queue:
-                pass
+                episode.conversion_status = Movie.CONVERTING
+                episode.save()
 
-        return JsonResponse(
-            json.dumps({'result': 'success'}, cls=DjangoJSONEncoder))
+                api_url = "{host}/process".format(host=settings.VIDEO_PROCESSING_API_URL)
+                callback_url = "http://{host}/movies/process/callback/?id={id}&token={token}".format(
+                    host=request.get_host(),  # Note: this might fail behind multiple proxies. See Django docs.
+                    id=episode.id,
+                    token=movie_conversion_callback_token(episode)
+                )
+                requests.post(api_url, json={'input': episode.library_filename, 'callbackUrl': callback_url})
+
+        return JsonResponse({'result': 'success'})
 
     def download_image(self, url, filename):
         req = requests.get(url, stream=True)
@@ -147,11 +158,16 @@ class JSONMovieListView(LoginRequiredMixin, View):
 class JSONMovieView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         movie_id = kwargs.get('id')
-        Movie.objects.get(pk=movie_id).delete()
-        return JsonResponse('')
+        try:
+            Movie.objects.get(pk=movie_id).delete()
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+        return JsonResponse({'result': 'success'})
 
 
 class JSONMovieTriageListView(LoginRequiredMixin, View):
+    """Return a list of untriaged movie and subtitle files."""
+
     def get(self, request, *args, **kwargs):
         movie_extensions = (
             '.mkv', '.avi', '.mpg', '.wmv', '.mov', '.m4v', '.3gp', '.mpeg', '.mpe', '.ogm', '.flv', '.divx', '.mp4'
@@ -170,13 +186,42 @@ class JSONMovieTriageListView(LoginRequiredMixin, View):
 
         # These movies are still in the completed downloads, but they are already triaged. They're seeding.
         triaged_movie_files = Movie.objects.filter(triage_path__in=movie_files).values_list('triage_path', flat=True)
-
         untriaged_movie_files = set(movie_files).difference(set(triaged_movie_files))
 
-        return JsonResponse(json.dumps(
-            {
-                'movies': list(untriaged_movie_files),
-                'subtitles': subtitle_files
-            },
-            cls=DjangoJSONEncoder
-        ))
+        return JsonResponse({'movies': list(untriaged_movie_files), 'subtitles': subtitle_files})
+
+
+class JSONMovieConversionCallbackView(View):
+    """Called when a movie conversion task is finished."""
+
+    def post(self, request, *args, **kwargs):
+        payload = json.loads(request.body, encoding='UTF-8')
+
+        if 'id' not in request.GET:
+            return JsonResponse({'result': 'failure', 'message': '`id` is missing from query string'}, status=400)
+        if 'status' not in payload:
+            return JsonResponse(
+                {'result': 'failure', 'message': '`status` is missing from request payload'}, status=400)
+        if 'token' not in request.GET:
+            return JsonResponse(
+                {'result': 'failure', 'message': '`token` parameter is missing from query string'}, status=400)
+
+        try:
+            movie = Movie.objects.get(pk=request.GET['id'])
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=204)
+
+        conversion_status = payload['status']
+
+        if request.GET['token'] == movie_conversion_callback_token(movie):
+            try:
+                movie.conversion_status = Movie.status_map[conversion_status]
+                movie.save()
+            except KeyError:
+                return JsonResponse(
+                    {'result': 'failure', 'message': '`{}` is not a valid `status` value'.format(conversion_status)},
+                    status=400
+                )
+            return JsonResponse({'result': 'success'})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Invalid `token`'}, status=400)

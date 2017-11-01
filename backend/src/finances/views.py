@@ -1,8 +1,7 @@
 from .models import Account, Transaction
-from django.core.serializers.json import DjangoJSONEncoder
-from utils.views import LoginRequiredMixin, JsonResponse
+from utils.views import LoginRequiredMixin
+from django.http import JsonResponse
 from django.views import View
-import json
 
 
 class JSONAccountListView(LoginRequiredMixin, View):
@@ -22,12 +21,7 @@ class JSONAccountListView(LoginRequiredMixin, View):
                 ],
             })
 
-        return JsonResponse(
-            json.dumps(
-                {'accounts': json_accounts},
-                cls=DjangoJSONEncoder
-            )
-        )
+        return JsonResponse({'accounts': json_accounts})
 
 
 class JSONTransactionListView(LoginRequiredMixin, View):
@@ -43,9 +37,4 @@ class JSONTransactionListView(LoginRequiredMixin, View):
                 'amount': float(transaction.amount),
             })
 
-        return JsonResponse(
-            json.dumps(
-                {'transactions': json_transactions},
-                cls=DjangoJSONEncoder
-            )
-        )
+        return JsonResponse({'transactions': json_transactions})
