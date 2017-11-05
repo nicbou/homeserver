@@ -52,8 +52,7 @@ INSTALLED_APPS = (
     'habits',
     'finances',
     'movies',
-    'utils',
-    'tokenapi',
+    'authentication',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -87,7 +86,6 @@ TEMPLATES = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'tokenapi.backends.TokenBackend',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -111,6 +109,8 @@ STATIC_URL = '/static/'
 # ==================================================
 # App-specific stuff
 # ==================================================
+
+LOGIN_REDIRECT_URL = '/'
 
 VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
 

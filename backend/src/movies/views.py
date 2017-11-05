@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from utils.views import LoginRequiredMixin
 from django.http import JsonResponse
 from .models import Movie
 from django.views import View
@@ -18,7 +17,7 @@ def movie_conversion_callback_token(movie):
     return salted_hmac(movie.tmdb_id, movie.id).hexdigest()
 
 
-class JSONMovieListView(LoginRequiredMixin, View):
+class JSONMovieListView(View):
     def get(self, request, *args, **kwargs):
         movies_by_tmdb_id = {}
 
@@ -155,7 +154,7 @@ class JSONMovieListView(LoginRequiredMixin, View):
                     cover_file.write(chunk)
 
 
-class JSONMovieView(LoginRequiredMixin, View):
+class JSONMovieView(View):
     def delete(self, request, *args, **kwargs):
         movie_id = kwargs.get('id')
         try:
@@ -165,7 +164,7 @@ class JSONMovieView(LoginRequiredMixin, View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONMovieTriageListView(LoginRequiredMixin, View):
+class JSONMovieTriageListView(View):
     """Return a list of untriaged movie and subtitle files."""
 
     def get(self, request, *args, **kwargs):

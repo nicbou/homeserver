@@ -1,10 +1,9 @@
 from .models import Account, Transaction
-from utils.views import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views import View
 
 
-class JSONAccountListView(LoginRequiredMixin, View):
+class JSONAccountListView(View):
     def get(self, request, *args, **kwargs):
         json_accounts = []
         for account in Account.objects.all():
@@ -24,7 +23,7 @@ class JSONAccountListView(LoginRequiredMixin, View):
         return JsonResponse({'accounts': json_accounts})
 
 
-class JSONTransactionListView(LoginRequiredMixin, View):
+class JSONTransactionListView(View):
     def get(self, request, *args, **kwargs):
         json_transactions = []
         for transaction in Transaction.objects.all():

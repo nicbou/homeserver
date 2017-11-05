@@ -1,4 +1,3 @@
-from utils.views import LoginRequiredMixin
 from django.http import JsonResponse
 from .models import Habit
 from django.views import View
@@ -9,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class JSONHabitListView(LoginRequiredMixin, View):
+class JSONHabitListView(View):
     def get(self, request, *args, **kwargs):
         json_habits = []
         for habit in Habit.objects.all():

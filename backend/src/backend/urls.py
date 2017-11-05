@@ -6,7 +6,7 @@ from habits.views import JSONHabitListView, JSONHabitToggleView
 from movies.views import JSONMovieListView, JSONMovieTriageListView, JSONMovieView, JSONMovieConversionCallbackView
 
 urlpatterns = [
-    url(r'^token/', include('tokenapi.urls')),
+    url(r'^auth/', include('authentication.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/$', JSONAccountListView.as_view()),
     url(r'^transactions/$', JSONTransactionListView.as_view()),
