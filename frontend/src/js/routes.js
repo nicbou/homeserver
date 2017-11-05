@@ -4,6 +4,6 @@ const router = new VueRouter({
     { path: '/torrents', name: 'torrents', component: TorrentsComponent },
     { path: '/triage', name: 'triage', component: TriageComponent },
     { path: '/movies/:episodeId?', name: 'movies', component: MoviesComponent },
-    { path: '/', redirect: { name: 'dashboard' }},
+    { path: '/', redirect: { name: 'movies' }},
   ]
 })
