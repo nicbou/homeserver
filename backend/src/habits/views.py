@@ -10,6 +10,12 @@ logger = logging.getLogger(__name__)
 
 class JSONHabitListView(View):
     def get(self, request, *args, **kwargs):
+        if not request.user.has_perm('authentication.habits'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
         json_habits = []
         for habit in Habit.objects.all():
             json_habits.append({
@@ -25,6 +31,12 @@ class JSONHabitListView(View):
 
 class JSONHabitToggleView(View):
     def post(self, request, *args, **kwargs):
+        if not request.user.has_perm('authentication.habits'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
         habit = get_object_or_404(Habit, pk=kwargs.get('id'))
         date = datetime.strptime(kwargs.get('date'), "%Y-%m-%d")
         next_day = date + timedelta(1)

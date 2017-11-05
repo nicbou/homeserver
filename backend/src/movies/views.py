@@ -60,6 +60,12 @@ class JSONMovieListView(View):
 
     def post(self, request, *args, **kwargs):
         """Create or update a movie with a list of episodes."""
+        if not request.user.has_perm('authentication.movies_manage'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
         payload = json.loads(request.body, encoding='UTF-8')
 
         with transaction.atomic():
@@ -156,6 +162,12 @@ class JSONMovieListView(View):
 
 class JSONMovieView(View):
     def delete(self, request, *args, **kwargs):
+        if not request.user.has_perm('authentication.movies_manage'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
         movie_id = kwargs.get('id')
         try:
             Movie.objects.get(pk=movie_id).delete()
@@ -168,6 +180,12 @@ class JSONMovieTriageListView(View):
     """Return a list of untriaged movie and subtitle files."""
 
     def get(self, request, *args, **kwargs):
+        if not request.user.has_perm('authentication.movies_manage'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
         movie_extensions = (
             '.mkv', '.avi', '.mpg', '.wmv', '.mov', '.m4v', '.3gp', '.mpeg', '.mpe', '.ogm', '.flv', '.divx', '.mp4'
         )

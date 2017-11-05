@@ -29,9 +29,9 @@
                     <nav>
                         <ul class="nav navbar-nav">
                             <li><router-link :to="{name: 'movies'}">Movies</router-link></li>
-                            <li><router-link :to="{name: 'torrents'}">Torrents</router-link></li>
-                            <li><router-link :to="{name: 'triage'}">Triage</router-link></li>
-                            <li><router-link :to="{name: 'dashboard'}">Status</router-link></li>
+                            <li v-if="canManageTorrents"><router-link :to="{name: 'torrents'}">Torrents</router-link></li>
+                            <li v-if="canManageMovies"><router-link :to="{name: 'triage'}">Triage</router-link></li>
+                            <li v-if="canSeeFinances || canSeeHabits"><router-link :to="{name: 'dashboard'}">Status</router-link></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
                         </ul>
@@ -50,6 +50,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="js/components/PermissionsService.js"></script>
     <script src="js/components/Currency.filter.js"></script>
     <script src="js/components/Date.filter.js"></script>
     <script src="js/components/Habit.model.js"></script>

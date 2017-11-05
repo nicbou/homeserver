@@ -5,6 +5,12 @@ from django.views import View
 
 class JSONAccountListView(View):
     def get(self, request, *args, **kwargs):
+        if not request.user.has_perm('authentication.finances'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
         json_accounts = []
         for account in Account.objects.all():
             json_accounts.append({
@@ -25,6 +31,12 @@ class JSONAccountListView(View):
 
 class JSONTransactionListView(View):
     def get(self, request, *args, **kwargs):
+        if not request.user.has_perm('authentication.finances'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
         json_transactions = []
         for transaction in Transaction.objects.all():
             json_transactions.append({
