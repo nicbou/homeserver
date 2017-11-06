@@ -20,7 +20,7 @@ set -x
 # loglevel warning
 # maxrate 1200k - max bitrate
 # movflags faststart - allows streaming
-# preset slow \
+# preset medium \
 # profile:v high \
 # threads 0 \
 # vf scale="trunc(oh*a/2)*2:480" \
@@ -28,7 +28,7 @@ $FFMPEG_PATH \
     -i "$1" \
     -codec:v libx264 \
     -profile:v high \
-    -preset slow \
+    -preset fast \
     -movflags faststart \
     -b:v 900k \
     -maxrate 1200k \
