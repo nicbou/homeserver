@@ -26,7 +26,7 @@ def process():
     if not os.path.exists(input_file):
         abort(404, {'result': 'failure', 'message': 'Input file does not exist'})
 
-    task_queue.enqueue(convert_to_mp4, args=(input_file, output_file, callback_url), timeout=7200)
+    task_queue.enqueue(convert_to_mp4, args=(input_file, output_file, callback_url), timeout=21600)
     if input_file.endswith('.mkv'):
         task_queue.enqueue(extract_mkv_subtitles, input_file)
 
