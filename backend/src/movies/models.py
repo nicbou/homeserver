@@ -81,6 +81,14 @@ class Movie(models.Model):
         return os.path.join(settings.MOVIE_LIBRARY_PATH, self.converted_filename)
 
     @property
+    def temporary_conversion_filename(self):
+        return self.filename('converted.mp4.tmp')
+
+    @property
+    def temporary_conversion_path(self):
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.temporary_conversion_filename)
+
+    @property
     def srt_subtitles_filename(self):
         return self.filename('srt')
 
@@ -148,6 +156,7 @@ def movie_delete(sender, instance, **kwargs):
         instance.converted_path,
         instance.srt_subtitles_path,
         instance.vtt_subtitles_path,
+        instance.temporary_conversion_path,
     ]
 
     episode_count = Movie.objects.filter(tmdb_id=instance.tmdb_id).count()
