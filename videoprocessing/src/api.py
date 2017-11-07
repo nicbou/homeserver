@@ -3,9 +3,11 @@ from bottle import route, run, request, abort, response
 import os
 import redis
 from rq import Queue
-from tasks import convert_to_mp4, extract_mkv_subtitles
+from jobs import convert_to_mp4, extract_mkv_subtitles
 
-task_queue = Queue(connection=redis.from_url('redis://redis:6379/1'))
+redis_connection = redis.from_url(os.environ['REDIS_DB_URL'])
+conversion_queue = Queue('conversion', connection=redis_connection)
+subtitles_queue = Queue('subtitles', connection=redis_connection)
 movie_library_path = os.environ.get('MOVIE_LIBRARY_PATH')
 
 
@@ -26,9 +28,23 @@ def process():
     if not os.path.exists(input_file):
         abort(404, {'result': 'failure', 'message': 'Input file does not exist'})
 
-    task_queue.enqueue(convert_to_mp4, args=(input_file, output_file, callback_url), timeout=21600)
+    conversion_queue.enqueue(
+        convert_to_mp4,
+        kwargs={
+            'input_file': input_file,
+            'output_file': output_file,
+            'callback_url': callback_url,
+        },
+        timeout=21600  # 6 hours
+    )
     if input_file.endswith('.mkv'):
-        task_queue.enqueue(extract_mkv_subtitles, input_file)
+        subtitles_queue.enqueue(
+            extract_mkv_subtitles,
+            kwargs={
+                'input_file': input_file,
+                'callback_url': callback_url,
+            },
+        )
 
     response.status = 202
     return {'result': 'success', 'message': 'Movie queued for conversion.'}

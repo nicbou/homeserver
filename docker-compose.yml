@@ -40,12 +40,17 @@ services:
 
   redis:
     image: smebberson/alpine-redis
+    volumes:
+      - redis_peristence:/data
   videoprocessing:
     build: videoprocessing
     environment:
       - MOVIE_LIBRARY_PATH=/movies/library
+      - REDIS_DB_URL=redis://redis:6379/1
     volumes:
       - ${MOVIE_LIBRARY_PATH}:/movies
+    ports:
+      - "9181:9181"
     depends_on:
       - redis
 
@@ -81,3 +86,4 @@ services:
 
 volumes:
   django_staticfiles:
+  redis_peristence:

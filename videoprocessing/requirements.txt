@@ -1,4 +1,5 @@
 bottle==0.12.13
 rq==0.8.2
+rq-dashboard==0.3.10
 redis==2.10.6
 requests==2.17.3

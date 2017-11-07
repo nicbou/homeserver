@@ -23,7 +23,7 @@ def convert_to_mp4(input_file, output_file, callback_url):
     return return_code
 
 
-def extract_mkv_subtitles(input_file):
+def extract_mkv_subtitles(input_file, callback_url):
     """
     Extract .srt subtitles from an .mkv file.
 
