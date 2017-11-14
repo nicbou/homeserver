@@ -1,6 +1,6 @@
 html, body, #page {height: 100%;}
 #page, body{background:#333;}
-    #movies input[type=search]{border:none;box-shadow:none;background:#222;}
+    #movies input[type=search]{border:none;box-shadow:none;background:#222;margin-bottom:15px;}
     #movies input[type=search]::-webkit-input-placeholder{color:#444;}
     h2{color:#777;font-weight:100;letter-spacing:2px; margin:0 0 15px;}
     #movies>hr{height:0;border:0;border-bottom:1px solid #444;}
@@ -47,6 +47,7 @@ table{font-size:inherit}
         .movie>.movie-info .actions{margin:0 0 10px;}
 
 .movie .title{max-width:165px;overflow:hidden;text-overflow:ellipsis;}
+.chromecast-icon{width:16px;height:16px;position:relative;top:-1px;}
 .play-in-browser{color:#5cb85c;}
     .play-in-browser.btn-success, a:hover .play-in-browser{color:#fff;}
     .movie .actions, .movie .date{white-space:nowrap;}

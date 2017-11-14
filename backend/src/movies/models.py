@@ -5,6 +5,10 @@ from django.conf import settings
 import os
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
+import datetime
+import uuid
+from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class Movie(models.Model):
@@ -169,3 +173,18 @@ def movie_delete(sender, instance, **kwargs):
             os.unlink(path)
         except:
             pass
+
+
+def tomorrow():
+    return timezone.now() + datetime.timedelta(days=1)
+
+
+def random_uuid():
+    return uuid.uuid4().hex
+
+
+class MovieAccessToken(models.Model):
+    movie = models.ForeignKey(Movie)
+    user = models.ForeignKey(User)
+    expiration_date = models.DateTimeField(default=tomorrow)
+    token = models.CharField(max_length=32, default=random_uuid)

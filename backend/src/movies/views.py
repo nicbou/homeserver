@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import JsonResponse
-from .models import Movie
+from .models import Movie, MovieAccessToken
 from django.views import View
 from django.conf import settings
 from django.db import transaction
@@ -242,3 +242,18 @@ class JSONMovieConversionCallbackView(View):
             return JsonResponse({'result': 'success'})
         else:
             return JsonResponse({'result': 'failure', 'message': 'Invalid `token`'}, status=400)
+
+
+class JSONMovieAccessTokenView(View):
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            movie_id = kwargs.get('id')
+            try:
+                movie = Movie.objects.get(pk=movie_id)
+            except Movie.DoesNotExist:
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+            access_token = MovieAccessToken(movie=movie, user=request.user)
+            access_token.save()
+            return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)

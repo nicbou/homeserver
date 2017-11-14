@@ -40,15 +40,17 @@ $FFMPEG_PATH \
     -async 1 \
     -loglevel warning \
     -codec:a libfdk_aac \
-    -f mp4 "${TMP_OUTPUT_PATH}" 2> "${LOG_FILE}"
+    -f mp4 "${TMP_OUTPUT_PATH}"
 
 # Check the exit code
 if [ $? -eq 0 ]
 then
     rm -f "${OUTPUT_PATH}"  # If it already exists
     mv "${TMP_OUTPUT_PATH}" "${OUTPUT_PATH}"
+    echo "Conversion of ${TMP_OUTPUT_PATH} succeeded"
     exit 0
 else
     rm -f "${TMP_OUTPUT_PATH}"
+    echo "Conversion of ${TMP_OUTPUT_PATH} failed"
     exit 1
 fi

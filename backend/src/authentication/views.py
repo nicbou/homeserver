@@ -1,12 +1,20 @@
 from django.http import HttpResponse, JsonResponse
 import re
+from movies.models import MovieAccessToken
 from django.views import View
 from django.contrib.auth.models import Permission
+from urlparse import urlparse, parse_qs
+from urllib import unquote
+import logging
+from django.utils import timezone
+
 
 permission_checks = (
     ('^/torrents', 'authentication.torrents'),
     ('^/movies', 'authentication.movies_watch'),
 )
+
+logger = logging.getLogger(__name__)
 
 
 def check_auth(request):
@@ -14,13 +22,32 @@ def check_auth(request):
     if not original_url:
         return HttpResponse(status=401)
 
+    parsed_url = urlparse(original_url)
+    querystring = parse_qs(parsed_url.query)
+
     if request.user.is_authenticated:
         for url_matcher, permission in permission_checks:
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
-                import logging
-                logging.error('%s doesnt match %s', url_matcher, original_url)
                 return HttpResponse(status=403)
         return HttpResponse()
+    elif parsed_url.path.startswith('/movies') and 'token' in querystring:
+        try:
+            access_token = MovieAccessToken.objects.get(token=querystring['token'][0])
+        except MovieAccessToken.DoesNotExist:
+            return HttpResponse(status=403)
+        if (
+            access_token.expiration_date < timezone.now() or
+            unquote(parsed_url.path) not in (
+                access_token.movie.library_url,
+                access_token.movie.converted_url,
+                access_token.movie.srt_subtitles_url,
+                access_token.movie.vtt_subtitles_url,
+                access_token.movie.cover_url,
+            )
+        ):
+            return HttpResponse(status=403)
+        else:
+            return HttpResponse()
     else:
         return HttpResponse(status=401)
 

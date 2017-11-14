@@ -65,6 +65,25 @@ const MovieActionsComponent = Vue.component('movie-actions', {
           </ul>
         </div>
         <div v-if="hasEpisodes && canWatchMovies" class="btn-group">
+          <button type="button" class="btn btn-default btn-sm dropdown-toggle btn-play btn-default" title="Stream this movie" data-toggle="dropdown">
+            <img src="/images/chromecast.svg" class="chromecast-icon"/>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li v-for="episode in movie.episodes">
+              <chromecast-button v-if="isConverted(episode)" :episode="episode">
+                Cast {{ episode.episodeString }}
+              </chromecast-button>
+              <a v-if="isConverting(episode)">
+                <span class="text-muted">{{ episode.episodeString }} is converting...</span>
+              </a>
+              <a v-if="!isConverting(episode) && !isConverted(episode)">
+                <span class="text-muted">{{ episode.episodeString }} is not converted</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div v-if="hasEpisodes && canWatchMovies" class="btn-group">
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
             <span class="glyphicon glyphicon-eye-open"></span>
             <span class="caret"></span>
@@ -83,6 +102,9 @@ const MovieActionsComponent = Vue.component('movie-actions', {
         <a v-if="!hasEpisodes && isConverted(movie.episodes[0]) && canWatchMovies" v-on:click.prevent="play(movie.episodes[0])" :href="movie.episodes[0].playbackUrl" title="Stream this movie" class="play-in-browser btn btn-success btn-sm">
           <span class="glyphicon glyphicon-play"></span>
         </a>
+        <chromecast-button :episode="movie.episodes[0]" v-if="!hasEpisodes && isConverted(movie.episodes[0]) && canWatchMovies" class="btn btn-default btn-sm">
+          <img src="/images/chromecast.svg" class="chromecast-icon"/>
+        </chromecast-button>
         <a v-if="!hasEpisodes && !isConverted(movie.episodes[0]) && canWatchMovies" title="This movie is not converted" class="play-in-browser btn btn-success btn-sm disabled">
           <span class="glyphicon glyphicon-play"></span>
         </a>
