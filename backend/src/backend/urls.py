@@ -15,7 +15,7 @@ urlpatterns = [
     url(r'^movies/(?P<id>\d+)/$', JSONMovieView.as_view()),
     url(r'^movies/(?P<id>\d+)/token/$', JSONMovieAccessTokenView.as_view()),
     url(r'^movies/triage/$', JSONMovieTriageListView.as_view()),
-    url(r'^movies/process/callback/$', JSONMovieConversionCallbackView.as_view()),
+    url(r'^movies/videoToMp4/callback/$', JSONMovieConversionCallbackView.as_view()),
     url(r'^habits/$', JSONHabitListView.as_view()),
     url(
         r'^habits/toggle/(?P<id>\d+)/(?P<date>\d{4}-\d{2}-\d{2})/$',

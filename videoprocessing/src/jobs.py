@@ -2,6 +2,8 @@ import subprocess
 import shlex
 import json
 import requests
+from pycaption import CaptionConverter, WebVTTWriter, SRTReader, CaptionReadNoCaptions
+import codecs
 
 
 def convert_to_mp4(input_file, output_file, callback_url):
@@ -21,6 +23,28 @@ def convert_to_mp4(input_file, output_file, callback_url):
             requests.post(callback_url, json={'status': 'conversion-failed'})
 
     return return_code
+
+
+def convert_subtitles_to_vtt(input_file, output_file):
+    """Convert .srt subtitles to .vtt for web playback."""
+    try:
+        with codecs.open(input_file, "r", "utf-8-sig") as srt_file:
+            srt_contents = srt_file.read()
+    except UnicodeDecodeError:
+        with open(input_file, "r") as srt_file:
+            srt_contents = unicode(srt_file.read().decode('iso-8859-1'))
+
+    converter = CaptionConverter()
+    try:
+        converter.read(srt_contents, SRTReader())
+    except CaptionReadNoCaptions:
+        return False  # Likely UTF-16 subtitles
+    vtt_captions = converter.write(WebVTTWriter())
+
+    with codecs.open(output_file, "w", "utf-8-sig") as vtt_file:
+        vtt_file.write(vtt_captions)
+
+    return True
 
 
 def extract_mkv_subtitles(input_file, callback_url):

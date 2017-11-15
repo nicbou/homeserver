@@ -52,18 +52,38 @@ class ChromeCastService {
     return this.castSession && this.castSession.status === "connected";
   }
 
-  setMedia(mediaUrl, contentType) {
+  setMedia(mediaUrl, subtitlesUrl, contentType) {
     const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl, contentType);
-    const request = new chrome.cast.media.LoadRequest(mediaInfo);
-    this.castSession.loadMedia(
-      request,
-      () => { console.log('Load succeed'); },
-      (errorCode) => { console.error(errorCode); }
-    );
-  }
+    let subtitlesPreparationPromise = Promise.resolve();
+    if (subtitlesUrl) { // Check if the subs exist
+      subtitlesPreparationPromise = axios.head(subtitlesUrl).then(
+        () => {
+          const subtitles = new chrome.cast.media.Track(1, chrome.cast.media.TrackType.TEXT);
+          subtitles.trackContentId = subtitlesUrl;
+          subtitles.trackContentType = 'text/vtt';
+          subtitles.subtype = chrome.cast.media.TextTrackType.SUBTITLES;
+          subtitles.name = 'English Subtitles'; // Can be in any language
+          subtitles.language = 'en-US'; // Can be in any language
+          subtitles.customData = null;
+          mediaInfo.tracks = [subtitles];
+          mediaInfo.activeTrackIds = [1];
+        },
+        () => {}
+      );
+    }
 
-  setSubtitles(url, contentType, name, languageCode, subtitlesLanguage) {
-
+    subtitlesPreparationPromise.then(() => {
+      const loadRequest = new chrome.cast.media.LoadRequest(mediaInfo);
+      this.castSession.loadMedia(
+        loadRequest,
+        (media) => {
+          console.log('Media loaded successfully');
+          const tracksInfoRequest = new chrome.cast.media.EditTracksInfoRequest([1]);
+          media.editTracksInfo(tracksInfoRequest, s => console.log('Subtitles loaded'), e => console.log(e));
+        },
+        (errorCode) => { console.error(errorCode); }
+      );
+    })
   }
 }
 

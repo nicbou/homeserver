@@ -142,8 +142,8 @@ class JSONMovieListView(View):
                 episode.conversion_status = Movie.CONVERTING
                 episode.save()
 
-                api_url = "{host}/process".format(host=settings.VIDEO_PROCESSING_API_URL)
-                callback_url = "http://{host}/movies/process/callback/?id={id}&token={token}".format(
+                api_url = "{host}/videoToMp4".format(host=settings.VIDEO_PROCESSING_API_URL)
+                callback_url = "http://{host}/movies/videoToMp4/callback/?id={id}&token={token}".format(
                     host=request.get_host(),  # Note: this might fail behind multiple proxies. See Django docs.
                     id=episode.id,
                     token=movie_conversion_callback_token(episode)
@@ -239,6 +239,12 @@ class JSONMovieConversionCallbackView(View):
                     {'result': 'failure', 'message': '`{}` is not a valid `status` value'.format(conversion_status)},
                     status=400
                 )
+
+            # Queue the subtitles for conversion
+            if os.path.exists(movie.srt_subtitles_path):
+                api_url = "{host}/subtitlesToVTT".format(host=settings.VIDEO_PROCESSING_API_URL)
+                requests.post(api_url, json={'input': movie.srt_subtitles_filename})
+
             return JsonResponse({'result': 'success'})
         else:
             return JsonResponse({'result': 'failure', 'message': 'Invalid `token`'}, status=400)

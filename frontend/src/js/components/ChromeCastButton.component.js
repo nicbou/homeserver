@@ -8,8 +8,8 @@ const ChromeCastButtonComponent = Vue.component('chromecast-button', {
         Api.request.get(`/movies/${this.episode.id}/token/`).then((response) => {
           const token = response.data.token;
           const mediaUrl = `${location.origin}${episode.convertedVideoUrl}?token=${token}`;
-          console.log(mediaUrl)
-          ChromeCast.setMedia(mediaUrl);
+          const subtitlesUrl = `${location.origin}${episode.vttSubtitlesUrl}?token=${token}`;
+          ChromeCast.setMedia(mediaUrl, subtitlesUrl);
         })
       }
 
