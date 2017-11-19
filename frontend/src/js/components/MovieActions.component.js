@@ -84,6 +84,19 @@ const MovieActionsComponent = Vue.component('movie-actions', {
           </ul>
         </div>
         <div v-if="hasEpisodes && canWatchMovies" class="btn-group">
+          <button type="button" class="btn btn-default btn-sm dropdown-toggle btn-play btn-default" title="Stream this movie" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-save"></span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li v-for="episode in movie.episodes">
+              <a :href="episode" download>
+                Download {{ episode.originalVideoUrl }}
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div v-if="hasEpisodes && canWatchMovies" class="btn-group">
           <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
             <span class="glyphicon glyphicon-eye-open"></span>
             <span class="caret"></span>
@@ -107,6 +120,9 @@ const MovieActionsComponent = Vue.component('movie-actions', {
         </chromecast-button>
         <a v-if="!hasEpisodes && !isConverted(movie.episodes[0]) && canWatchMovies" title="This movie is not converted" class="play-in-browser btn btn-success btn-sm disabled">
           <span class="glyphicon glyphicon-play"></span>
+        </a>
+        <a v-if="!hasEpisodes && canWatchMovies" :href="movie.episodes[0].originalVideoUrl" title="Download this movie" class="btn btn-default btn-sm" download>
+          <span class="glyphicon glyphicon-save"></span>
         </a>
         <a href="#" v-if="!hasEpisodes && movie.lastWatched && canWatchMovies" title="Unmark as watched" v-on:click.prevent="markAsUnwatched(movie.episodes[0])" class="mark-unwatched btn btn-default btn-sm">
           <span class="glyphicon glyphicon-eye-close"></span>
