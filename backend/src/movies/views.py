@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import requests
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -83,11 +84,11 @@ class JSONMovieListView(View):
                     episode.title = payload.get('title')
                 if payload.get('description'):
                     episode.description = payload.get('description')
-                if json_episode.get('dateAdded'):
+                if 'dateAdded' in json_episode:
                     episode.date_added = json_episode.get('dateAdded')
-                if json_episode.get('lastWatched'):
+                if 'lastWatched' in json_episode:
                     episode.last_watched = json_episode.get('lastWatched')
-                if json_episode.get('progress', 0):
+                if 'progress' in json_episode:
                     episode.stopped_at = json_episode.get('progress', 0)
                 if json_episode.get('releaseYear'):
                     episode.release_year = json_episode.get('releaseYear')
@@ -261,5 +262,37 @@ class JSONMovieAccessTokenView(View):
             access_token = MovieAccessToken(movie=movie, user=request.user)
             access_token.save()
             return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+
+class JSONMovieWatchedView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            movie_id = kwargs.get('id')
+            try:
+                movie = Movie.objects.get(pk=movie_id)
+                movie.last_watched = datetime.date.today()
+                movie.stopped_at = 0
+                movie.save()
+            except Movie.DoesNotExist:
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+            return JsonResponse({'result': 'success'})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+
+class JSONMovieUnwatchedView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            movie_id = kwargs.get('id')
+            try:
+                movie = Movie.objects.get(pk=movie_id)
+                movie.last_watched = None
+                movie.stopped_at = 0
+                movie.save()
+            except Movie.DoesNotExist:
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+            return JsonResponse({'result': 'success'})
         else:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)

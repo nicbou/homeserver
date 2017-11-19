@@ -7,11 +7,11 @@ class MoviesService {
   }
 
   static markAsWatched(id) {
-    Api.request.post(`/movies/${id}/watched/`);
+    return Api.request.post(`/movies/${id}/watched/`);
   }
 
   static markAsUnwatched(id) {
-    Api.request.post(`/movies/${id}/unwatched/`);
+    return Api.request.post(`/movies/${id}/unwatched/`);
   }
 
   static save(movie, params={}) {

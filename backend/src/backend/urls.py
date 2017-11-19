@@ -4,7 +4,7 @@ from django.contrib import admin
 from finances.views import JSONAccountListView, JSONTransactionListView
 from habits.views import JSONHabitListView, JSONHabitToggleView
 from movies.views import JSONMovieListView, JSONMovieTriageListView, JSONMovieView, JSONMovieConversionCallbackView, \
-    JSONMovieAccessTokenView
+    JSONMovieAccessTokenView, JSONMovieWatchedView, JSONMovieUnwatchedView
 
 urlpatterns = [
     url(r'^auth/', include('authentication.urls')),
@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'^movies/$', JSONMovieListView.as_view()),
     url(r'^movies/(?P<id>\d+)/$', JSONMovieView.as_view()),
     url(r'^movies/(?P<id>\d+)/token/$', JSONMovieAccessTokenView.as_view()),
+    url(r'^movies/(?P<id>\d+)/watched/$', JSONMovieWatchedView.as_view()),
+    url(r'^movies/(?P<id>\d+)/unwatched/$', JSONMovieUnwatchedView.as_view()),
     url(r'^movies/triage/$', JSONMovieTriageListView.as_view()),
     url(r'^movies/videoToMp4/callback/$', JSONMovieConversionCallbackView.as_view()),
     url(r'^habits/$', JSONHabitListView.as_view()),
