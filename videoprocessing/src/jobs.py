@@ -3,7 +3,7 @@ import shlex
 import json
 import requests
 from pycaption import CaptionConverter, WebVTTWriter, SRTReader, CaptionReadNoCaptions
-import codecs
+import chardet
 
 
 def convert_to_mp4(input_file, output_file, callback_url):
@@ -27,12 +27,11 @@ def convert_to_mp4(input_file, output_file, callback_url):
 
 def convert_subtitles_to_vtt(input_file, output_file):
     """Convert .srt subtitles to .vtt for web playback."""
-    try:
-        with codecs.open(input_file, "r", "utf-8-sig") as srt_file:
-            srt_contents = srt_file.read()
-    except UnicodeDecodeError:
-        with open(input_file, "r") as srt_file:
-            srt_contents = unicode(srt_file.read().decode('iso-8859-1'))
+    with open(input_file, mode='rb') as raw_input_content:
+        encoding = chardet.detect(raw_input_content.read())['encoding']
+
+    with open(input_file, mode='r', encoding=encoding) as srt_file:
+        srt_contents = str(srt_file.read())
 
     converter = CaptionConverter()
     try:
@@ -41,7 +40,7 @@ def convert_subtitles_to_vtt(input_file, output_file):
         return False  # Likely UTF-16 subtitles
     vtt_captions = converter.write(WebVTTWriter())
 
-    with codecs.open(output_file, "w", "utf-8-sig") as vtt_file:
+    with open(output_file, mode='w', encoding='utf-8-sig') as vtt_file:
         vtt_file.write(vtt_captions)
 
     return True
