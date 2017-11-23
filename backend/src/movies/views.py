@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import JsonResponse
-from .models import Movie, MovieAccessToken
+from .models import Movie, MovieWatchStatus, MovieAccessToken
 from django.views import View
 from django.conf import settings
 from django.db import transaction
@@ -22,6 +22,8 @@ class JSONMovieListView(View):
     def get(self, request, *args, **kwargs):
         movies_by_tmdb_id = {}
 
+        watch_statuses = {wp.movie_id: wp for wp in MovieWatchStatus.objects.filter(user=request.user)}
+
         for movie in Movie.objects.all():
             if not movies_by_tmdb_id.get(movie.tmdb_id):
                 movies_by_tmdb_id[movie.tmdb_id] = []
@@ -39,17 +41,19 @@ class JSONMovieListView(View):
                 'episodes': []
             }
 
+            watch_status = watch_statuses.get(movie.pk)
+
             for movie in movies:
                 json_movie['episodes'].append({
                     'conversionStatus': movie.conversion_status,
                     'convertedVideoUrl': movie.converted_url,
                     'dateAdded': movie.date_added,
                     'id': movie.id,
-                    'lastWatched': movie.last_watched,
+                    'lastWatched': watch_status.last_watched if watch_status else None,
                     'originalVideoUrl': movie.library_url,
                     'season': movie.season,
                     'episode': movie.episode,
-                    'progress': movie.stopped_at,
+                    'progress': watch_status.stopped_at if watch_status else 0,
                     'releaseYear': movie.release_year,
                     'srtSubtitlesUrl': movie.srt_subtitles_url,
                     'vttSubtitlesUrl': movie.vtt_subtitles_url,
@@ -86,10 +90,14 @@ class JSONMovieListView(View):
                     episode.description = payload.get('description')
                 if 'dateAdded' in json_episode:
                     episode.date_added = json_episode.get('dateAdded')
-                if 'lastWatched' in json_episode:
-                    episode.last_watched = json_episode.get('lastWatched')
-                if 'progress' in json_episode:
-                    episode.stopped_at = json_episode.get('progress', 0)
+
+                if 'progress' in json_episode or 'lastWatched' in json_episode:
+                    watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+                    if 'progress' in json_episode:
+                        watch_status.stopped_at = json_episode.get('progress', 0)
+                    if 'lastWatched' in json_episode:
+                        watch_status.last_watched = json_episode.get('lastWatched')
+                    watch_status.save()
                 if json_episode.get('releaseYear'):
                     episode.release_year = json_episode.get('releaseYear')
 
@@ -272,9 +280,10 @@ class JSONMovieWatchedView(View):
             movie_id = kwargs.get('id')
             try:
                 movie = Movie.objects.get(pk=movie_id)
-                movie.last_watched = datetime.date.today()
-                movie.stopped_at = 0
-                movie.save()
+                watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=movie)[0]
+                watch_status.last_watched = datetime.date.today()
+                watch_status.stopped_at = 0
+                watch_status.save()
             except Movie.DoesNotExist:
                 return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
             return JsonResponse({'result': 'success'})
@@ -288,11 +297,35 @@ class JSONMovieUnwatchedView(View):
             movie_id = kwargs.get('id')
             try:
                 movie = Movie.objects.get(pk=movie_id)
-                movie.last_watched = None
-                movie.stopped_at = 0
-                movie.save()
+                watch_status = MovieWatchStatus.objects.get(user=request.user, movie=movie)
+                watch_status.delete()
+            except MovieWatchStatus.DoesNotExist:
+                pass
             except Movie.DoesNotExist:
                 return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+            return JsonResponse({'result': 'success'})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+
+class JSONMovieProgressView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            movie_id = kwargs.get('id')
+            payload = json.loads(request.body, encoding='UTF-8')
+            try:
+                movie = Movie.objects.get(pk=movie_id)
+                watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=movie)[0]
+                watch_status.stopped_at = int(payload['progress'])
+                watch_status.save()
+            except Movie.DoesNotExist:
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+            except KeyError:
+                return JsonResponse(
+                    {'result': 'failure', 'message': '`progress` is missing from request payload'}, 400)
+            except ValueError:
+                return JsonResponse(
+                    {'result': 'failure', 'message': '`progress` must be an integer'}, 400)
             return JsonResponse({'result': 'success'})
         else:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)

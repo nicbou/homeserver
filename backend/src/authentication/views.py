@@ -45,6 +45,7 @@ def check_auth(request):
                 access_token.movie.cover_url,
             )
         ):
+            access_token.delete()
             return HttpResponse(status=403)
         else:
             return HttpResponse()

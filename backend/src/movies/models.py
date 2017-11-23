@@ -49,8 +49,6 @@ class Movie(models.Model):
 
     # Library
     date_added = models.DateField(auto_now_add=True)
-    last_watched = models.DateField(default=None, blank=True, null=True)
-    stopped_at = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
         return self.title
@@ -181,6 +179,16 @@ def tomorrow():
 
 def random_uuid():
     return uuid.uuid4().hex
+
+
+class MovieWatchStatus(models.Model):
+    movie = models.ForeignKey(Movie)
+    user = models.ForeignKey(User)
+    stopped_at = models.PositiveIntegerField(default=0)
+    last_watched = models.DateField(default=None, blank=True, null=True)
+
+    class Meta:
+        unique_together = (('movie', 'user'),)
 
 
 class MovieAccessToken(models.Model):

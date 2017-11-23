@@ -14,6 +14,10 @@ class MoviesService {
     return Api.request.post(`/movies/${id}/unwatched/`);
   }
 
+  static setProgress(id, progressInSeconds) {
+    return Api.request.post(`/movies/${id}/progress/`, {'progress': progressInSeconds});
+  }
+
   static save(movie, params={}) {
     const triageParams = {
       movieFile: params.movieFile || null,
