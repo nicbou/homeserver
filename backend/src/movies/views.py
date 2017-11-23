@@ -119,7 +119,7 @@ class JSONMovieListView(View):
             for episode, triage_options in zip(episodes, triage_options):
                 movie_file = triage_options.get('movieFile')
                 movie_file_abs = os.path.join(settings.TRIAGE_PATH, movie_file) if movie_file else None
-                if movie_file and os.path.exists(movie_file_abs):
+                if movie_file and os.path.exists(movie_file_abs.encode('utf-8')):
                     episode.triage_path = movie_file
                     episode.original_extension = os.path.splitext(movie_file)[1][1:].lower()  # extension without dot
                     try:
@@ -131,7 +131,7 @@ class JSONMovieListView(View):
 
                 subtitles_file = triage_options.get('subtitlesFile')
                 subtitles_file_abs = os.path.join(settings.TRIAGE_PATH, subtitles_file) if subtitles_file else None
-                if subtitles_file and os.path.exists(subtitles_file_abs):
+                if subtitles_file and os.path.exists(subtitles_file_abs.encode('utf-8')):
                     try:
                         os.unlink(episode.srt_subtitles_path.encode('utf-8'))
                     except:
@@ -250,7 +250,7 @@ class JSONMovieConversionCallbackView(View):
                 )
 
             # Queue the subtitles for conversion
-            if os.path.exists(movie.srt_subtitles_path):
+            if os.path.exists(movie.srt_subtitles_path.encode('utf-8')):
                 api_url = "{host}/subtitlesToVTT".format(host=settings.VIDEO_PROCESSING_API_URL)
                 requests.post(api_url, json={'input': movie.srt_subtitles_filename})
 
