@@ -91,7 +91,7 @@ const MovieActionsComponent = Vue.component('movie-actions', {
           <ul class="dropdown-menu" role="menu">
             <li v-for="episode in movie.episodes">
               <a :href="episode" download>
-                Download {{ episode.originalVideoUrl }}
+                Download { episode.episodeString }}
               </a>
             </li>
           </ul>
