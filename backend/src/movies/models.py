@@ -187,6 +187,9 @@ class MovieWatchStatus(models.Model):
     stopped_at = models.PositiveIntegerField(default=0)
     last_watched = models.DateField(default=None, blank=True, null=True)
 
+    def __unicode__(self):
+        return u"{} for user {}".format(self.movie.title, self.user)
+
     class Meta:
         unique_together = (('movie', 'user'),)
 

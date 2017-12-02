@@ -37,13 +37,12 @@ class JSONMovieListView(View):
                 'title': movies[0].title,
                 'description': movies[0].description,
                 'coverUrl': movies[0].cover_url,
-                'rating': movie.rating,
+                'rating': movies[0].rating,
                 'episodes': []
             }
 
-            watch_status = watch_statuses.get(movie.pk)
-
             for movie in movies:
+                watch_status = watch_statuses.get(movie.pk)
                 json_movie['episodes'].append({
                     'conversionStatus': movie.conversion_status,
                     'convertedVideoUrl': movie.converted_url,
