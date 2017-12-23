@@ -119,6 +119,8 @@ COMMERZBANK_ACCOUNT_NUMBER = os.environ.get('COMMERZBANK_ACCOUNT_NUMBER')
 COMMERZBANK_PASSWORD = os.environ.get('COMMERZBANK_PASSWORD')
 N26_USERNAME = os.environ.get('N26_USERNAME')
 N26_PASSWORD = os.environ.get('N26_PASSWORD')
+DEGIRO_USERNAME = os.environ.get('DEGIRO_USERNAME')
+DEGIRO_PASSWORD = os.environ.get('DEGIRO_PASSWORD')
 
 MOVIE_LIBRARY_PATH = os.environ.get('MOVIE_LIBRARY_PATH')  # The renamed, triaged movies and their artifacts go here
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')

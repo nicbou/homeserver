@@ -4,7 +4,6 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repos
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories
 
 # Install Python 3 for the API, mkvtoolnix for mkv subtitles, lxml for vtt subtitles
-RUN apk upgrade --no-cache
 RUN apk add --no-cache \
     python3 \
     python3-dev \

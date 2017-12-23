@@ -2,3 +2,4 @@ SHELL=/bin/bash
 
 0 */6 * * * source /srv/cronenv; /usr/bin/python /srv/src/manage.py get_balance_commerzbank >> /srv/logs/cron.log 2>&1
 0 * * * * source /srv/cronenv; /usr/bin/python /srv/src/manage.py get_balance_n26 >> /srv/logs/cron.log 2>&1
+0 * * * * source /srv/cronenv; /usr/bin/python /srv/src/manage.py get_balance_degiro >> /srv/logs/cron.log 2>&1

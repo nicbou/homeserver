@@ -13,6 +13,8 @@ Home server backend and frontend. The backend is built with Django and the front
     * `COMMERZBANK_PASSWORD`: Commerzbank login password.
     * `N26_USERNAME`
     * `N26_PASSWORD`
+    * `DEGIRO_USERNAME`
+    * `DEGIRO_PASSWORD`
     * `TRANSMISSION_DATA_PATH`: Local path that will be mounted as Transmission's data folder (for incomplete torrents, settings etc)
     * `MOVIE_LIBRARY_PATH`: The directory where the completed torrents awaiting triage and the organized movies, covers and subtitles are stored.
     * OpenVPN configuration for [the Transmission/OpenVPN image](https://hub.docker.com/r/haugene/transmission-openvpn/):
@@ -22,5 +24,5 @@ Home server backend and frontend. The backend is built with Django and the front
 2. Put your fixtures in the BACKEND_FIXTURES_PATH.
 3. Run `docker-compose build` to build all the components.
 4. Run `docker-compose up` to start all the components.
-5. If necessary, run `docker-compose exec backend createsuperuser` to generate your first user.
+5. If necessary, run `docker-compose exec backend python manage.py createsuperuser` to create your first user.
 6. Remove the fixtures from BACKEND_FIXTURES_PATH.
