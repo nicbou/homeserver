@@ -25,16 +25,16 @@ service rsyslog start
 
 # Activate cron with all Django environment variables
 > /srv/cronenv
-echo "export BACKEND_SECRET_KEY=\"${BACKEND_SECRET_KEY}\"" >> /srv/cronenv
-echo "export BACKEND_DEBUG=\"${BACKEND_DEBUG}\"" >> /srv/cronenv
-echo "export DB_PERSISTENCE_PATH=\"${DB_PERSISTENCE_PATH}\"" >> /srv/cronenv
-echo "export COMMERZBANK_ACCOUNT_NUMBER=\"${COMMERZBANK_ACCOUNT_NUMBER}\"" >> /srv/cronenv
-echo "export COMMERZBANK_PASSWORD=\"${COMMERZBANK_PASSWORD}\"" >> /srv/cronenv
-echo "export N26_USERNAME=\"${N26_USERNAME}\"" >> /srv/cronenv
-echo "export N26_PASSWORD=\"${N26_PASSWORD}\"" >> /srv/cronenv
-echo "export DEGIRO_USERNAME=\"${DEGIRO_USERNAME}\"" >> /srv/cronenv
-echo "export DEGIRO_PASSWORD=\"${DEGIRO_PASSWORD}\"" >> /srv/cronenv
-echo "export BACKEND_FIXTURES_PATH=\"${BACKEND_FIXTURES_PATH}\"" >> /srv/cronenv
+echo "export BACKEND_SECRET_KEY='${BACKEND_SECRET_KEY}'" >> /srv/cronenv
+echo "export BACKEND_DEBUG='${BACKEND_DEBUG}'" >> /srv/cronenv
+echo "export DB_PERSISTENCE_PATH='${DB_PERSISTENCE_PATH}'" >> /srv/cronenv
+echo "export COMMERZBANK_ACCOUNT_NUMBER='${COMMERZBANK_ACCOUNT_NUMBER}'" >> /srv/cronenv
+echo "export COMMERZBANK_PASSWORD='${COMMERZBANK_PASSWORD}'" >> /srv/cronenv
+echo "export N26_USERNAME='${N26_USERNAME}'" >> /srv/cronenv
+echo "export N26_PASSWORD='${N26_PASSWORD}'" >> /srv/cronenv
+echo "export DEGIRO_USERNAME='${DEGIRO_USERNAME}'" >> /srv/cronenv
+echo "export DEGIRO_PASSWORD='${DEGIRO_PASSWORD}'" >> /srv/cronenv
+echo "export BACKEND_FIXTURES_PATH='${BACKEND_FIXTURES_PATH}'" >> /srv/cronenv
 crontab /srv/crontab
 service cron start
 
