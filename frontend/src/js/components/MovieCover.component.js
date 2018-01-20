@@ -92,7 +92,7 @@ const MovieCoverComponent = Vue.component('movie-cover', {
           <div v-if="hasEpisodes" class="panel-heading">
             <i class="glyphicon glyphicon-menu-left" v-on:click="selectedEpisode=null"></i>
             Season {{ selectedSeason.seasonNumber }}, episode {{ selectedEpisode.episode }}
-            <i v-if="selectedSeason.unseenEpisodeCount() == 0" class="glyphicon glyphicon-ok pull-right"></i>
+            <i v-if="selectedEpisode.watchStatus == WatchStatus.Watched" class="glyphicon glyphicon-ok pull-right"></i>
           </div>
           <div class="panel-body">
             <episode-actions :episode="selectedEpisode" v-on:episodeDeleted="episodeDeleted"></episode-actions>
