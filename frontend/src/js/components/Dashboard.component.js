@@ -1,6 +1,6 @@
 const DashboardComponent = Vue.component('dashboard', {
   template: `
-    <div>
+    <div id="dashboard">
       <div class="row">
         <div class='col-md-12'>
           <finances-panel></finances-panel>

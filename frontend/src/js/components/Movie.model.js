@@ -103,9 +103,9 @@ class Movie {
         dateAdded: moment(episode.dateAdded),
         episodeString: episodeString,
         get watchStatus() {
-          if (movie.progress > 0) {
+          if (this.progress > 0) {
             return WatchStatus.WATCHING;
-          } else if (movie.lastWatched) {
+          } else if (this.lastWatched) {
             return WatchStatus.WATCHED;
           }
           return WatchStatus.NOT_WATCHED;

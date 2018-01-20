@@ -49,6 +49,6 @@ class MoviesService {
   }
 
   static delete(id) {
-    Api.request.delete(`/movies/${id}/`);
+    return Api.request.delete(`/movies/${id}/`);
   }
 }

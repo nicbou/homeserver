@@ -2,15 +2,11 @@ html, body, #page {height: 100%;}
 #page, body{background:#333;}
     #movies input[type=search]{border:none;box-shadow:none;background:#222;margin-bottom:15px;}
     #movies input[type=search]::-webkit-input-placeholder{color:#444;}
-    h2{color:#777;font-weight:100;letter-spacing:2px; margin:0 0 15px;}
+    h2{color:#777;font-weight:200;letter-spacing:2px;margin:0 0 15px;}
     #movies>hr{height:0;border:0;border-bottom:1px solid #444;}
     #login-panel{margin-top:50px;}
-    .panel{border-color:#000;box-shadow: 0 3px 10px rgba(0,0,0,0.5);}
-        .panel-iframe>.panel-body{padding:0px;}
-        .panel-iframe>.panel-body>iframe{border:none;border-top:1px solid #ccc;width:100%;height:100%;}
     .navbar{border:0;}
 
-.badge{background-color:#d9534f;}
 table{font-size:inherit}
     .table>tbody>tr>td, .table>tbody>tr>th, .table>thead>tr>td, .table>thead>tr>th{border-top-style:dotted;}
     tbody.inset{box-shadow:inset 0px 6px 10px -10px rgba(0,0,0,0.5);background:#f9f9f9;}
@@ -41,16 +37,18 @@ table{font-size:inherit}
     .movie.deleted{background-color:#444;box-shadow:none;text-align:center}
     .movie.deleted .deleted-icon{font-size:72px;vertical-align:middle}
         .movie.deleted .deleted-icon::before{content:"\e020";font-family:'Glyphicons Halflings';}
-    .movie>.movie-info{padding:15px;box-sizing:border-box;width:100%;}
-        .movie>.movie-info h2{margin-top:0;}
-        .movie>.movie-info .episode{position:absolute;z-index:101;top:20px;left:20px;color:#fff;-webkit-text-stroke: 1px black;font-size:20px;font-weight:bold}
-        .movie>.movie-info .actions{margin:0 0 10px;}
+    .movie>.movie-info{padding:15px;box-sizing:border-box;width:100%;height:100%;overflow-y:auto;}
+        .movie>.movie-info h2{margin-top:0;line-height: 30px;}
+        .movie>.movie-info>.panel .panel-heading{font-weight:bold}
+        .movie>.movie-info>.panel, .movie>.movie-info>.list-group{margin-left:-16px;margin-right:-15px;border-radius:0;border-left:0;border-right:0;}
+        .panel-body>.list-group{margin: -16px -15px;}
+            .movie>.movie-info .list-group>*{border-left:0;border-right:0;border-radius:0!important}
 
 .movie .title{max-width:165px;overflow:hidden;text-overflow:ellipsis;}
 .chromecast-icon{width:16px;height:16px;position:relative;top:-1px;}
 .play-in-browser{color:#5cb85c;}
     .play-in-browser.btn-success, a:hover .play-in-browser{color:#fff;}
-    .movie .actions, .movie .date{white-space:nowrap;}
+    .movie .date{white-space:nowrap;}
 
 /* Player */
 .player{position:fixed;width:100%;height:100%;top:0;left:0;z-index:1000;background:rgba(0,0,0,0.6);display:flex;align-items:center;}
@@ -75,11 +73,12 @@ table{font-size:inherit}
     .status+h4{margin-top:20px;}
     .status-details{display:inline-block;flex:1 1;vertical-align:top;padding:0 0 0 5px;}
     .status-details .balance{float:right;}
-    .panel-danger .panel-heading{background:#d9534f;color:#fff;}
-    .panel-warning .panel-heading{background:#f0ad4e;color:#fff;}
-    #finances>table{margin-top:-15px;}
-    .panel>table tr>td:first-child{padding-left:15px;}
-    .panel>table tr>td:last-child{padding-right:15px;}
+    #dashboard .panel{border-color:#000;box-shadow: 0 3px 10px rgba(0,0,0,0.5);}
+        #dashboard .panel-danger .panel-heading{background:#d9534f;color:#fff;}
+        #dashboard .panel-warning .panel-heading{background:#f0ad4e;color:#fff;}
+        #finances>table{margin-top:-15px;}
+        #dashboard .panel>table tr>td:first-child{padding-left:15px;}
+        #dashboard .panel>table tr>td:last-child{padding-right:15px;}
 
 .chart{height:200px;margin-bottom:20px;max-width:100%;}
 .stock-chart{filter:opacity(0.6) contrast(0) grayscale() brightness(1);image-rendering:pixelated;width:100%;}
@@ -124,10 +123,9 @@ dd,dt{text-align:left!important}
     table{font-size:75%;}
     .col-md-3 .movie{position:relative;overflow:hidden;}
     .movie:hover>.cover{display:block;width:100%;}
-    .movie .movie-info{padding:0;}
+    .movie .movie-info{/* padding:0; */}
     .col-md-3.col-xs-6{padding:0;}
         .col-md-3 .movie{margin-bottom:0;}
-            .col-md-3 .movie .actions{display:inline-block;position:absolute;z-index:1000;bottom:10px;left:0;width:100%;text-align:center}
     .movie.not-converted{background:#333;}
         .movie.not-converted img{opacity:0.6;-webkit-filter:grayscale(1);}
 }
