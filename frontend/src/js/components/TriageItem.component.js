@@ -122,7 +122,8 @@ const TriageItemComponent = Vue.component('triage-item', {
           movieFile: this.file, 
           subtitlesFile: this.selectedSubtitles || null, 
           convertToMp4: this.convertToMp4
-        }).then(() => {
+        }
+      ).then(() => {
         this.savingInProgress = false;
         this.saved = true;
       })

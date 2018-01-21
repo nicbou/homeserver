@@ -35,7 +35,6 @@ const MovieActionsComponent = Vue.component('episode-actions', {
     },
   },
   created: function() {
-    console.log(this.episode)
     Permissions.checkPermission('movies_watch').then(value => { this.canWatchMovies = value; });
     Permissions.checkPermission('movies_manage').then(value => { this.canManageMovies = value; });
   },
