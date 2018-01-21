@@ -136,12 +136,12 @@ const TriageItemComponent = Vue.component('triage-item', {
         <span class="no-cover-icon" v-if="!coverUrl"></span>
       </div>
       <div class="movie-info">
-        <h2 v-if="selectedMovie" class="hidden-sm hidden-xs">
+        <h2 v-if="selectedMovie">
           {{ fullTitle }}
           <br><small>{{ selectedMovie.releaseYear }}</small>
         </h2>
 
-        <h2 v-if="!selectedMovie" class="hidden-sm hidden-xs">
+        <h2 v-if="!selectedMovie">
           {{ file }}
         </h2>
 
