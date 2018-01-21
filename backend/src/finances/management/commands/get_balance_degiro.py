@@ -1,10 +1,8 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
-from decimal import Decimal
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from finances.models import Balance, Account
-from datetime import datetime
 import requests
 import logging
 import json
@@ -33,8 +31,8 @@ class Command(BaseCommand):
 
     def get_portfolio(self, session_id, account_id):
         response = requests.get(
-            "https://trader.degiro.nl/trading/secure/v5/update/{account_id};jsessionid={session_id}".format(
-                account_id=account_id,
+            "https://trader.degiro.nl/trading/secure/v5/update/{acct_id};jsessionid={session_id}".format(
+                acct_id=account_id,
                 session_id=session_id
             ),
             params={'portfolio': 0, 'totalPortfolio': 0}
@@ -43,7 +41,7 @@ class Command(BaseCommand):
 
     def get_balance(self, portfolio):
         balances = portfolio['totalPortfolio']['value']
-        return [balance['value'] for balance in balances if balance['name'] == 'total'][0] 
+        return [balance['value'] for balance in balances if balance['name'] == 'reportNetliq'][0]
 
     def handle(self, *args, **options):
         account = Account.objects.get_or_create(name='degiro', is_credit=False)[0]
