@@ -1,5 +1,5 @@
 const MovieActionsComponent = Vue.component('episode-actions', {
-  props: ['episode'],
+  props: ['episode', 'is-movie', 'is-only-episode'],
   data: function() {
     return {
       canWatchMovies: false,
@@ -12,6 +12,10 @@ const MovieActionsComponent = Vue.component('episode-actions', {
     },
     isConverting: function() {
       return this.episode.conversionStatus === ConversionStatus.CONVERTING
+    },
+    hasChromecastSupport: function() {
+      console.log(ChromeCast)
+      return !!ChromeCast;
     }
   },
   methods: {
@@ -30,9 +34,9 @@ const MovieActionsComponent = Vue.component('episode-actions', {
     },
     deleteEpisode: function() {
       const deletionPromises = MoviesService.delete(this.episode.id).then(() => {
-        this.$emit('episodeDeleted');
+        this.$emit('episodeDeleted', this.episode);
       });
-    },
+    }
   },
   created: function() {
     Permissions.checkPermission('movies_watch').then(value => { this.canWatchMovies = value; });
@@ -44,7 +48,7 @@ const MovieActionsComponent = Vue.component('episode-actions', {
         <span class="glyphicon glyphicon-play"></span>
         Play in browser
       </button>
-      <chromecast-button v-if="isConverted" :episode="episode" class="list-group-item">
+      <chromecast-button v-if="isConverted && hasChromecastSupport" :episode="episode" class="list-group-item">
         <img src="/images/chromecast.svg" class="chromecast-icon"/> Play on Chromecast
       </chromecast-button>
       <a :href="episode.originalVideoUrl" download class="list-group-item">
@@ -59,7 +63,8 @@ const MovieActionsComponent = Vue.component('episode-actions', {
       </a>
       <a href="#" title="Delete" v-if="canManageMovies" v-on:click.prevent="deleteEpisode()" class="list-group-item">
         <span class="glyphicon glyphicon-trash"></span>
-        Delete episode
+        <span v-if="!isOnlyEpisode">Delete <span v-if="isMovie">part</span><span v-if="!isMovie">episode</span></span>
+        <span v-if="isOnlyEpisode">Delete <span v-if="isMovie">movie</span><span v-if="!isMovie">episode</span></span>
       </a>
     </div>
   `

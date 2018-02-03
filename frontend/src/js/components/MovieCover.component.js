@@ -6,25 +6,58 @@ const MovieCoverComponent = Vue.component('movie-cover', {
       selectedSeason: null,
       selectedEpisode: null,
       WatchStatus: WatchStatus,
+      MediaType: MediaType,
       showInfo: false,
     };
   },
   methods: {
-    episodeDeleted: function() {
-      const deletedIndex = this.movie.episodes.indexOf(episodeDeleted);
-      this.movie.episodes.splice(deletedIndex, 1);
+    episodeDeleted: function(episode) {
+      // Remove episode from movie's episodes
+      const deletionIndex = this.movie.episodes.indexOf(episode);
+      if (deletionIndex !== -1) {
+        this.movie.episodes.splice(deletionIndex, 1);
+      }
+
+      if (episode === this.selectedEpisode) {
+        this.selectedEpisode = null;
+      }
+
+      // Remove episode from selected season
+      if (this.selectedSeason && this.selectedSeason.seasonNumber === episode.season) {
+        const seasonDeletionIndex = this.selectedSeason.indexOf(episode);
+        if (seasonDeletionIndex !== -1) {
+          this.selectedSeason.splice(seasonDeletionIndex, 1);
+        }
+
+        if (this.selectedSeason.length === 0) {
+          this.selectedSeason = null;
+        }
+      }
+
       if (this.movie.episodes.length == 0){
         this.deleted = true;
       }
+
+      this.selectDefaultSeasonAndEpisode();
     },
+    selectDefaultSeasonAndEpisode: function() {
+      if (!this.hasEpisodes) {
+        this.selectedEpisode = this.movie.episodes[0];
+      }
+      else if (!this.hasSeasons) {
+        this.selectedSeason = this.seasons[0];
+      }
+    }
   },
   computed: {
     seasons: function() {
       return this.movie.episodes
         .reduce((seasons, episode) => {
-          seasons[episode.season - 1] = seasons[episode.season - 1] || []
-          seasons[episode.season - 1].push(episode);
-          seasons[episode.season - 1].seasonNumber = episode.season
+          // episode.season can be null
+          const seasonNumber = episode.season === null ? 1 : episode.season;
+          seasons[seasonNumber - 1] = seasons[seasonNumber - 1] || []
+          seasons[seasonNumber - 1].push(episode);
+          seasons[seasonNumber - 1].seasonNumber = seasonNumber;
           return seasons;
         }, [])
         .filter(Boolean)
@@ -41,14 +74,15 @@ const MovieCoverComponent = Vue.component('movie-cover', {
     hasSeasons: function() {
       return this.seasons.length > 1;
     },
+    isMovie: function() {
+      return this.movie.mediaType === MediaType.MOVIE;
+    },
+    isTVShow: function() {
+      return this.movie.mediaType === MediaType.TV_SHOW;
+    }
   },
   created: function() {
-    if (!this.hasEpisodes) {
-      this.selectedEpisode = this.movie.episodes[0];
-    }
-    else if (!this.hasSeasons) {
-      this.selectedSeason = this.seasons[0];
-    }
+    this.selectDefaultSeasonAndEpisode();
   },
   template: `
     <div class="movie" :class="{ watched: movie.watched, deleted: deleted }">
@@ -59,9 +93,12 @@ const MovieCoverComponent = Vue.component('movie-cover', {
           {{ movie.title }}
           <br><small>{{ movie.releaseYear }}</small>
         </h2>
+
+        <!-- Season list -->
         <div v-if="!selectedSeason && !selectedEpisode" class="panel panel-default">
           <div v-if="hasEpisodes" class="panel-heading">
-            <span v-if="hasSeasons">{{ seasons.length }} seasons, </span>{{ movie.episodes.length }} episodes
+            <span v-if="hasSeasons">{{ seasons.length }} seasons, </span>
+            {{ movie.episodes.length }} <span v-if="isMovie">parts</span><span v-if="isTVShow">episodes</span>
             <i v-if="movie.watched" class="glyphicon glyphicon-ok pull-right"></i>
           </div>
           <div class="panel-body">
@@ -73,8 +110,10 @@ const MovieCoverComponent = Vue.component('movie-cover', {
             </div>
           </div>
         </div>
+
+        <!-- Episode/part list -->
         <div v-if="selectedSeason && !selectedEpisode" class="panel panel-default">
-          <div class="panel-heading">
+          <div class="panel-heading" v-if="isTVShow || hasSeasons">
             <i v-if="hasSeasons" class="glyphicon glyphicon-menu-left" v-on:click="selectedSeason=null"></i>
             Season {{ selectedSeason.seasonNumber }}
             <i v-if="selectedSeason.unseenEpisodeCount() == 0" class="glyphicon glyphicon-ok pull-right"></i>
@@ -82,20 +121,24 @@ const MovieCoverComponent = Vue.component('movie-cover', {
           <div class="panel-body">
             <div class="list-group">
               <button v-for="episode in selectedSeason" v-on:click="selectedEpisode=episode" class="list-group-item">
-                Episode {{ episode.episode }}
+                <span v-if="isTVShow">Episode {{ episode.episode }}</span>
+                <span v-if="isMovie">Part {{ episode.episode }}</span>
                 <i v-if="episode.watchStatus == WatchStatus.WATCHED" class="glyphicon glyphicon-ok pull-right"></i>
               </button>
             </div>
           </div>
         </div>
+
+        <!-- Individual episodes/parts -->
         <div v-if="selectedEpisode" class="panel panel-default">
-          <div v-if="hasEpisodes" class="panel-heading">
-            <i class="glyphicon glyphicon-menu-left" v-on:click="selectedEpisode=null"></i>
-            Season {{ selectedSeason.seasonNumber }}, episode {{ selectedEpisode.episode }}
+          <div v-if="hasEpisodes || isTVShow" class="panel-heading">
+            <i class="glyphicon glyphicon-menu-left" v-if="hasEpisodes" v-on:click="selectedEpisode=null"></i>
+            <span v-if="isTVShow">Season {{ (selectedSeason || this.seasons[0]).seasonNumber }}, episode {{ selectedEpisode.episode }}</span>
+            <span v-if="isMovie">Part {{ selectedEpisode.episode }}</span>
             <i v-if="selectedEpisode.watchStatus == WatchStatus.Watched" class="glyphicon glyphicon-ok pull-right"></i>
           </div>
           <div class="panel-body">
-            <episode-actions :episode="selectedEpisode" v-on:episodeDeleted="episodeDeleted"></episode-actions>
+            <episode-actions :episode="selectedEpisode" v-on:episodeDeleted="episodeDeleted" :is-movie="isMovie" :is-only-episode="!hasEpisodes"></episode-actions>
           </div>
           </div>
           <p>{{ movie.description }}</p>

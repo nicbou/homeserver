@@ -80,7 +80,7 @@ class JSONMovieListView(View):
                     tmdb_id=payload.get('tmdbId'),
                     episode=json_episode.get('episode', None),
                     season=json_episode.get('season', None),
-                    media_type=json_episode.get('mediaType', Movie.MOVIE)
+                    media_type=payload.get('mediaType', Movie.MOVIE)
                 )[0]
 
                 if payload.get('title'):
