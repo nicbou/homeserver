@@ -1,12 +1,12 @@
-version: '3'
+version: "2.1"
 services:
   db:
-    image: postgres
+    image: postgres:9.6
     environment:
       - DB_PERSISTENCE_PATH
     volumes:
       - ${DB_PERSISTENCE_PATH}:/var/lib/postgresql/data
-
+    userns_mode: "host"
   backend:
     build: backend
     depends_on:
@@ -44,6 +44,7 @@ services:
     image: smebberson/alpine-redis
     volumes:
       - redis_peristence:/data
+
   videoprocessing:
     build: videoprocessing
     environment:
@@ -73,7 +74,7 @@ services:
       - 8.8.4.4
     cap_add:
       - NET_ADMIN
-
+    userns_mode: "host"
   proxy:
     build: proxy
     ports:
