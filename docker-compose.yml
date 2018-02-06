@@ -31,7 +31,8 @@ services:
       - ./backend/src:/srv/src
       - ${BACKEND_FIXTURES_PATH}:/fixtures
       - ${MOVIE_LIBRARY_PATH}:/movies
-
+    privileged: true
+    userns_mode: "host"
   frontend:
     build: frontend
     volumes:
@@ -56,7 +57,8 @@ services:
       - "9181:9181"
     depends_on:
       - redis
-
+    privileged: true
+    userns_mode: "host"
   torrents:
     build: torrents
     privileged: true
