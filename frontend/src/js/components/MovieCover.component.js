@@ -47,6 +47,9 @@ const MovieCoverComponent = Vue.component('movie-cover', {
       else if (!this.hasSeasons) {
         this.selectedSeason = this.seasons[0];
       }
+    },
+    scrollToTop: function() {
+      this.$el.querySelector('.movie-info').scrollTop = 0;
     }
   },
   computed: {
@@ -103,7 +106,7 @@ const MovieCoverComponent = Vue.component('movie-cover', {
           </div>
           <div class="panel-body">
             <div class="list-group">
-              <button v-for="(season, index) in seasons" v-on:click="selectedSeason=season" class="list-group-item">
+              <button v-for="(season, index) in seasons" v-on:click="selectedSeason=season;scrollToTop()" class="list-group-item">
                 Season {{ season.seasonNumber }}
                 <i v-if="season.unseenEpisodeCount() == 0" class="glyphicon glyphicon-ok pull-right"></i>
               </button>
@@ -114,13 +117,13 @@ const MovieCoverComponent = Vue.component('movie-cover', {
         <!-- Episode/part list -->
         <div v-if="selectedSeason && !selectedEpisode" class="panel panel-default">
           <div class="panel-heading" v-if="isTVShow || hasSeasons">
-            <i v-if="hasSeasons" class="glyphicon glyphicon-menu-left" v-on:click="selectedSeason=null"></i>
+            <i v-if="hasSeasons" class="glyphicon glyphicon-menu-left" v-on:click="selectedSeason=null;scrollToTop()"></i>
             Season {{ selectedSeason.seasonNumber }}
             <i v-if="selectedSeason.unseenEpisodeCount() == 0" class="glyphicon glyphicon-ok pull-right"></i>
           </div>
           <div class="panel-body">
             <div class="list-group">
-              <button v-for="episode in selectedSeason" v-on:click="selectedEpisode=episode" class="list-group-item">
+              <button v-for="episode in selectedSeason" v-on:click="selectedEpisode=episode;scrollToTop()" class="list-group-item">
                 <span v-if="isTVShow">Episode {{ episode.episode }}</span>
                 <span v-if="isMovie">Part {{ episode.episode }}</span>
                 <i v-if="episode.watchStatus == WatchStatus.WATCHED" class="glyphicon glyphicon-ok pull-right"></i>
@@ -132,7 +135,7 @@ const MovieCoverComponent = Vue.component('movie-cover', {
         <!-- Individual episodes/parts -->
         <div v-if="selectedEpisode" class="panel panel-default">
           <div v-if="hasEpisodes || isTVShow" class="panel-heading">
-            <i class="glyphicon glyphicon-menu-left" v-if="hasEpisodes" v-on:click="selectedEpisode=null"></i>
+            <i class="glyphicon glyphicon-menu-left" v-if="hasEpisodes" v-on:click="selectedEpisode=null;scrollToTop()"></i>
             <span v-if="isTVShow">Season {{ (selectedSeason || this.seasons[0]).seasonNumber }}, episode {{ selectedEpisode.episode }}</span>
             <span v-if="isMovie">Part {{ selectedEpisode.episode }}</span>
             <i v-if="selectedEpisode.watchStatus == WatchStatus.Watched" class="glyphicon glyphicon-ok pull-right"></i>

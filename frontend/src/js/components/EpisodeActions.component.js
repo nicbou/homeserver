@@ -14,7 +14,6 @@ const MovieActionsComponent = Vue.component('episode-actions', {
       return this.episode.conversionStatus === ConversionStatus.CONVERTING
     },
     hasChromecastSupport: function() {
-      console.log(ChromeCast)
       return !!ChromeCast;
     }
   },
