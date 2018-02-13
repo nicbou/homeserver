@@ -39,7 +39,7 @@ Recently added movies are shown first. Recently seen movies are shown last. If y
 ![](http://nicolasbouliane.com/files/homeserver/description.png)
 ![](http://nicolasbouliane.com/files/homeserver/play-in-browser.png)
 ![](http://nicolasbouliane.com/files/homeserver/seasons.png)
-![](http://nicolasbouliane.com/files/homeserver/mobile.png)![](http://nicolasbouliane.com/files/homeserver/mobile-video.png)
+![](http://nicolasbouliane.com/files/homeserver/mobile-covers.png) ![](http://nicolasbouliane.com/files/homeserver/mobile-video.png)
 
 ## Setup
 
