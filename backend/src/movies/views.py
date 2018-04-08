@@ -281,7 +281,6 @@ class JSONMovieWatchedView(View):
                 movie = Movie.objects.get(pk=movie_id)
                 watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=movie)[0]
                 watch_status.last_watched = datetime.date.today()
-                watch_status.stopped_at = 0
                 watch_status.save()
             except Movie.DoesNotExist:
                 return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
