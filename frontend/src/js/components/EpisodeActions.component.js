@@ -4,6 +4,7 @@ const MovieActionsComponent = Vue.component('episode-actions', {
     return {
       canWatchMovies: false,
       canManageMovies: false,
+      showDownloads: false,
     }
   },
   computed: {
@@ -50,9 +51,22 @@ const MovieActionsComponent = Vue.component('episode-actions', {
       <chromecast-button v-if="isConverted && hasChromecastSupport" :episode="episode" class="list-group-item">
         <img src="/images/chromecast.svg" class="chromecast-icon"/> Play on Chromecast
       </chromecast-button>
-      <a :href="episode.originalVideoUrl" download class="list-group-item">
+      <a :href="episode.originalVideoUrl" class="list-group-item" v-on:click.prevent="showDownloads = !showDownloads">
         <span class="glyphicon glyphicon-save"></span>
         Download
+        <span v-show="showDownloads" class="glyphicon glyphicon-menu-up pull-right"></span>
+        <span v-show="!showDownloads" class="glyphicon glyphicon-menu-down pull-right"></span>
+      </a>
+      <a :href="episode.originalVideoUrl" download class="list-group-item list-group-subitem" v-if="showDownloads">
+        Download original version
+        <br><small>Better quality</small>
+      </a>
+      <a :href="episode.convertedVideoUrl" download class="list-group-item list-group-subitem" v-if="showDownloads">
+        Download mobile version
+        <br><small>Smaller file, plays everywhere</small>
+      </a>
+      <a :href="episode.srtSubtitlesUrl" download class="list-group-item list-group-subitem" v-if="showDownloads">
+        Download subtitles
       </a>
       <a href="#" v-if="!episode.lastWatched" v-on:click.prevent="markAsWatched()" class="list-group-item">
         <span class="glyphicon glyphicon-eye-open"></span> Mark as seen

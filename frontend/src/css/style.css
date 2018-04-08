@@ -44,6 +44,7 @@ table{font-size:inherit}
         .movie>.movie-info>.panel, .movie>.movie-info>.list-group{margin-left:-16px;margin-right:-15px;border-radius:0;border-left:0;border-right:0;}
         .panel-body>.list-group{margin: -16px -15px;}
             .movie>.movie-info .list-group>*{border-left:0;border-right:0;border-radius:0!important}
+            .movie>.movie-info .list-group>.list-group-subitem{padding-left:33px;}
 
 .movie .title{max-width:165px;overflow:hidden;text-overflow:ellipsis;}
 .chromecast-icon{width:16px;height:16px;position:relative;top:-1px;}
