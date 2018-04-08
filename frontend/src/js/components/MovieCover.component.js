@@ -91,7 +91,7 @@ const MovieCoverComponent = Vue.component('movie-cover', {
     <div class="movie" :class="{ watched: movie.watched, deleted: deleted }">
       <span class="deleted-icon" v-if="deleted"></span>
       <img v-if="!deleted && movie.coverUrl && !showInfo" class="cover" :src="movie.coverUrl" v-on:click="showInfo=true">
-      <div v-if="!deleted" class="movie-info">
+      <div v-show="!deleted" class="movie-info">
         <h2>
           {{ movie.title }}
           <br><small>{{ movie.releaseYear }}</small>
