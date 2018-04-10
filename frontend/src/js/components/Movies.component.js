@@ -13,6 +13,12 @@ const MoviesComponent = Vue.component('movies', {
         .reduce((allEpisodes, episodes) => allEpisodes.concat(episodes), [])
         .find(episode => episode.id == this.$route.params.episodeId);
     },
+    selectedMovie: function() {
+      if (this.selectedEpisode) {
+        return this.movies.find(movie => movie.episodes.includes(this.selectedEpisode));
+      }
+      return null;
+    },
     trimmedQuery: function() {
       return this.query.trim().toLocaleLowerCase();
     },
@@ -40,7 +46,7 @@ const MoviesComponent = Vue.component('movies', {
   },
   template: `
     <div id="movies">
-        <player v-if="selectedEpisode" :episode="selectedEpisode"></player>
+        <player v-if="selectedEpisode" :movie="selectedMovie" :episode="selectedEpisode"></player>
         <h2 v-if="unfinishedMovies.length > 0">Unfinished movies</h2>
         <div class="row" v-if="unfinishedMovies.length > 0">
             <div class="col-md-3 col-xs-6" v-for="movie in unfinishedMovies">

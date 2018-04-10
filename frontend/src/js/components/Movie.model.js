@@ -93,7 +93,7 @@ class Movie {
         episode: episode.episode,
         conversionStatus: episode.conversionStatus,
         lastWatched: episode.lastWatched ? moment(episode.lastWatched) : null,
-        playbackUrl: episode.conversionStatus === ConversionStatus.CONVERTED ? `/player/play/${ episode.id }/` : null,
+        playbackUrl: `/player/play/${ episode.id }/`,
         convertedVideoUrl: episode.convertedVideoUrl,
         originalVideoUrl: episode.originalVideoUrl,
         vttSubtitlesUrl: episode.vttSubtitlesUrl,
