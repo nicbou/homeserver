@@ -65,7 +65,7 @@ const PlayerComponent = Vue.component('player', {
   },
   template: `
     <div class="text-center player" v-on:click.self="close">
-      <video id="video" controls autoplay v-if="isConverted">
+      <video id="video" controls autoplay v-if="isConverted" :key="this.episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">
         <track label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrl" default>
       </video>
