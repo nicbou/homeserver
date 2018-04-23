@@ -24,10 +24,11 @@ const MoviesComponent = Vue.component('movies', {
     },
     filteredMovies: function() {
       return this.movies.filter((movie) => {
-        return
+        return (
           this.trimmedQuery === ''
           || movie.title.toLocaleLowerCase().includes(this.trimmedQuery)
           || movie.description.toLocaleLowerCase().includes(this.trimmedQuery)
+        );
       });
     },
     unfinishedMovies: function() {
