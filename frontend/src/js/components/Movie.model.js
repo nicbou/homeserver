@@ -30,10 +30,7 @@ const movieSorter = (a, b) => {
 };
 
 const episodeSorter = (a, b) => {
-  return 
-    ((a.season || 0)*100 + (a.episode || 0))
-    -
-    ((b.season || 0)*100 + (b.episode || 0));
+  return a.season - b.season || a.episode - b.episode
 };
 
 class Movie {
