@@ -23,14 +23,12 @@ const MoviesComponent = Vue.component('movies', {
       return this.query.trim().toLocaleLowerCase();
     },
     filteredMovies: function() {
-      if (this.trimmedQuery) {
-        const movies = this.movies.filter((movie) => {
-          return movie.title.toLocaleLowerCase().includes(this.trimmedQuery)
-            || movie.description.toLocaleLowerCase().includes(this.trimmedQuery)
-        });
-        return movies
-      }
-      return this.movies;
+      return this.movies.filter((movie) => {
+        return
+          this.trimmedQuery === ''
+          || movie.title.toLocaleLowerCase().includes(this.trimmedQuery)
+          || movie.description.toLocaleLowerCase().includes(this.trimmedQuery)
+      });
     },
     unfinishedMovies: function() {
       return this.filteredMovies.filter(m => m.watchStatus === WatchStatus.WATCHING);
@@ -63,7 +61,7 @@ const MoviesComponent = Vue.component('movies', {
         <spinner v-if="movies.length === 0"></spinner>
         <div class="row">
             <div class="col-md-3 col-xs-6" v-for="movie in filteredMovies" v-if="movie.isConverted || !onlyShowConvertedMovies">
-                <movie-cover :movie="movie" :key="movie.id"></movie-cover>
+                <movie-cover :movie="movie"></movie-cover>
             </div>
         </div>
     </div>
