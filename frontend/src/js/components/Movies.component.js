@@ -61,8 +61,8 @@ const MoviesComponent = Vue.component('movies', {
         </div>
         <spinner v-if="movies.length === 0"></spinner>
         <div class="row">
-            <div class="col-md-3 col-xs-6" v-for="movie in filteredMovies" v-if="movie.isConverted || !onlyShowConvertedMovies">
-                <movie-cover :movie="movie" :key="movie.id"></movie-cover>
+            <div class="col-md-3 col-xs-6" v-for="movie in filteredMovies" :key="movie.id" v-if="movie.isConverted || !onlyShowConvertedMovies">
+                <movie-cover :movie="movie"></movie-cover>
             </div>
         </div>
     </div>
