@@ -16,6 +16,26 @@ const MediaType = {
   MOVIE: 2,
 };
 
+const movieSorter = (a, b) => {
+  // New additions, old additions, watched a long time ago, watched recently
+  if (a.lastWatched && b.lastWatched) {
+    return a.lastWatched - b.lastWatched;
+  } else if (a.lastWatched) {
+    return 1;
+  } else if (b.lastWatched) {
+    return -1;
+  } else {
+    return b.dateAdded - a.dateAdded;
+  }
+};
+
+const episodeSorter = (a, b) => {
+  return 
+    ((a.season || 0)*100 + (a.episode || 0))
+    -
+    ((b.season || 0)*100 + (b.episode || 0));
+};
+
 class Movie {
   get watchStatus() {
     if (this.episodes.every(p => p.watchStatus === WatchStatus.WATCHED)) {
@@ -68,6 +88,25 @@ class Movie {
     return moment.max(this.episodes.map(p => p.dateAdded));
   }
 
+  get seasons() {
+    return this.episodes
+      .reduce((seasons, episode) => {
+        // episode.season can be null
+        const seasonNumber = episode.season === null ? 1 : episode.season;
+        seasons[seasonNumber - 1] = seasons[seasonNumber - 1] || []
+        seasons[seasonNumber - 1].push(episode);
+        seasons[seasonNumber - 1].seasonNumber = seasonNumber;
+        return seasons;
+      }, [])
+      .filter(Boolean)
+      .map((season) => {
+        season.unseenEpisodeCount = function () {
+          return season.filter(e => e.watchStatus !== WatchStatus.WATCHED).length
+        }
+        return season;
+      });
+  }
+
   static fromMovieApiResponse(jsonResponse) {
     const movie = new Movie();
     movie.tmdbId = jsonResponse.tmdbId;
@@ -76,49 +115,44 @@ class Movie {
     movie.coverUrl = jsonResponse.coverUrl;
     movie.rating = jsonResponse.rating;
     movie.mediaType = jsonResponse.mediaType;
-    movie.episodes = jsonResponse.episodes.map((episode) => {
-      let episodeString = '';
-      if (episode.episode) {
-        if (episode.season) {
-          episodeString = `S${episode.season}E${episode.episode}`;
-        }
-        else {
-          episodeString = `Part ${episode.episode}`;
-        }
-      }
-
-      return {
-        id: episode.id,
-        season: episode.season,
-        episode: episode.episode,
-        conversionStatus: episode.conversionStatus,
-        lastWatched: episode.lastWatched ? moment(episode.lastWatched) : null,
-        playbackUrl: `/player/play/${ episode.id }/`,
-        convertedVideoUrl: episode.convertedVideoUrl,
-        originalVideoUrl: episode.originalVideoUrl,
-        vttSubtitlesUrl: episode.vttSubtitlesUrl,
-        srtSubtitlesUrl: episode.srtSubtitlesUrl,
-        releaseYear: episode.releaseYear,
-        progress: episode.progress,
-        dateAdded: moment(episode.dateAdded),
-        episodeString: episodeString,
-        get watchStatus() {
-          if (this.progress > 0 && !this.lastWatched) {
-            return WatchStatus.WATCHING;
-          } else if (this.lastWatched) {
-            return WatchStatus.WATCHED;
+    movie.episodes = jsonResponse.episodes
+      .map((episode) => {
+        let episodeString = '';
+        if (episode.episode) {
+          if (episode.season) {
+            episodeString = `S${episode.season}E${episode.episode}`;
           }
-          return WatchStatus.NOT_WATCHED;
+          else {
+            episodeString = `Part ${episode.episode}`;
+          }
         }
-      }
-    });
 
-    movie.episodes.sort((a, b) => {
-      return 
-        ((a.season || 0)*100 + (a.episode || 0))
-        -
-        ((b.season || 0)*100 + (b.episode || 0));
-    });
+        return {
+          id: episode.id,
+          season: episode.season,
+          episode: episode.episode,
+          conversionStatus: episode.conversionStatus,
+          lastWatched: episode.lastWatched ? moment(episode.lastWatched) : null,
+          playbackUrl: `/player/play/${ episode.id }/`,
+          convertedVideoUrl: episode.convertedVideoUrl,
+          originalVideoUrl: episode.originalVideoUrl,
+          vttSubtitlesUrl: episode.vttSubtitlesUrl,
+          srtSubtitlesUrl: episode.srtSubtitlesUrl,
+          releaseYear: episode.releaseYear,
+          progress: episode.progress,
+          dateAdded: moment(episode.dateAdded),
+          episodeString: episodeString,
+          get watchStatus() {
+            if (this.progress > 0 && !this.lastWatched) {
+              return WatchStatus.WATCHING;
+            } else if (this.lastWatched) {
+              return WatchStatus.WATCHED;
+            }
+            return WatchStatus.NOT_WATCHED;
+          }
+        }
+      })
+      .sort(episodeSorter);
 
     return movie;
   }
@@ -152,18 +186,5 @@ class Movie {
       }
     ];
     return movie;
-  }
-}
-
-const movieSorter = (a, b) => {
-  // New additions, old additions, watched a long time ago, watched recently
-  if (a.lastWatched && b.lastWatched) {
-    return a.lastWatched - b.lastWatched;
-  } else if (a.lastWatched) {
-    return 1;
-  } else if (b.lastWatched) {
-    return -1;
-  } else {
-    return b.dateAdded - a.dateAdded;
   }
 }

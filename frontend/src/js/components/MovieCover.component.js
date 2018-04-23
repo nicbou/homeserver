@@ -45,7 +45,7 @@ const MovieCoverComponent = Vue.component('movie-cover', {
         this.selectedEpisode = this.movie.episodes[0];
       }
       else if (!this.hasSeasons) {
-        this.selectedSeason = this.seasons[0];
+        this.selectedSeason = this.movie.seasons[0];
       }
     },
     scrollToTop: function() {
@@ -53,29 +53,11 @@ const MovieCoverComponent = Vue.component('movie-cover', {
     }
   },
   computed: {
-    seasons: function() {
-      return this.movie.episodes
-        .reduce((seasons, episode) => {
-          // episode.season can be null
-          const seasonNumber = episode.season === null ? 1 : episode.season;
-          seasons[seasonNumber - 1] = seasons[seasonNumber - 1] || []
-          seasons[seasonNumber - 1].push(episode);
-          seasons[seasonNumber - 1].seasonNumber = seasonNumber;
-          return seasons;
-        }, [])
-        .filter(Boolean)
-        .map((season) => {
-          season.unseenEpisodeCount = () => {
-            return season.filter(e => e.watchStatus !== WatchStatus.WATCHED).length
-          }
-          return season.sort((a, b) => { return a.episode - b.episode; });
-        });
-    },
     hasEpisodes: function() {
       return this.movie.episodes.length > 1;
     },
     hasSeasons: function() {
-      return this.seasons.length > 1;
+      return this.movie.seasons.length > 1;
     },
     isMovie: function() {
       return this.movie.mediaType === MediaType.MOVIE;
@@ -136,7 +118,7 @@ const MovieCoverComponent = Vue.component('movie-cover', {
         <div v-if="selectedEpisode" class="panel panel-default">
           <div v-if="hasEpisodes || isTVShow" class="panel-heading">
             <i class="glyphicon glyphicon-menu-left" v-if="hasEpisodes" v-on:click="selectedEpisode=null;scrollToTop()"></i>
-            <span v-if="isTVShow">Season {{ (selectedSeason || this.seasons[0]).seasonNumber }}, episode {{ selectedEpisode.episode }}</span>
+            <span v-if="isTVShow">Season {{ (selectedSeason || this.movie.seasons[0]).seasonNumber }}, episode {{ selectedEpisode.episode }}</span>
             <span v-if="isMovie">Part {{ selectedEpisode.episode }}</span>
             <i v-if="selectedEpisode.watchStatus == WatchStatus.Watched" class="glyphicon glyphicon-ok pull-right"></i>
           </div>
