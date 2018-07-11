@@ -4,6 +4,7 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
       accounts: [],
       transactions: [],
       selectedDate: moment(),
+      daysToShow: 180,
     }
   },
   computed: {
@@ -25,7 +26,7 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
     }
   },
   created: function () {
-    AccountsService.getAccounts().then(
+    AccountsService.getAccounts(this.daysToShow).then(
       (accounts) => {
         this.accounts = accounts;
       },

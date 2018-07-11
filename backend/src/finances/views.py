@@ -1,6 +1,8 @@
 from .models import Account, Transaction
 from django.http import JsonResponse
 from django.views import View
+from django.utils import timezone
+from datetime import timedelta
 
 
 class JSONAccountListView(View):
@@ -10,6 +12,14 @@ class JSONAccountListView(View):
                 'result': 'failure',
                 'message': 'You do not have the permission to access this feature'
             }, status=403)
+
+        balance_days_to_fetch = 30
+        try:
+            balance_days_to_fetch = int(request.GET.get('days', balance_days_to_fetch))
+        except ValueError:
+            pass
+
+        balance_date_from = timezone.now() - timedelta(days=balance_days_to_fetch)
 
         json_accounts = []
         for account in Account.objects.all():
@@ -22,7 +32,7 @@ class JSONAccountListView(View):
                     {
                         'balance': float(balance.balance),
                         'date': balance.date_added,
-                    } for balance in account.balance_set.all()
+                    } for balance in account.balance_set.filter(date_added__gte=balance_date_from)
                 ],
             })
 
