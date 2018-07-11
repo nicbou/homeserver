@@ -10,10 +10,16 @@ class Account {
         return jsonBalance;
       })
       .reduce((balances, balance, index) => {
-        if (index === 0) {
+        // The balances are sorted from newest to oldest. This would fail otherwise.
+        if (!balances['current']) {
           balances['current'] = balance;
         }
-        balances[balance.date.startOf('day').toISOString()] = balance;
+
+        const roundedDate = balance.date.startOf('day').toString();
+        if (!balances[roundedDate]) {
+          console.log(roundedDate, balance)
+          balances[roundedDate] = balance;
+        }
         return balances;
       }, {});
   }
@@ -23,7 +29,7 @@ class Account {
   } 
 
   balanceForDate(date) {
-    const roundedDate = date.startOf('day').toISOString()
+    const roundedDate = date.startOf('day').toString()
     return this.balances[roundedDate] ? this.balances[roundedDate].balance : 0;
   }
 
