@@ -56,8 +56,7 @@ const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
           return account.balanceForDate(currentRowDate);
         });
         const savingsTarget = this.target.targetForDate(currentRowDate);
-
-        balanceRows.push([currentRowDate.toDate(), ...balances, savingsTarget])
+        balanceRows.push([currentRowDate.toDate(), ...balances, savingsTarget]);
       }
 
       return google.visualization.arrayToDataTable([columnDefinitions, ...balanceRows]);

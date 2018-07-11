@@ -4,22 +4,27 @@ class Account {
     this.displayName = jsonResponse.displayName;
     this.isCredit = !!jsonResponse.isCredit;
     this.isActive = !!jsonResponse.isActive;
-    this.balances = jsonResponse.balances;
-
-    this.balances.forEach((balance) => {
-      balance.date = moment(balance.date);
-    })
+    this.balances = jsonResponse.balances
+      .map((jsonBalance) => {
+        jsonBalance.date = moment(jsonBalance.date);
+        return jsonBalance;
+      })
+      .reduce((balances, balance, index) => {
+        if (index === 0) {
+          balances['current'] = balance;
+        }
+        balances[balance.date.startOf('day').toISOString()] = balance;
+        return balances;
+      }, {});
   }
 
   get balance() {
-    return this.balances[0] ? this.balances[0].balance : 0;
+    return this.balances['current'] ? this.balances['current'].balance : 0;
   } 
 
   balanceForDate(date) {
-    const closestBalance = this.balances.find((balance) => {
-      return balance.date.isSameOrBefore(date);
-    });
-    return closestBalance ? closestBalance.balance : 0;
+    const roundedDate = date.startOf('day').toISOString()
+    return this.balances[roundedDate] ? this.balances[roundedDate].balance : 0;
   }
 
   variationBetweenDates(startDate, endDate=null) {
