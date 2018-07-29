@@ -26,7 +26,8 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
     }
   },
   created: function () {
-    AccountsService.getAccounts(this.daysToShow).then(
+    // Get at least 365 days of data
+    AccountsService.getAccounts(Math.max(this.daysToShow, 365)).then(
       (accounts) => {
         this.accounts = accounts;
       },
