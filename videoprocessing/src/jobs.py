@@ -5,6 +5,9 @@ import requests
 from pycaption import CaptionConverter, WebVTTWriter, SRTReader, CaptionReadNoCaptions
 import chardet
 
+# Prevents escaping of HTML in subtitles
+WebVTTWriter._encode = lambda self, s: s
+
 
 def convert_to_mp4(input_file, output_file, callback_url):
     """Convert input_file to MP4, saves it to output_file."""
