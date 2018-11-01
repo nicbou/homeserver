@@ -180,7 +180,7 @@ class JSONMovieView(View):
         try:
             Movie.objects.get(pk=movie_id).delete()
         except Movie.DoesNotExist:
-            return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+            return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
         return JsonResponse({'result': 'success'})
 
 
@@ -265,7 +265,7 @@ class JSONMovieAccessTokenView(View):
             try:
                 movie = Movie.objects.get(pk=movie_id)
             except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
             access_token = MovieAccessToken(movie=movie, user=request.user)
             access_token.save()
             return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
@@ -283,7 +283,7 @@ class JSONMovieWatchedView(View):
                 watch_status.last_watched = datetime.date.today()
                 watch_status.save()
             except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
             return JsonResponse({'result': 'success'})
         else:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
@@ -300,7 +300,7 @@ class JSONMovieUnwatchedView(View):
             except MovieWatchStatus.DoesNotExist:
                 pass
             except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
             return JsonResponse({'result': 'success'})
         else:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
@@ -317,13 +317,13 @@ class JSONMovieProgressView(View):
                 watch_status.stopped_at = int(payload['progress'])
                 watch_status.save()
             except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, 404)
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
             except KeyError:
                 return JsonResponse(
-                    {'result': 'failure', 'message': '`progress` is missing from request payload'}, 400)
+                    {'result': 'failure', 'message': '`progress` is missing from request payload'}, status=400)
             except ValueError:
                 return JsonResponse(
-                    {'result': 'failure', 'message': '`progress` must be an integer'}, 400)
+                    {'result': 'failure', 'message': '`progress` must be an integer'}, status=400)
             return JsonResponse({'result': 'success'})
         else:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
