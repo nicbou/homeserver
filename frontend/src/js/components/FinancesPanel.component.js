@@ -22,8 +22,17 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
   },
   methods: {
     dateSelected: function(date) {
-      this.selectedDate = date;
-    }
+      this.selectedDate = date.endOf('day');
+    },
+    selectDate: function(dateString) {
+      if (dateString === 'today') {
+        this.dateSelected(moment());
+      } else if (dateString === 'tomorrow') {
+        this.dateSelected(this.selectedDate.clone().add(1, 'days'));
+      } else if (dateString === 'yesterday') {
+        this.dateSelected(this.selectedDate.clone().subtract(1, 'days'));
+      }
+    },
   },
   created: function () {
     // Get at least 365 days of data
@@ -53,6 +62,25 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
         }">
       <div class="panel-heading">
         <h3 class="panel-title">
+          <div class="pull-right">
+            <a v-on:click="selectDate('yesterday')">
+              <i class="glyphicon glyphicon-menu-left"></i>
+            </a>
+
+            <a v-if="!selectedDateIsToday" v-on:click="selectDate('today')">
+              <i class="glyphicon glyphicon-calendar"></i>
+            </a>
+            <span class="text-muted" v-if="selectedDateIsToday">
+              <i class="glyphicon glyphicon-calendar"></i>
+            </span>
+
+            <a v-if="!selectedDateIsToday" v-on:click="selectDate('tomorrow')">
+              <i class="glyphicon glyphicon-menu-right"></i>
+            </a>
+            <span class="text-muted" v-if="selectedDateIsToday">
+              <i class="glyphicon glyphicon-menu-right"></i>
+            </span>
+          </div>
           Finances
           <span v-if="!selectedDateIsToday">for {{ selectedDate.format('MMMM D') }}</span>
         </h3>
