@@ -2,6 +2,6 @@ bottle==0.12.13
 rq==0.8.2
 rq-dashboard==0.3.10
 redis==2.10.6
-requests==2.17.3
+requests==2.20.0
 pycaption==1.0.1
 chardet==3.0.4
