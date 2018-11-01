@@ -22,14 +22,22 @@ const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
             return 1;
           }
           else {
-            if (a.displayName > b.displayName) {
-              return -1;
+            if (a.isActive > b.isActive) {
+              return 1
             }
-            else if (a.displayName === b.displayName) {
-              return 0;
+            else if (a.isActive < b.isActive) {
+              return -1
             }
             else {
-              return 1;
+              if (a.balance > b.balance) {
+                return 1;
+              }
+              else if (a.balance === b.balance) {
+                return 0;
+              }
+              else {
+                return -1;
+              }
             }
           }
         });
@@ -78,13 +86,8 @@ const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
           bottom: 0,
         },
         colors: [
-          '#000000',
-          '#e67e22', //Orange
-          '#2ecc71', //Green
-          '#f1c40f', //Yellow
-          '#3498db', //Blue                            
+          '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000'
         ],
-        focusTarget: 'category',
         hAxis: {
           title: 'Date',
           titleTextStyle: {color: '#333'},
