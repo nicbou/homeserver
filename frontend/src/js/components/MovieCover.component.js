@@ -15,7 +15,14 @@ const MovieCoverComponent = Vue.component('movie-cover', {
       // Remove episode from movie's episodes
       const deletionIndex = this.movie.episodes.indexOf(episode);
       if (deletionIndex !== -1) {
-        this.movie.episodes.splice(deletionIndex, 1);
+        if (this.movie.episodes.length === 1) {
+          // Don't delete the last part/episode. The template doesn't support a
+          // movie without any parts or episodes.
+          this.deleted = true;
+        }
+        else {
+          this.movie.episodes.splice(deletionIndex, 1);
+        }
       }
 
       if (episode === this.selectedEpisode) {
@@ -32,10 +39,6 @@ const MovieCoverComponent = Vue.component('movie-cover', {
         if (this.selectedSeason.length === 0) {
           this.selectedSeason = null;
         }
-      }
-
-      if (this.movie.episodes.length == 0){
-        this.deleted = true;
       }
 
       this.selectDefaultSeasonAndEpisode();
