@@ -1,5 +1,5 @@
 const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
-  props: ['accounts', 'target'],
+  props: ['accounts', 'target', 'selectedAccount'],
   data: function() {
     return {
       endDate: moment(),
@@ -9,6 +9,10 @@ const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
   },
   computed: {
     sortedAccounts: function() {
+      if (this.selectedAccount) {
+        return [this.selectedAccount];
+      }
+
       const accounts = this.accounts
         .sort((a, b) => {
           if (a.isCredit > b.isCredit) {
@@ -65,10 +69,6 @@ const AccountsBalanceGraph = Vue.component('accounts-balance-graph', {
       const savingsTargetColumnIndex = this.chartData.getNumberOfColumns() - 2;
 
       const options = {
-        animation: {
-          duration: 1000,
-          startup: true,
-        },
         areaOpacity: 0.8,
         axisTitlesPosition: 'none',
         chartArea: {

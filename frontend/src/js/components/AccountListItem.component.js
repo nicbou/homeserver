@@ -1,10 +1,5 @@
 const AccountListItemComponent = Vue.component('account-list-item', {
-  props: ['account', 'selectedDate'],
-  data: function() {
-    return {
-      showVariation: false
-    };
-  },
+  props: ['account', 'selectedDate', 'selectedAccount'],
   computed: {
     variationString: function() {
       const variationDay = this.account.variationForNumberOfDays(1, this.selectedDate);
@@ -22,10 +17,22 @@ const AccountListItemComponent = Vue.component('account-list-item', {
     },
     balance: function () {
       return currencyFilter(this.account.balanceForDate(this.selectedDate));
+    },
+    isSelected: function () {
+      return this.selectedAccount === this.account;
     }
   },
+  methods: {
+    accountSelected() {
+      if (this.selectedAccount === this.account) {
+        this.$emit('account-selected', null);
+      } else {
+        this.$emit('account-selected', this.account);
+      }
+    },
+  },
   template: `
-    <div class="status" v-on:click="showVariation = !showVariation">
+    <div class="status" :class="{selected: isSelected}" v-on:click="accountSelected()">
       <div class="status-details">
         <span class="balance" :title="variationString">
           {{ balance }}
@@ -39,12 +46,6 @@ const AccountListItemComponent = Vue.component('account-list-item', {
             }"></i>
         </span>
         {{ account.displayName }}
-        <span v-if="showVariation">
-          <br>
-          <small class="text-muted">
-            {{ variationString }}
-          </small>
-        </span>
       </div>
     </div>
   `

@@ -2,6 +2,7 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
   data: function() {
     return {
       accounts: [],
+      selectedAccount: null,
       transactions: [],
       selectedDate: moment(),
       daysToShow: 180,
@@ -10,7 +11,7 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
   computed: {
     savingsTarget: function() {
       return new SavingsTarget(
-        this.accounts,
+        this.selectedAccount ? [this.selectedAccount] : this.accounts,
         12500,
         moment(new Date(2018, 4, 1)), // 0-based month
         moment(new Date(2019, 3, 30))
@@ -18,9 +19,12 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
     },
     selectedDateIsToday: function() {
       return this.selectedDate.isSame(moment(), 'day');
-    }
+    },
   },
   methods: {
+    accountSelected: function(account) {
+      this.selectedAccount = account;
+    },
     dateSelected: function(date) {
       this.selectedDate = date.endOf('day');
     },
@@ -57,8 +61,8 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
   template: `
     <div id="finances" class="panel panel-finances"
         :class="{
-            'panel-default': accounts.length === 0 || savingsTarget.isOnTrack(selectedDate),
-            'panel-danger': accounts.length > 0 && !savingsTarget.isOnTrack(selectedDate)
+            'panel-default': accounts.length === 0 || savingsTarget.isOnTrack(selectedDate) || selectedAccount,
+            'panel-danger': accounts.length > 0 && !savingsTarget.isOnTrack(selectedDate) && !selectedAccount
         }">
       <div class="panel-heading">
         <h3 class="panel-title">
@@ -87,10 +91,10 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
       </div>
       <spinner v-if="accounts.length === 0"></spinner>
       <div v-show="accounts.length > 0" class="panel-body">
-        <accounts-balance-graph :accounts="accounts" :target="savingsTarget" v-on:date-selected="dateSelected"></accounts-balance-graph>
+        <accounts-balance-graph :accounts="accounts" :selected-account="selectedAccount" :target="savingsTarget" v-on:date-selected="dateSelected"></accounts-balance-graph>
         <div class="row">
-          <account-list :accounts="accounts" :selected-date="selectedDate" class="col-xs-6"></account-list>
-          <accounts-variation :accounts="accounts" :selected-date="selectedDate" :target="savingsTarget" class="col-xs-6"></accounts-variation>
+          <account-list :accounts="accounts" :selected-account="selectedAccount" :selected-date="selectedDate" v-on:account-selected="accountSelected" class="col-xs-6"></account-list>
+          <accounts-variation :accounts="accounts" :selected-account="selectedAccount" :selected-date="selectedDate" :target="savingsTarget" class="col-xs-6"></accounts-variation>
         </div>
         <h4>Recent transactions</h4>
       </div>
