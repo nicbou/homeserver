@@ -38,12 +38,10 @@ services:
     depends_on:
       - backend
       - torrents
-
   redis:
     image: smebberson/alpine-redis
     volumes:
-      - redis_peristence:/data
-
+      - redis_persistence:/data
   videoprocessing:
     build: videoprocessing
     environment:
@@ -87,7 +85,6 @@ services:
     volumes:
       - django_staticfiles:/static
       - ${MOVIE_LIBRARY_PATH}:/movies
-
 volumes:
   django_staticfiles:
-  redis_peristence:
+  redis_persistence:
