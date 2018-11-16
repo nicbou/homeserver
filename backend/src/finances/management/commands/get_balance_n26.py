@@ -74,7 +74,11 @@ class Command(BaseCommand):
             amount = Decimal(transaction.get('amount', 0))
             original_currency_amount = Decimal(transaction.get('originalAmount', 0))
             transaction_id = transaction.get('id')
-            title = transaction.get('merchantName', 'Unknown merchant')
+            title = (
+                transaction.get('merchantName') or
+                transaction.get('partnerName') or
+                'Unknown merchant'
+            )
             if transaction.get('category') == "micro-v2-income":
                 title = 'Transfer from ' + transaction.get('partnerName')
             elif transaction.get('category') == "micro-v2-atm":
