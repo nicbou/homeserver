@@ -1,5 +1,5 @@
 const AccountsVariationComponent = Vue.component('accounts-variation', {
-  props: ['accounts', 'target', 'selectedDate'],
+  props: ['accounts', 'target', 'selectedDate', 'selectedAccount'],
   computed: {
     variationDayPositive: function() {
       return this.target.variationDay(this.selectedDate) >= 0
@@ -34,15 +34,15 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
       return variation > 0 ? '+' + variationString : variationString;
     },
     isOnTrack: function() {
-      return this.target.isOnTrack(this.selectedDate);
+      return this.selectedAccount || this.target.isOnTrack(this.selectedDate);
     }
   },
   template: `
     <div>
       <div class="alert" v-bind:class="{ 'alert-default': isOnTrack, 'alert-danger': !isOnTrack }">
         <h3>
-          <span v-if="target.isStarted(selectedDate)">{{ target.amountSaved(selectedDate) | currency }} <small>saved</small></span>
-          <span v-else>{{ 0 | currency }} <small>saved (goal not started)</small></span>
+          <span v-if="target.isStarted(selectedDate)">{{ target.amountSaved(selectedDate) | currency }} <small>saved <span v-if="selectedAccount">in this account</span></small></span>
+          <span v-else>{{ 0 | currency }} <small>saved <span v-if="selectedAccount">in this account </span>(goal not started)</small></span>
         </h3>
       </div>
       <div class="status">
@@ -77,7 +77,7 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <span class="balance">{{ variationStringYear }}</span> This year
         </div>
       </div>
-      <div class="status" v-if="target.isStarted(selectedDate)">
+      <div class="status" v-if="target.isStarted(selectedDate) && !selectedAccount">
         <span v-if="isOnTrack" class="status-icon label label-success"><i class="glyphicon glyphicon-ok"></i></span>
         <span v-else class="status-icon label label-danger"><i class="glyphicon glyphicon-remove"></i></span>
 

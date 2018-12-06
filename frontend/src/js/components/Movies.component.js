@@ -48,7 +48,7 @@ const MoviesComponent = Vue.component('movies', {
         <player v-if="selectedEpisode" :movie="selectedMovie" :episode="selectedEpisode"></player>
         <h2 v-if="unfinishedMovies.length > 0">Unfinished movies</h2>
         <div class="row" v-if="unfinishedMovies.length > 0">
-            <div class="col-md-3 col-xs-6" v-for="movie in unfinishedMovies">
+            <div class="col-md-3 col-xs-6" v-for="movie in unfinishedMovies" :key="movie.tmdbId">
                 <movie-cover :movie="movie"></movie-cover>
             </div>
         </div>

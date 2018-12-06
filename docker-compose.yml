@@ -15,7 +15,6 @@ services:
     environment:
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
-      - BACKEND_FIXTURES_PATH
       - COMMERZBANK_ACCOUNT_NUMBER
       - COMMERZBANK_PASSWORD
       - N26_USERNAME
@@ -29,7 +28,6 @@ services:
     volumes:
       - django_staticfiles:/srv/static
       - ./backend/src:/srv/src
-      - ${BACKEND_FIXTURES_PATH}:/fixtures
       - ${MOVIE_LIBRARY_PATH}:/movies
     privileged: true
     userns_mode: "host"
@@ -40,12 +38,10 @@ services:
     depends_on:
       - backend
       - torrents
-
   redis:
     image: smebberson/alpine-redis
     volumes:
-      - redis_peristence:/data
-
+      - redis_persistence:/data
   videoprocessing:
     build: videoprocessing
     environment:
@@ -89,7 +85,6 @@ services:
     volumes:
       - django_staticfiles:/static
       - ${MOVIE_LIBRARY_PATH}:/movies
-
 volumes:
   django_staticfiles:
-  redis_peristence:
+  redis_persistence:

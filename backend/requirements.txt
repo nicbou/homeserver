@@ -1,5 +1,5 @@
-Django==1.11
-gunicorn==19.3.0
+Django==1.11.15
+gunicorn==19.5.0
 psycopg2
-requests==2.17.3
+requests==2.20.0
 selenium==2.43.0

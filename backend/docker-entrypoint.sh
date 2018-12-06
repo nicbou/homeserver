@@ -6,16 +6,6 @@ until nc -z db 5432; do echo Waiting for PostgreSQL; sleep 1; done
 python manage.py migrate                  # Apply database migrations
 python manage.py collectstatic --noinput  # Collect static files
 
-# Load fixtures
-FIXTURES_PATH=/fixtures
-if [[ ! -z $FIXTURES_PATH ]];
-then
-    for fixture in ${FIXTURES_PATH}/*.json; do
-        filename=`basename "$fixture"`
-        python manage.py loaddata /fixtures/${filename}
-    done
-fi
-
 # Prepare log files and start outputting logs to stdout
 touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
@@ -33,7 +23,6 @@ printf "export N26_USERNAME=%q\n" "${N26_USERNAME}" >> /srv/cronenv
 printf "export N26_PASSWORD=%q\n" "${N26_PASSWORD}" >> /srv/cronenv
 printf "export DEGIRO_USERNAME=%q\n" "${DEGIRO_USERNAME}" >> /srv/cronenv
 printf "export DEGIRO_PASSWORD=%q\n" "${DEGIRO_PASSWORD}" >> /srv/cronenv
-printf "export BACKEND_FIXTURES_PATH=%q\n" "${BACKEND_FIXTURES_PATH}" >> /srv/cronenv
 
 crontab /srv/crontab
 service cron start
