@@ -44,8 +44,14 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
     <div>
       <div class="alert" v-bind:class="{ 'alert-default': isOnTrack, 'alert-danger': !isOnTrack }">
         <h3>
-          <span v-if="target.isStarted(selectedDate)">{{ target.amountSaved(selectedDate) | currency }} <small>saved <span v-if="selectedAccount">in this account</span></small></span>
-          <span v-else>{{ 0 | currency }} <small>saved <span v-if="selectedAccount">in this account </span>(goal not started)</small></span>
+          <span v-if="target.isStarted(selectedDate)">
+            {{ target.amountSaved(selectedDate) | currency }}
+            <small>saved <span v-if="selectedAccount">in this account</span></small>
+          </span>
+          <span v-else>
+            {{ 0 | currency }}
+            <small>saved <span v-if="selectedAccount">in this account </span>(goal not started)</small>
+          </span>
         </h3>
       </div>
       <div class="status">
@@ -96,7 +102,8 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <span v-if="isOnTrack">{{ target.balanceForDate(selectedDate) - target.targetForDate(selectedDate) | currency }} above expected savings</span>
           <span v-else>{{ target.targetForDate(selectedDate) - target.balanceForDate(selectedDate) | currency }} below expected savings</span>
           <br>
-          <small class="text-muted" v-if="target.amountLeftToSave(selectedDate) > 0">{{ target.daysLeft(selectedDate) }} days left to save remaining {{ target.amountLeftToSave(selectedDate) | currency }}</small>
+          <small class="text-muted" v-if="target.amountLeftToSave(selectedDate) > 0">{{ target.daysLeft(selectedDate) }} days left to reach {{ target.targetAmount | currency}}</small>
+          <small class="text-muted" v-if="target.amountLeftToSave(selectedDate) < 0">{{ target.daysLeft(selectedDate) }} days left. {{ target.targetAmount | currency}} target reached.</small>
         </div>
       </div>
     </div>
