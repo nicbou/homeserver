@@ -73,7 +73,7 @@ table{font-size:inherit}
 
 .status{border-bottom: 1px dotted #ddd;padding:5px 0;display:flex;flex-direction:row;overflow:auto;}
     .status.selected{background:#eee;}
-    h4+.status, .alert+.status{border-top: 1px dotted #ddd;}
+    h4+.status{border-top: 1px dotted #ddd;}
     .status .status-icon{display:flex;align-items:center;margin-right:5px;}
     .status+h4{margin-top:20px;}
     .status-details{display:inline-block;flex:1 1;vertical-align:top;padding:0 0 0 5px;}
@@ -88,6 +88,7 @@ table{font-size:inherit}
 .chart{height:200px;margin-bottom:20px;max-width:100%;}
 .stock-chart{filter:opacity(0.6) contrast(0) grayscale() brightness(1);image-rendering:pixelated;width:100%;}
 
+.alert{margin-bottom:0;}
 .alert.alert-danger{border-left-color:#d9534f;border-left-width:23px;}
 .alert.alert-warning{border-left-color:#f0ad4e;border-left-width:23px;}
 .alert.alert-default{border-color:#ddd;}
