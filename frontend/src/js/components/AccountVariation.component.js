@@ -103,7 +103,8 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <span v-else>{{ target.targetForDate(selectedDate) - target.balanceForDate(selectedDate) | currency }} below expected savings</span>
           <br>
           <small class="text-muted" v-if="target.amountLeftToSave(selectedDate) > 0">{{ target.daysLeft(selectedDate) }} days left to reach {{ target.targetAmount | currency}}</small>
-          <small class="text-muted" v-if="target.amountLeftToSave(selectedDate) < 0">{{ target.daysLeft(selectedDate) }} days left. {{ target.targetAmount | currency}} target reached.</small>
+          <small class="text-muted" v-if="target.amountSaved() < target.targetAmount">{{ target.daysLeft(selectedDate) }} days left to reach final {{ target.targetAmount | currency}} target</small>
+          <small class="text-muted" v-else>{{ target.daysLeft(selectedDate) }} days left. Final {{ target.targetAmount | currency}} target already reached.</small>
         </div>
       </div>
     </div>
