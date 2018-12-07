@@ -8,10 +8,13 @@ const MoviesComponent = Vue.component('movies', {
   },
   computed: {
     selectedEpisode: function() {
-      return this.movies
-        .map(movie => movie.episodes)
-        .reduce((allEpisodes, episodes) => allEpisodes.concat(episodes), [])
-        .find(episode => episode.id == this.$route.params.episodeId);
+      if (this.$route.params.episodeId) {
+        return this.movies
+          .map(movie => movie.episodes)
+          .reduce((allEpisodes, episodes) => allEpisodes.concat(episodes), [])
+          .find(episode => episode.id == this.$route.params.episodeId);
+      }
+      return null;
     },
     selectedMovie: function() {
       if (this.selectedEpisode) {
@@ -23,13 +26,16 @@ const MoviesComponent = Vue.component('movies', {
       return this.query.trim().toLocaleLowerCase();
     },
     filteredMovies: function() {
-      return this.movies.filter((movie) => {
-        return (
-          this.trimmedQuery === ''
-          || movie.title.toLocaleLowerCase().includes(this.trimmedQuery)
-          || movie.description.toLocaleLowerCase().includes(this.trimmedQuery)
-        );
-      });
+      if (this.trimmedQuery) {
+        return this.movies.filter((movie) => {
+          return (
+            this.trimmedQuery === ''
+            || movie.title.toLocaleLowerCase().includes(this.trimmedQuery)
+            || movie.description.toLocaleLowerCase().includes(this.trimmedQuery)
+          );
+        });
+      }
+      return this.movies;
     },
     unfinishedMovies: function() {
       return this.filteredMovies.filter(m => m.watchStatus === WatchStatus.WATCHING);
