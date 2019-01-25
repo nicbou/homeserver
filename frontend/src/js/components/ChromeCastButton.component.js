@@ -5,7 +5,7 @@ const ChromeCastButtonComponent = Vue.component('chromecast-button', {
       const loadMedia = () => {
         // We request a token so that the ChromeCast can access the media file without
         // any authentication.
-        Api.request.get(`/movies/${this.episode.id}/token/`).then((response) => {
+        return Api.request.get(`/movies/${this.episode.id}/token/`).then((response) => {
           const token = response.data.token;
           const mediaUrl = `${location.origin}${episode.convertedVideoUrl}?token=${token}`;
           const subtitlesUrl = `${location.origin}${episode.vttSubtitlesUrl}?token=${token}`;
@@ -17,6 +17,12 @@ const ChromeCastButtonComponent = Vue.component('chromecast-button', {
         ChromeCast.selectDevice().then(loadMedia);
       } else {
         loadMedia();
+      }
+
+      // Set the playback time to 1 second, so that the movie shows in unfinished movies
+      if (episode.progress === 0) {
+        episode.progress = 1;
+        MoviesService.setProgress(episode.id, episode.progress);
       }
     }
   },
