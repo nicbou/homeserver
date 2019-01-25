@@ -20,5 +20,9 @@ RUN pip install -r /srv/requirements.txt
 
 COPY src /srv/src
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
 WORKDIR "/srv/src"
 ENTRYPOINT ["/docker-entrypoint.sh"]
