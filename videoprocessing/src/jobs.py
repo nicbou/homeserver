@@ -63,7 +63,7 @@ def extract_mkv_subtitles(input_file, callback_url):
         input_path=shlex.quote(input_file)
     )
     mkvmerge_output = subprocess.check_output(command, shell=True)
-    json_tracks = json.loads(mkvmerge_output).get('tracks', [])
+    json_tracks = json.loads(mkvmerge_output.decode('utf-8')).get('tracks', [])
 
     tracks_to_extract = {}
     for track in json_tracks:

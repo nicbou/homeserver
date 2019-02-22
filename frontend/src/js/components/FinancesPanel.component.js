@@ -93,8 +93,8 @@ const FinancesPanelComponent = Vue.component('finances-panel', {
       <div v-show="accounts.length > 0" class="panel-body">
         <accounts-balance-graph :accounts="accounts" :selected-account="selectedAccount" :target="savingsTarget" v-on:date-selected="dateSelected"></accounts-balance-graph>
         <div class="row">
-          <account-list :accounts="accounts" :selected-account="selectedAccount" :selected-date="selectedDate" v-on:account-selected="accountSelected" class="col-xs-6"></account-list>
-          <accounts-variation :accounts="accounts" :selected-account="selectedAccount" :selected-date="selectedDate" :target="savingsTarget" class="col-xs-6"></accounts-variation>
+          <account-list :accounts="accounts" :selected-account="selectedAccount" :selected-date="selectedDate" v-on:account-selected="accountSelected" class="col-md-6"></account-list>
+          <accounts-variation :accounts="accounts" :selected-account="selectedAccount" :selected-date="selectedDate" :target="savingsTarget" class="col-md-6"></accounts-variation>
         </div>
         <h4>Recent transactions</h4>
       </div>

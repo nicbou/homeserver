@@ -35,14 +35,23 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
     },
     isOnTrack: function() {
       return this.selectedAccount || this.target.isOnTrack(this.selectedDate);
-    }
+    },
+    selectedDateIsToday: function() {
+      return this.selectedDate.isSame(moment(), 'day');
+    },
   },
   template: `
     <div>
       <div class="alert" v-bind:class="{ 'alert-default': isOnTrack, 'alert-danger': !isOnTrack }">
         <h3>
-          <span v-if="target.isStarted(selectedDate)">{{ target.amountSaved(selectedDate) | currency }} <small>saved <span v-if="selectedAccount">in this account</span></small></span>
-          <span v-else>{{ 0 | currency }} <small>saved <span v-if="selectedAccount">in this account </span>(goal not started)</small></span>
+          <span v-if="target.isStarted(selectedDate)">
+            {{ target.amountSaved(selectedDate) | currency }}
+            <small>saved <span v-if="selectedAccount">in this account</span></small>
+          </span>
+          <span v-else>
+            {{ 0 | currency }}
+            <small>saved <span v-if="selectedAccount">in this account </span>(goal not started)</small>
+          </span>
         </h3>
       </div>
       <div class="status">
@@ -50,7 +59,9 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <i class="glyphicon glyphicon-ok" v-bind:class="{ 'glyphicon-ok': variationDayPositive, 'glyphicon-flag': !variationDayPositive }"></i>
         </span>
         <div class="status-details">
-          <span class="balance">{{ variationStringDay }}</span> Today
+          <span class="balance">{{ variationStringDay }}</span>
+          <span v-if="selectedDateIsToday">Today</span>
+          <span v-else>On {{ selectedDate.format('MMMM D') }}</span>
         </div>
       </div>
       <div class="status">
@@ -58,7 +69,9 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <i class="glyphicon glyphicon-ok" v-bind:class="{ 'glyphicon-ok': variationWeekPositive, 'glyphicon-flag': !variationWeekPositive }"></i>
         </span>
         <div class="status-details">
-          <span class="balance">{{ variationStringWeek }}</span> This week
+          <span class="balance">{{ variationStringWeek }}</span>
+          <span v-if="selectedDateIsToday">This week</span>
+          <span v-else>That week</span>
         </div>
       </div>
       <div class="status">
@@ -66,7 +79,9 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <i class="glyphicon glyphicon-ok" v-bind:class="{ 'glyphicon-ok': variationMonthPositive, 'glyphicon-flag': !variationMonthPositive }"></i>
         </span>
         <div class="status-details">
-          <span class="balance">{{ variationStringMonth }}</span> This month
+          <span class="balance">{{ variationStringMonth }}</span>
+          <span v-if="selectedDateIsToday">This month</span>
+          <span v-else>That month</span>
         </div>
       </div>
       <div class="status">
@@ -74,7 +89,9 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <i class="glyphicon glyphicon-ok" v-bind:class="{ 'glyphicon-ok': variationYearPositive, 'glyphicon-flag': !variationYearPositive }"></i>
         </span>
         <div class="status-details">
-          <span class="balance">{{ variationStringYear }}</span> This year
+          <span class="balance">{{ variationStringYear }}</span>
+          <span v-if="selectedDateIsToday">This year</span>
+          <span v-else>That year</span>
         </div>
       </div>
       <div class="status" v-if="target.isStarted(selectedDate) && !selectedAccount">
@@ -85,7 +102,9 @@ const AccountsVariationComponent = Vue.component('accounts-variation', {
           <span v-if="isOnTrack">{{ target.balanceForDate(selectedDate) - target.targetForDate(selectedDate) | currency }} above expected savings</span>
           <span v-else>{{ target.targetForDate(selectedDate) - target.balanceForDate(selectedDate) | currency }} below expected savings</span>
           <br>
-          <small class="text-muted" v-if="target.amountLeftToSave(selectedDate) > 0">{{ target.daysLeft(selectedDate) }} days left to save remaining {{ target.amountLeftToSave(selectedDate) | currency }}</small>
+          <small class="text-muted" v-if="target.amountLeftToSave(selectedDate) > 0">{{ target.daysLeft(selectedDate) }} days left to reach {{ target.targetAmount | currency}}</small>
+          <small class="text-muted" v-if="target.amountSaved() < target.targetAmount">{{ target.daysLeft(selectedDate) }} days left to reach final {{ target.targetAmount | currency}} target</small>
+          <small class="text-muted" v-else>{{ target.daysLeft(selectedDate) }} days left. Final {{ target.targetAmount | currency}} target already reached.</small>
         </div>
       </div>
     </div>

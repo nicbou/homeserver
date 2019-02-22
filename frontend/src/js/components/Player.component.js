@@ -11,7 +11,10 @@ const PlayerComponent = Vue.component('player', {
       return this.episode.conversionStatus === ConversionStatus.CONVERTED
     },
     fullTitle: function() {
-      return `${this.movie.title}, S${this.episode.season || '?'}E${this.episode.episode || '?'}`
+      if (this.movie.mediaType === MediaType.MOVIE) {
+        return `${this.movie.title}`;
+      }
+      return `${this.movie.title}, S${this.episode.season || '?'}E${this.episode.episode || '?'}`;
     },
     episodeIndex: function() {
       return this.movie.episodes.indexOf(this.episode);
