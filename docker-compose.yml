@@ -37,7 +37,6 @@ services:
       - ./frontend/src:/var/www
     depends_on:
       - backend
-      - torrents
   redis:
     image: smebberson/alpine-redis
     volumes:
@@ -77,6 +76,7 @@ services:
     build: proxy
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - frontend
       - backend
@@ -85,6 +85,15 @@ services:
     volumes:
       - django_staticfiles:/static
       - ${MOVIE_LIBRARY_PATH}:/movies
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    #command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 volumes:
   django_staticfiles:
   redis_persistence:
