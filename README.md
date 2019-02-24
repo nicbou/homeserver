@@ -45,8 +45,6 @@ Recently added movies are shown first. Recently seen movies are shown last. If y
 
 1. Put your SSL certificates in `proxy/ssl-certs`. These are expected:
     * `server.key`, the key used to generate your SSL certificate
-    * `server.ca-bundle`, obtained from your certificate issuer
-    * `server.crt`, obtained from your certificate issuer
     * `cert-chain.crt`, created by running `cat server.crt server.ca-bundle >> cert-chain.crt`
 2. Run `scripts/setup.sh` to setup the project. It will ask a few questions and create a config file for you.
 3. Run `scripts/start.sh` to start all the components.

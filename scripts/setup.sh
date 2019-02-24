@@ -1,5 +1,18 @@
 #!/bin/bash
 set -e
+
+function assert_exists {
+    if [ ! -f $1 ]; then
+        echo -e "\033[0;31m$1 does not exist.\033[0m Aborting setup."
+        exit
+    fi
+}
+
+ssl_certs_path="proxy/ssl-certs"
+echo "Checking SSL certs..."
+assert_exists "$ssl_certs_path/cert-chain.crt"
+assert_exists "$ssl_certs_path/server.key"
+
 docker-compose build
 
 echo -e "\n\033[1mEnter the movie library path\033[0m"
