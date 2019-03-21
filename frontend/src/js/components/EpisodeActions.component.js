@@ -65,7 +65,7 @@ const MovieActionsComponent = Vue.component('episode-actions', {
         Download mobile version
         <br><small>Smaller file, plays everywhere</small>
       </a>
-      <a :href="episode.srtSubtitlesUrl" download class="list-group-item list-group-subitem" v-if="showDownloads">
+      <a :href="episode.srtSubtitlesUrlEn" download class="list-group-item list-group-subitem" v-if="showDownloads">
         Download subtitles
       </a>
       <a href="#" v-if="!episode.lastWatched" v-on:click.prevent="markAsWatched()" class="list-group-item">

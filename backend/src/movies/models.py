@@ -129,17 +129,45 @@ class Movie(models.Model):
         )
 
     @property
-    def srt_subtitles_url(self):
+    def srt_subtitles_url_en(self):
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
             file=self.filename('srt')
         )
 
     @property
-    def vtt_subtitles_url(self):
+    def srt_subtitles_url_de(self):
+        return u"{url}/{file}".format(
+            url=settings.MOVIE_LIBRARY_URL,
+            file=self.filename('ger.srt')
+        )
+
+    @property
+    def srt_subtitles_url_fr(self):
+        return u"{url}/{file}".format(
+            url=settings.MOVIE_LIBRARY_URL,
+            file=self.filename('fre.srt')
+        )
+
+    @property
+    def vtt_subtitles_url_en(self):
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
             file=self.filename('vtt')
+        )
+
+    @property
+    def vtt_subtitles_url_de(self):
+        return u"{url}/{file}".format(
+            url=settings.MOVIE_LIBRARY_URL,
+            file=self.filename('ger.vtt')
+        )
+
+    @property
+    def vtt_subtitles_url_fr(self):
+        return u"{url}/{file}".format(
+            url=settings.MOVIE_LIBRARY_URL,
+            file=self.filename('fre.vtt')
         )
 
     @property

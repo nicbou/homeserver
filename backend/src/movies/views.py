@@ -54,8 +54,12 @@ class JSONMovieListView(View):
                     'episode': movie.episode,
                     'progress': watch_status.stopped_at if watch_status else 0,
                     'releaseYear': movie.release_year,
-                    'srtSubtitlesUrl': movie.srt_subtitles_url,
-                    'vttSubtitlesUrl': movie.vtt_subtitles_url,
+                    'srtSubtitlesUrlEn': movie.srt_subtitles_url_en,
+                    'srtSubtitlesUrlDe': movie.srt_subtitles_url_de,
+                    'srtSubtitlesUrlFr': movie.srt_subtitles_url_fr,
+                    'vttSubtitlesUrlEn': movie.vtt_subtitles_url_en,
+                    'vttSubtitlesUrlDe': movie.vtt_subtitles_url_de,
+                    'vttSubtitlesUrlFr': movie.vtt_subtitles_url_fr,
                 })
 
             json_movies.append(json_movie)

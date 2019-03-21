@@ -40,8 +40,12 @@ def check_auth(request):
             unquote(parsed_url.path) not in (
                 access_token.movie.library_url,
                 access_token.movie.converted_url,
-                access_token.movie.srt_subtitles_url,
-                access_token.movie.vtt_subtitles_url,
+                access_token.movie.srt_subtitles_url_en,
+                access_token.movie.vtt_subtitles_url_en,
+                access_token.movie.srt_subtitles_url_de,
+                access_token.movie.vtt_subtitles_url_de,
+                access_token.movie.srt_subtitles_url_fr,
+                access_token.movie.vtt_subtitles_url_fr,
                 access_token.movie.cover_url,
             )
         ):

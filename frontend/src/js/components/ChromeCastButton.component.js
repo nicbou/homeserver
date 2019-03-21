@@ -1,14 +1,18 @@
 const ChromeCastButtonComponent = Vue.component('chromecast-button', {
   props: ['episode'],
   methods: {
-    play: function(episode) {
+    play: function(episode, subtitlesLanguage='en') {
       const loadMedia = () => {
         // We request a token so that the ChromeCast can access the media file without
         // any authentication.
         return Api.request.get(`/movies/${this.episode.id}/token/`).then((response) => {
           const token = response.data.token;
           const mediaUrl = `${location.origin}${episode.convertedVideoUrl}?token=${token}`;
-          const subtitlesUrl = `${location.origin}${episode.vttSubtitlesUrl}?token=${token}`;
+
+          const capitalizedLanguageCode = subtitlesLanguage.charAt(0).toUpperCase() + subtitlesLanguage.slice(1).toLowerCase();
+          const subtitlesAttribute = `vttSubtitlesUrl${capitalizedLanguageCode}`;
+          const subtitlesUrl = `${location.origin}${episode[subtitlesAttribute]}?token=${token}`;
+
           ChromeCast.setMedia(mediaUrl, subtitlesUrl);
         })
       }

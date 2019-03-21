@@ -70,7 +70,9 @@ const PlayerComponent = Vue.component('player', {
     <div class="text-center player" v-on:click.self="close">
       <video id="video" controls autoplay v-if="isConverted" :key="this.episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">
-        <track label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrl" default>
+        <track label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrlEn" default>
+        <track label="French" kind="captions" srclang="fr" :src="episode.vttSubtitlesUrlFr">
+        <track label="German" kind="captions" srclang="de" :src="episode.vttSubtitlesUrlDe">
       </video>
       <div v-if="!isConverted" class="not-converted">This episode is not converted.</div>
       <div class="episode-controls">
