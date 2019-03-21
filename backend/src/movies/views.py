@@ -118,6 +118,7 @@ class JSONMovieListView(View):
             ]
 
             # Link the movies and subtitles from the triage dir to the the library dir
+            # If the movie is already in the library, overwrite the file
             conversion_queue = []
             for episode, triage_options in zip(episodes, triage_options):
                 movie_file = triage_options.get('movieFile')
@@ -132,17 +133,18 @@ class JSONMovieListView(View):
                     os.link(movie_file_abs.encode('utf-8'), episode.library_path.encode('utf-8'))
                     episode.save()
 
-                subtitles_file = triage_options.get('subtitlesFile')
-                subtitles_file_abs = os.path.join(settings.TRIAGE_PATH, subtitles_file) if subtitles_file else None
-                if subtitles_file and os.path.exists(subtitles_file_abs.encode('utf-8')):
-                    try:
-                        os.unlink(episode.srt_subtitles_path.encode('utf-8'))
-                    except:
-                        pass
-                    os.link(subtitles_file_abs.encode('utf-8'), episode.srt_subtitles_path.encode('utf-8'))
+                for subtitles_language in ('En', 'De', 'Fr'):
+                    subtitles_file = triage_options.get('subtitlesFile' + subtitles_language)
+                    subtitles_file_abs = os.path.join(settings.TRIAGE_PATH, subtitles_file) if subtitles_file else None
+                    if subtitles_file and os.path.exists(subtitles_file_abs.encode('utf-8')):
+                        try:
+                            os.unlink(episode.srt_subtitles_path.encode('utf-8'))
+                        except:
+                            pass
+                        os.link(subtitles_file_abs.encode('utf-8'), episode.srt_subtitles_path.encode('utf-8'))
 
-                if bool(triage_options.get('convertToMp4')):
-                    conversion_queue.append(episode)
+                    if bool(triage_options.get('convertToMp4')):
+                        conversion_queue.append(episode)
 
             # Download the cover URL if necessary
             new_cover_url = payload.get('coverUrl')
@@ -253,9 +255,15 @@ class JSONMovieConversionCallbackView(View):
                 )
 
             # Queue the subtitles for conversion
-            if os.path.exists(movie.srt_subtitles_path.encode('utf-8')):
-                api_url = "{host}/subtitlesToVTT".format(host=settings.VIDEO_PROCESSING_API_URL)
-                requests.post(api_url, json={'input': movie.srt_subtitles_filename})
+            subtitles_paths_and_filenames = (
+                (movie.srt_subtitles_path_en, movie.srt_subtitles_filename_en),
+                (movie.srt_subtitles_path_de, movie.srt_subtitles_filename_de),
+                (movie.srt_subtitles_path_fr, movie.srt_subtitles_filename_fr),
+            )
+            for srt_subtitles_path, srt_subtitles_filename in subtitles_paths_and_filenames:
+                if os.path.exists(srt_subtitles_path.encode('utf-8')):
+                    api_url = "{host}/subtitlesToVTT".format(host=settings.VIDEO_PROCESSING_API_URL)
+                    requests.post(api_url, json={'input': srt_subtitles_filename})
 
             return JsonResponse({'result': 'success'})
         else:

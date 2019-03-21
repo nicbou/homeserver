@@ -26,7 +26,9 @@ const TriageItemComponent = Vue.component('triage-item', {
       savingInProgress: false,
       season: null,
       selectedMovie: null,
-      selectedSubtitles: null,
+      selectedSubtitlesEn: null,
+      selectedSubtitlesDe: null,
+      selectedSubtitlesFr: null,
       suggestions: [],
       suggestionsVisible: false,
     }
@@ -120,7 +122,9 @@ const TriageItemComponent = Vue.component('triage-item', {
       MoviesService.save(
         this.selectedMovie, {
           movieFile: this.file, 
-          subtitlesFile: this.selectedSubtitles || null, 
+          subtitlesFileEn: this.selectedSubtitlesEn || null, 
+          subtitlesFileDe: this.selectedSubtitlesDe || null, 
+          subtitlesFileFr: this.selectedSubtitlesFr || null, 
           convertToMp4: this.convertToMp4
         }
       ).then(() => {
@@ -188,9 +192,31 @@ const TriageItemComponent = Vue.component('triage-item', {
           </div>
 
           <div class="form-group">
-            <label :for="_uid + '-subtitles'" class="control-label col-sm-2">Subtitles</label>
+            <label :for="_uid + '-subtitles'" class="control-label col-sm-2">Subtitles (English)</label>
             <div class="col-sm-10 col-md-8">
-              <select v-model="selectedSubtitles" class="form-control" :id="_uid + '-subtitles'">
+              <select v-model="selectedSubtitlesEn" class="form-control" :id="_uid + '-subtitles'">
+                <option value="" selected>No subtitles file</option>
+                <option disabled>-----</option>
+                <option v-for="subtitle in subtitles">{{ subtitle }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label :for="_uid + '-subtitles'" class="control-label col-sm-2">Subtitles (German)</label>
+            <div class="col-sm-10 col-md-8">
+              <select v-model="selectedSubtitlesDe" class="form-control" :id="_uid + '-subtitles'">
+                <option value="" selected>No subtitles file</option>
+                <option disabled>-----</option>
+                <option v-for="subtitle in subtitles">{{ subtitle }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label :for="_uid + '-subtitles'" class="control-label col-sm-2">Subtitles (French)</label>
+            <div class="col-sm-10 col-md-8">
+              <select v-model="selectedSubtitlesFr" class="form-control" :id="_uid + '-subtitles'">
                 <option value="" selected>No subtitles file</option>
                 <option disabled>-----</option>
                 <option v-for="subtitle in subtitles">{{ subtitle }}</option>

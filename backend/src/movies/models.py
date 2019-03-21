@@ -91,20 +91,52 @@ class Movie(models.Model):
         return os.path.join(settings.MOVIE_LIBRARY_PATH, self.temporary_conversion_filename)
 
     @property
-    def srt_subtitles_filename(self):
+    def srt_subtitles_filename_en(self):
         return self.filename('srt')
 
     @property
-    def srt_subtitles_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.srt_subtitles_filename)
+    def srt_subtitles_filename_de(self):
+        return self.filename('ger.srt')
 
     @property
-    def vtt_subtitles_filename(self):
+    def srt_subtitles_filename_fr(self):
+        return self.filename('fre.srt')
+
+    @property
+    def srt_subtitles_path_en(self):
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.srt_subtitles_filename_en)
+
+    @property
+    def srt_subtitles_path_de(self):
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.srt_subtitles_filename_de)
+
+    @property
+    def srt_subtitles_path_fr(self):
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.srt_subtitles_filename_fr)
+
+    @property
+    def vtt_subtitles_filename_en(self):
         return self.filename('vtt')
 
     @property
-    def vtt_subtitles_path(self):
-        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.vtt_subtitles_filename)
+    def vtt_subtitles_filename_de(self):
+        return self.filename('ger.vtt')
+
+    @property
+    def vtt_subtitles_filename_fr(self):
+        return self.filename('fre.vtt')
+
+    @property
+    def vtt_subtitles_path_en(self):
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.vtt_subtitles_filename_en)
+
+    @property
+    def vtt_subtitles_path_de(self):
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.vtt_subtitles_filename_de)
+
+    @property
+    def vtt_subtitles_path_fr(self):
+        return os.path.join(settings.MOVIE_LIBRARY_PATH, self.vtt_subtitles_filename_fr)
 
     @property
     def cover_filename(self):
@@ -184,8 +216,12 @@ def movie_delete(sender, instance, **kwargs):
     files_to_delete = [
         instance.library_path,
         instance.converted_path,
-        instance.srt_subtitles_path,
-        instance.vtt_subtitles_path,
+        instance.srt_subtitles_path_en,
+        instance.srt_subtitles_path_de,
+        instance.srt_subtitles_path_fr,
+        instance.vtt_subtitles_path_en,
+        instance.vtt_subtitles_path_de,
+        instance.vtt_subtitles_path_fr,
         instance.temporary_conversion_path,
     ]
 

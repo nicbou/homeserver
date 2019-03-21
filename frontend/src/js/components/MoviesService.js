@@ -21,7 +21,9 @@ class MoviesService {
   static save(movie, params={}) {
     const triageParams = {
       movieFile: params.movieFile || null,
-      subtitlesFile: params.subtitlesFile || null,
+      subtitlesFileEn: params.subtitlesFileEn || null,
+      subtitlesFileDe: params.subtitlesFileDe || null,
+      subtitlesFileFr: params.subtitlesFileFr || null,
       convertToMp4: params.convertToMp4 || false,
     };
 
