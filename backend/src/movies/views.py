@@ -143,8 +143,8 @@ class JSONMovieListView(View):
                             pass
                         os.link(subtitles_file_abs.encode('utf-8'), episode.srt_subtitles_path.encode('utf-8'))
 
-                    if bool(triage_options.get('convertToMp4')):
-                        conversion_queue.append(episode)
+                if bool(triage_options.get('convertToMp4')):
+                    conversion_queue.append(episode)
 
             # Download the cover URL if necessary
             new_cover_url = payload.get('coverUrl')
