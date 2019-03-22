@@ -27,7 +27,7 @@ class Command(BaseCommand):
         response = requests.get(
             "https://trader.degiro.nl/pa/secure/client?sessionId={session_id}".format(session_id=session_id)
         )
-        return response.json()['intAccount']
+        return response.json()['data']['intAccount']
 
     def get_portfolio(self, session_id, account_id):
         response = requests.get(
