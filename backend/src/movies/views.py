@@ -137,11 +137,12 @@ class JSONMovieListView(View):
                     subtitles_file = triage_options.get('subtitlesFile' + subtitles_language)
                     subtitles_file_abs = os.path.join(settings.TRIAGE_PATH, subtitles_file) if subtitles_file else None
                     if subtitles_file and os.path.exists(subtitles_file_abs.encode('utf-8')):
+                        dest_subtitles_path = getattr(episode, 'srt_subtitles_path_' + subtitles_language.lower())
                         try:
-                            os.unlink(episode.srt_subtitles_path.encode('utf-8'))
+                            os.unlink(dest_subtitles_path.encode('utf-8'))
                         except:
                             pass
-                        os.link(subtitles_file_abs.encode('utf-8'), episode.srt_subtitles_path.encode('utf-8'))
+                        os.link(subtitles_file_abs.encode('utf-8'), dest_subtitles_path.encode('utf-8'))
 
                 if bool(triage_options.get('convertToMp4')):
                     conversion_queue.append(episode)
