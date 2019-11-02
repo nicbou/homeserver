@@ -1,4 +1,4 @@
-Django==1.11.19
+Django==1.11.23
 gunicorn==19.5.0
 psycopg2
 requests==2.20.0
