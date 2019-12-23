@@ -1,5 +1,6 @@
 html, body, #page {height: 100%;}
 #page, body{background:#333;}
+    #movies .pagination{margin:30px;}
     #movies input[type=search]{border:none;box-shadow:none;background:#222;margin-bottom:15px;}
     #movies input[type=search]::-webkit-input-placeholder{color:#444;}
     h2{color:#777;font-weight:200;letter-spacing:2px;margin:0 0 15px;}
