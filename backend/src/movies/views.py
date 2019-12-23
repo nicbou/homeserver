@@ -30,7 +30,7 @@ class JSONMovieListView(View):
             movies_by_tmdb_id[movie.tmdb_id].append(movie)
 
         json_movies = []
-        for tmdb_id, movies in movies_by_tmdb_id.iteritems():
+        for tmdb_id, movies in movies_by_tmdb_id.items():
             json_movie = {
                 'tmdbId': tmdb_id,
                 'mediaType': movies[0].media_type,

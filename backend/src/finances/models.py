@@ -18,7 +18,7 @@ class Account(models.Model):
 
 
 class Balance(models.Model):
-    account = models.ForeignKey(Account)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=8, decimal_places=2, null=True)
     date_added = models.DateTimeField(default=timezone.now)
 
@@ -37,7 +37,7 @@ class Balance(models.Model):
 
 class Transaction(models.Model):
     transaction_id = models.CharField(max_length=50, unique=True, null=True)
-    account = models.ForeignKey(Account)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True)
     date = models.DateField()

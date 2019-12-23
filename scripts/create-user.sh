@@ -1,2 +1,2 @@
 #!/bin/bash
-docker-compose exec backend python manage.py createsuperuser
+docker-compose exec backend python3 manage.py createsuperuser

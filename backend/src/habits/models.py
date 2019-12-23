@@ -7,7 +7,7 @@ class Habit(models.Model):
     minimum_successful_days = models.IntegerField(default=7)
     days_per_period = models.IntegerField(default=7)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -15,7 +15,7 @@ class Habit(models.Model):
 
 
 class HabitOccurence(models.Model):
-    habit = models.ForeignKey(Habit, related_name='occurences')
+    habit = models.ForeignKey(Habit, related_name='occurences', on_delete=models.CASCADE)
     extra_data = models.TextField(blank=True)
     date = models.DateTimeField()
 

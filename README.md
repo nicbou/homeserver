@@ -47,7 +47,7 @@ Recently added movies are shown first. Recently seen movies are shown last. If y
     * `server.key`, the key used to generate your SSL certificate
     * `cert-chain.crt`, created by running `cat server.crt server.ca-bundle >> cert-chain.crt`
 2. Run `scripts/setup.sh` to setup the project. It will ask a few questions and create a config file for you.
-3. Run `scripts/start.sh` to start all the components.
+3. Run `docker-compose up --build -d` to start all the components.
 4. If necessary, run `scripts/create-user.sh` to create your first user.
 
 ### Environment variables

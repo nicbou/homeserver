@@ -50,7 +50,7 @@ class Movie(models.Model):
     # Library
     date_added = models.DateField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def filename(self, extension='mp4', show_season=True):
@@ -246,12 +246,12 @@ def random_uuid():
 
 
 class MovieWatchStatus(models.Model):
-    movie = models.ForeignKey(Movie)
-    user = models.ForeignKey(User)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     stopped_at = models.PositiveIntegerField(default=0)
     last_watched = models.DateField(default=None, blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"{} for user {}".format(self.movie.title, self.user)
 
     class Meta:
@@ -259,7 +259,7 @@ class MovieWatchStatus(models.Model):
 
 
 class MovieAccessToken(models.Model):
-    movie = models.ForeignKey(Movie)
-    user = models.ForeignKey(User)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     expiration_date = models.DateTimeField(default=tomorrow)
     token = models.CharField(max_length=32, default=random_uuid)

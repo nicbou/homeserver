@@ -3,8 +3,7 @@ import re
 from movies.models import MovieAccessToken
 from django.views import View
 from django.contrib.auth.models import Permission
-from urlparse import urlparse, parse_qs
-from urllib import unquote
+from urllib.parse import urlparse, parse_qs, unquote
 import logging
 from django.utils import timezone
 

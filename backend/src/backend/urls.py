@@ -1,4 +1,5 @@
-from django.conf.urls import include, url
+from django.conf.urls import include
+from django.urls import path
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 from finances.views import JSONAccountListView, JSONTransactionListView
@@ -7,22 +8,19 @@ from movies.views import JSONMovieListView, JSONMovieTriageListView, JSONMovieVi
     JSONMovieAccessTokenView, JSONMovieWatchedView, JSONMovieUnwatchedView, JSONMovieProgressView
 
 urlpatterns = [
-    url(r'^auth/', include('authentication.urls')),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^accounts/$', JSONAccountListView.as_view()),
-    url(r'^transactions/$', JSONTransactionListView.as_view()),
-    url(r'^movies/$', JSONMovieListView.as_view()),
-    url(r'^movies/(?P<id>\d+)/$', JSONMovieView.as_view()),
-    url(r'^movies/(?P<id>\d+)/token/$', JSONMovieAccessTokenView.as_view()),
-    url(r'^movies/(?P<id>\d+)/watched/$', JSONMovieWatchedView.as_view()),
-    url(r'^movies/(?P<id>\d+)/unwatched/$', JSONMovieUnwatchedView.as_view()),
-    url(r'^movies/(?P<id>\d+)/progress/$', JSONMovieProgressView.as_view()),
-    url(r'^movies/triage/$', JSONMovieTriageListView.as_view()),
-    url(r'^movies/videoToMp4/callback/$', JSONMovieConversionCallbackView.as_view()),
-    url(r'^habits/$', JSONHabitListView.as_view()),
-    url(
-        r'^habits/toggle/(?P<id>\d+)/(?P<date>\d{4}-\d{2}-\d{2})/$',
-        JSONHabitToggleView.as_view()
-    ),
+    path('auth/', include('authentication.urls')),
+    path('admin/', admin.site.urls),
+    path('accounts/', JSONAccountListView.as_view()),
+    path('transactions/', JSONTransactionListView.as_view()),
+    path('movies/', JSONMovieListView.as_view()),
+    path('movies/<int:id>/', JSONMovieView.as_view()),
+    path('movies/<int:id>/token/', JSONMovieAccessTokenView.as_view()),
+    path('movies/<int:id>/watched/', JSONMovieWatchedView.as_view()),
+    path('movies/<int:id>/unwatched/', JSONMovieUnwatchedView.as_view()),
+    path('movies/<int:id>/progress/', JSONMovieProgressView.as_view()),
+    path('movies/triage/', JSONMovieTriageListView.as_view()),
+    path('movies/videoToMp4/callback/', JSONMovieConversionCallbackView.as_view()),
+    path('habits/', JSONHabitListView.as_view()),
+    path('habits/toggle/<int:id>/<date>/', JSONHabitToggleView.as_view()),
 ]
 urlpatterns += staticfiles_urlpatterns()

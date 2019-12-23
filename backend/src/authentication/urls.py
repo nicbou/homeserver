@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import path
 from .views import check_auth, JSONPermissionsView
-from django.contrib.auth.views import login
+from django.contrib.auth.views import LoginView
 
 urlpatterns = [
-    url(r'^$', login, name='login'),
-    url(r'^verify/$', check_auth),
-    url(r'^info/$', JSONPermissionsView.as_view()),
+    path('', LoginView.as_view(), name='login'),
+    path('verify/', check_auth),
+    path('info/', JSONPermissionsView.as_view()),
 ]
