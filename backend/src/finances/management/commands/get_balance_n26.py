@@ -34,7 +34,7 @@ class Command(BaseCommand):
         )
         token = request.json().get('access_token')
         if not token:
-            raise Exception('No token returned. Perhaps invalid credentials were supplied?')
+            raise Exception('No token returned. Perhaps invalid credentials were supplied?', request.json())
         return token
 
     def get_headers(self, access_token):

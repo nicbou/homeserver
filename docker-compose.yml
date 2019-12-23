@@ -63,6 +63,8 @@ services:
       - OPENVPN_USERNAME
       - OPENVPN_PASSWORD
       - TRANSMISSION_DOWNLOAD_DIR=/triage
+      - TRANSMISSION_RATIO_LIMIT=3
+      - TRANSMISSION_RATIO_LIMIT_ENABLED=true
     volumes:
       - ${TRANSMISSION_DATA_PATH}:/data
       - ${MOVIE_LIBRARY_PATH}/triage:/triage
