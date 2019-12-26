@@ -8,39 +8,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u">
     <link href="css/style.css" rel="stylesheet">
     <link href="js/components/Spinner.component.css" rel="stylesheet">
     <script src="https://www.google.com/jsapi"></script>
+    <script src="https://kit.fontawesome.com/a791434585.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="page">
-        <div class="navbar navbar-default navbar-static-top navbar-inverse">
+        <div id="main-menu">
             <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-menu">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <router-link class="navbar-brand" :to="{name: 'dashboard'}">Home Server</router-link>
-                </div>
-                <div class="collapse navbar-collapse" id="main-menu">
-                    <nav>
-                        <ul class="nav navbar-nav">
-                            <li><router-link :to="{name: 'movies'}">Movies</router-link></li>
-                            <li v-if="canManageTorrents"><router-link :to="{name: 'torrents'}">Torrents</router-link></li>
-                            <li v-if="canManageMovies"><router-link :to="{name: 'triage'}">Triage</router-link></li>
-                            <li v-if="canSeeFinances || canSeeHabits"><router-link :to="{name: 'dashboard'}">Status</router-link></li>
-                        </ul>
-                        <ul class="nav navbar-nav navbar-right">
-                        </ul>
-                    </nav>
-                </div>
+                <nav>
+                    <ul>
+                        <li>
+                            <router-link :to="{name: 'movies'}">Movies</router-link>
+                        </li>
+                        <li v-if="canManageTorrents">
+                            <router-link :to="{name: 'torrents'}">Torrents</router-link>
+                        </li>
+                        <li v-if="canManageMovies">
+                            <router-link :to="{name: 'triage'}">Triage</router-link>
+                        </li>
+                        <li v-if="canSeeFinances || canSeeHabits">
+                            <router-link :to="{name: 'dashboard'}">Status</router-link>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
-        <div class="container">
-            <router-view></router-view>
+        <div id="main-content">
+            <router-view :key="$route.fullPath"></router-view>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js"></script>
@@ -49,7 +45,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.5.3/vue-router.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"></script>
     <script src="js/components/PermissionsService.js"></script>
     <script src="js/components/ChromeCastService.js"></script>
     <script src="js/components/Currency.filter.js"></script>
@@ -71,12 +66,12 @@
     <script src="js/components/ChromeCastButton.component.js"></script>
     <script src="js/components/Movie.model.js"></script>
     <script src="js/components/MoviesService.js"></script>
+    <script src="js/components/Episode.component.js"></script>
     <script src="js/components/EpisodeActions.component.js"></script>
-    <script src="js/components/MovieCover.component.js"></script>
-    <script src="js/components/Player.component.js"></script>
     <script src="js/components/Dashboard.component.js"></script>
     <script src="js/components/HabitsPanel.component.js"></script>
     <script src="js/components/FinancesPanel.component.js"></script>
+    <script src="js/components/Movie.component.js"></script>
     <script src="js/components/Movies.component.js"></script>
     <script src="js/components/Torrents.component.js"></script>
     <script src="js/components/TriageService.js"></script>
