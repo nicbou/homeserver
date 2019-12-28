@@ -33,6 +33,47 @@ const episodeSorter = (a, b) => {
   return a.season - b.season || a.episode - b.episode;
 };
 
+class Episode {
+  get episodeString() {
+    if (this.episode) {
+      if (this.season) {
+        return `S${this.season}E${this.episode}`;
+      }
+      return `Part ${this.episode}`;
+    }
+    return '';
+  }
+
+  get watchStatus() {
+    if (this.progress > 0 && !this.lastWatched) {
+      return WatchStatus.WATCHING;
+    } else if (this.lastWatched) {
+      return WatchStatus.WATCHED;
+    }
+    return WatchStatus.NOT_WATCHED;
+  }
+
+  get isWatched() {
+    return this.watchStatus === WatchStatus.WATCHED;
+  }
+
+  get isWatching() {
+    return this.watchStatus === WatchStatus.WATCHING;
+  }
+
+  get isConverting() {
+    return this.conversionStatus === ConversionStatus.CONVERTING;
+  }
+
+  get isConverted() {
+    return this.conversionStatus === ConversionStatus.CONVERTED;
+  }
+
+  get playbackUrl() {
+    return `/player/play/${ this.id }/`;
+  }
+}
+
 class Movie {
   get watchStatus() {
     if (this.episodes.every(p => p.watchStatus === WatchStatus.WATCHED)) {
@@ -65,10 +106,6 @@ class Movie {
       return ConversionStatus.CONVERSION_FAILED;
     }
     return ConversionStatus.NOT_CONVERTED;
-  }
-
-  get isConverted() {
-    return this.conversionStatus === ConversionStatus.CONVERTED;
   }
 
   get nextEpisodeToPlay() {
@@ -113,45 +150,25 @@ class Movie {
     movie.rating = jsonResponse.rating;
     movie.mediaType = jsonResponse.mediaType;
     movie.episodes = jsonResponse.episodes
-      .map((episode) => {
-        let episodeString = '';
-        if (episode.episode) {
-          if (episode.season) {
-            episodeString = `S${episode.season}E${episode.episode}`;
-          }
-          else {
-            episodeString = `Part ${episode.episode}`;
-          }
-        }
-
-        return {
-          id: episode.id,
-          season: episode.season,
-          episode: episode.episode,
-          conversionStatus: episode.conversionStatus,
-          lastWatched: episode.lastWatched ? moment(episode.lastWatched) : null,
-          playbackUrl: `/player/play/${ episode.id }/`,
-          convertedVideoUrl: episode.convertedVideoUrl,
-          originalVideoUrl: episode.originalVideoUrl,
-          vttSubtitlesUrlEn: episode.vttSubtitlesUrlEn,
-          vttSubtitlesUrlDe: episode.vttSubtitlesUrlDe,
-          vttSubtitlesUrlFr: episode.vttSubtitlesUrlFr,
-          srtSubtitlesUrlEn: episode.srtSubtitlesUrlEn,
-          srtSubtitlesUrlDe: episode.srtSubtitlesUrlDe,
-          srtSubtitlesUrlFr: episode.srtSubtitlesUrlFr,
-          releaseYear: episode.releaseYear,
-          progress: episode.progress,
-          dateAdded: moment(episode.dateAdded),
-          episodeString: episodeString,
-          get watchStatus() {
-            if (this.progress > 0 && !this.lastWatched) {
-              return WatchStatus.WATCHING;
-            } else if (this.lastWatched) {
-              return WatchStatus.WATCHED;
-            }
-            return WatchStatus.NOT_WATCHED;
-          }
-        }
+      .map((jsonEpisode) => {
+        const episode = new Episode();
+        episode.id = jsonEpisode.id;
+        episode.season = jsonEpisode.season;
+        episode.episode = jsonEpisode.episode;
+        episode.conversionStatus = jsonEpisode.conversionStatus;
+        episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
+        episode.convertedVideoUrl = jsonEpisode.convertedVideoUrl;
+        episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
+        episode.vttSubtitlesUrlEn = jsonEpisode.vttSubtitlesUrlEn;
+        episode.vttSubtitlesUrlDe = jsonEpisode.vttSubtitlesUrlDe;
+        episode.vttSubtitlesUrlFr = jsonEpisode.vttSubtitlesUrlFr;
+        episode.srtSubtitlesUrlEn = jsonEpisode.srtSubtitlesUrlEn;
+        episode.srtSubtitlesUrlDe = jsonEpisode.srtSubtitlesUrlDe;
+        episode.srtSubtitlesUrlFr = jsonEpisode.srtSubtitlesUrlFr;
+        episode.releaseYear = jsonEpisode.releaseYear;
+        episode.progress = jsonEpisode.progress;
+        episode.dateAdded = moment(jsonEpisode.dateAdded);
+        return episode;
       })
       .sort(episodeSorter);
 
@@ -159,37 +176,35 @@ class Movie {
   }
 
   static fromTMDBSearchResult(result) {
-    const movie = new Movie();
     const coverRelativeUrl = result.poster_path || result.cover_path;
     const releaseDate = result.release_date || result.first_air_date;
+
+    const episode = new Episode();
+    episode.id = null;
+    episode.season = null;
+    episode.episode = null;
+    episode.conversionStatus = ConversionStatus.NOT_CONVERTED;
+    episode.lastWatched = null;
+    episode.convertedVideoUrl = null;
+    episode.originalVideoUrl = null;
+    episode.vttSubtitlesUrlEn = null;
+    episode.vttSubtitlesUrlDe = null;
+    episode.vttSubtitlesUrlFr = null;
+    episode.srtSubtitlesUrlEn = null;
+    episode.srtSubtitlesUrlDe = null;
+    episode.srtSubtitlesUrlFr = null;
+    episode.releaseYear = releaseDate ? parseInt(releaseDate.substring(0,4)) : null;
+    episode.progress = 0;
+    episode.dateAdded = moment();
+
+    const movie = new Movie();
     movie.tmdbId = result.id;
     movie.title = result.title || result.name;
     movie.description = result.overview;
     movie.coverUrl = coverRelativeUrl ? `https://image.tmdb.org/t/p/w500${coverRelativeUrl}` : null;
     movie.rating = null;
     movie.mediaType = result.media_type == 'tv' ? MediaType.TV_SHOW : MediaType.MOVIE;
-    movie.episodes = [
-      {
-        id: null,
-        season: null,
-        episode: null,
-        conversionStatus: null,
-        lastWatched: null,
-        playbackUrl: null,
-        convertedVideoUrl: null,
-        originalVideoUrl: null,
-        vttSubtitlesUrlEn: null,
-        vttSubtitlesUrlDe: null,
-        vttSubtitlesUrlFr: null,
-        srtSubtitlesUrlEn: null,
-        srtSubtitlesUrlDe: null,
-        srtSubtitlesUrlFr: null,
-        releaseYear: releaseDate ? parseInt(releaseDate.substring(0,4)) : null,
-        progress: 0,
-        dateAdded: moment(),
-        watchStatus: WatchStatus.NOT_WATCHED
-      }
-    ];
+    movie.episodes = [episode];
     return movie;
   }
 }

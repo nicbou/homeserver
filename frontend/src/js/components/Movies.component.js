@@ -4,7 +4,6 @@ const MoviesComponent = Vue.component('movies', {
       movies: [],
       page: 0,
       moviesPerPage: 20,
-      onlyShowConvertedMovies: false,
       query: '',
     }
   },
@@ -59,9 +58,9 @@ const MoviesComponent = Vue.component('movies', {
       <input id="search-box" type="search" v-model="query" placeholder="Search movies"><h2>All movies</h2>
       <spinner v-if="movies.length === 0"></spinner>
       <div class="covers">
-        <img @click="openMovie(movie)" class="cover" :src="movie.coverUrl" v-for="movie in paginatedMovies" :key="movie.tmdbId" v-if="movie.isConverted || !onlyShowConvertedMovies"/>
+        <img @click="openMovie(movie)" class="cover" :src="movie.coverUrl" v-for="movie in paginatedMovies" :key="movie.tmdbId"/>
       </div>
-      <div class="button-group" role="group" aria-label="...">
+      <div class="button-group horizontal">
         <button class="button" v-if="page > 0" @click="page-=1" type="button">Previous page</button>
         <button class="button" v-if="page < maxPage" @click="page+=1" type="button">Next page</button>
       </div>

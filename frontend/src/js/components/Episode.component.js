@@ -8,9 +8,6 @@ const EpisodeComponent = Vue.component('episode', {
     }
   },
   computed: {
-    isConverted: function() {
-      return this.episode.conversionStatus === ConversionStatus.CONVERTED
-    },
     fullTitle: function() {
       if (this.movie.mediaType === MediaType.MOVIE) {
         return `${this.movie.title}`;
@@ -56,7 +53,7 @@ const EpisodeComponent = Vue.component('episode', {
       this.episode = this.movie.episodes.find(e => e.id == this.$route.params.episodeId);
       this.$nextTick(function () {
         // Save video position
-        if (this.isConverted) {
+        if (this.episode.isConverted) {
           this.videoElement = document.getElementById("video");
           this.videoElement.currentTime = this.episode.progress;
           this.progressInterval = setInterval(this.saveProgress, 3000);
@@ -71,22 +68,22 @@ const EpisodeComponent = Vue.component('episode', {
   template: `
     <div v-if="episode">
       <h2 class="container">{{ fullTitle }}</h2>
-      <video id="video" controls autoplay v-if="isConverted" :key="this.episode.id">
+      <video id="video" controls autoplay v-if="episode.isConverted" :key="this.episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">
         <track label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrlEn" default>
         <track label="French" kind="captions" srclang="fr" :src="episode.vttSubtitlesUrlFr">
         <track label="German" kind="captions" srclang="de" :src="episode.vttSubtitlesUrlDe">
       </video>
-      <div v-if="!isConverted">This episode is not converted for web playback.</div>
+      <div v-if="!episode.isConverted">This episode is not converted for web playback.</div>
       <div class="container episode-actions">
-        <div class="button-group">
+        <div class="button-group horizontal">
           <a class="button" v-if="!episode.lastWatched" v-on:click.prevent="markAsWatched()">
             <i class="fas fa-eye"></i>
           </a>
           <a class="button" v-if="episode.lastWatched" v-on:click.prevent="markAsUnwatched()">
             <i class="fas fa-eye-slash"></i>
           </a>
-          <chromecast-button v-if="isConverted && hasChromecastSupport" :episode="episode" class="button">
+          <chromecast-button v-if="episode.isConverted && hasChromecastSupport" :episode="episode" class="button">
             <i class="fab fa-chromecast"></i>
           </chromecast-button>
           <router-link class="button" v-if="previousEpisode" :to="{ name: 'episode', params: { tmdbId: movie.tmdbId, episodeId: previousEpisode.id }}">
@@ -99,7 +96,4 @@ const EpisodeComponent = Vue.component('episode', {
       </div>
     </div>
   `,
-  components: [
-    AccountListItemComponent,
-  ]
 });
