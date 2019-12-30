@@ -73,17 +73,17 @@ const TriageItemComponent = Vue.component('triage-item', {
     },
     sanitizedSeason: function (newSeason) {
       if (this.selectedMovie) {
-        this.selectedMovie.episodes[0].season = newSeason;
+        this.selectedMovie.episodeList[0].season = newSeason;
       }
     },
     sanitizedEpisode: function (newEpisode) {
       if (this.selectedMovie) {
-        this.selectedMovie.episodes[0].episode = newEpisode;
+        this.selectedMovie.episodeList[0].episode = newEpisode;
       }
     },
     selectedMovie: function () {
-      this.selectedMovie.episodes[0].season = this.sanitizedSeason;
-      this.selectedMovie.episodes[0].episode = this.sanitizedEpisode;
+      this.selectedMovie.episodeList[0].season = this.sanitizedSeason;
+      this.selectedMovie.episodeList[0].episode = this.sanitizedEpisode;
       this.query = this.selectedMovie.title;
       this.description = this.selectedMovie.description;
     },
@@ -166,7 +166,7 @@ const TriageItemComponent = Vue.component('triage-item', {
                       v-for="(suggestion, index) in suggestions"
                       v-on:click="selectedMovie = suggestion"
                       v-on:mouseenter="highlightedSuggestion = index">
-                    <small class="text-muted pull-right">{{ suggestion.episodes[0].releaseYear }}</small>
+                    <small class="text-muted pull-right">{{ suggestion.episodeList[0].releaseYear }}</small>
                     {{ suggestion.title }}
                   </li>
               </ul>

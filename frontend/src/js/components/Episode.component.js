@@ -15,13 +15,13 @@ const EpisodeComponent = Vue.component('episode', {
       return `${this.movie.title}, S${this.episode.season || '?'}E${this.episode.episode || '?'}`;
     },
     episodeIndex: function() {
-      return this.movie.episodes.indexOf(this.episode);
+      return this.movie.episodeList.indexOf(this.episode);
     },
     previousEpisode: function() {
-      return this.movie.episodes[this.episodeIndex-1] || null;
+      return this.movie.episodeList[this.episodeIndex-1] || null;
     },
     nextEpisode: function() {
-      return this.movie.episodes[this.episodeIndex+1] || null;
+      return this.movie.episodeList[this.episodeIndex+1] || null;
     },
     hasChromecastSupport: function() {
       return !!ChromeCast;
@@ -32,34 +32,41 @@ const EpisodeComponent = Vue.component('episode', {
       // Only save position when video is loaded so a slow connection doesn't
       // erase the previous playback position.
       if (this.videoElement.readyState >= 3) {
-        this.episode.progress = this.videoElement.currentTime;
-        MoviesService.setProgress(this.episode.id, this.videoElement.currentTime);
+        this.$store.dispatch('setEpisodeProgress', {
+          tmdbId: this.movie.tmdbId,
+          episodeId: this.episode.id,
+          progress: this.videoElement.currentTime,
+        });
       }
     },
-    markAsWatched: function() {
-      MoviesService.markAsWatched(this.episode.id).then(() => {
-        this.episode.lastWatched = moment();
+    markEpisodeAsWatched: function() {
+      this.$store.dispatch('markEpisodeAsWatched', {
+        tmdbId: this.movie.tmdbId,
+        episodeId: this.episode.id,
       });
     },
-    markAsUnwatched: function() {
-      MoviesService.markAsUnwatched(this.episode.id).then(() => {
-        this.episode.lastWatched = null;
+    markEpisodeAsUnwatched: function() {
+      this.$store.dispatch('markEpisodeAsUnwatched', {
+        tmdbId: this.movie.tmdbId,
+        episodeId: this.episode.id,
       });
     },
   },
   mounted: function () {
-    MoviesService.getMovies().then((movies) => {
-      this.movie = movies.find(m => m.tmdbId == this.$route.params.tmdbId);
-      this.episode = this.movie.episodes.find(e => e.id == this.$route.params.episodeId);
-      this.$nextTick(function () {
-        // Save video position
-        if (this.episode.isConverted) {
-          this.videoElement = document.getElementById("video");
-          this.videoElement.currentTime = this.episode.progress;
-          this.progressInterval = setInterval(this.saveProgress, 3000);
-        }
-      });
-    })
+    this.$store.dispatch('getMovie', this.$route.params.tmdbId).then(
+      movie => {
+        this.movie = movie;
+        this.episode = this.movie.episodeMap[this.$route.params.episodeId];
+        this.$nextTick(function () {
+          // Save video position
+          if (this.episode.isConverted) {
+            this.videoElement = document.getElementById("video");
+            this.videoElement.currentTime = this.episode.progress;
+            this.progressInterval = setInterval(this.saveProgress, 3000);
+          }
+        });
+      }
+    );
   },
   beforeDestroy: function () {
     clearInterval(this.progressInterval);
@@ -77,10 +84,10 @@ const EpisodeComponent = Vue.component('episode', {
       <div v-if="!episode.isConverted">This episode is not converted for web playback.</div>
       <div class="container episode-actions">
         <div class="button-group horizontal">
-          <a class="button" v-if="!episode.lastWatched" v-on:click.prevent="markAsWatched()">
+          <a class="button" v-if="!episode.lastWatched" v-on:click.prevent="markEpisodeAsWatched">
             <i class="fas fa-eye"></i>
           </a>
-          <a class="button" v-if="episode.lastWatched" v-on:click.prevent="markAsUnwatched()">
+          <a class="button" v-if="episode.lastWatched" v-on:click.prevent="markEpisodeAsUnwatched">
             <i class="fas fa-eye-slash"></i>
           </a>
           <chromecast-button v-if="episode.isConverted && hasChromecastSupport" :episode="episode" class="button">

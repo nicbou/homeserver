@@ -27,7 +27,7 @@ class MoviesService {
       convertToMp4: params.convertToMp4 || false,
     };
 
-    const jsonEpisodes = movie.episodes.map((episode) => {
+    const jsonEpisodes = movie.episodeList.map((episode) => {
       return {
         lastWatched: episode.lastWatched,
         season: episode.season,

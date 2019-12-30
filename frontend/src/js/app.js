@@ -15,5 +15,6 @@ const app = new Vue({
     Permissions.checkPermission('finances').then(value => { this.canSeeFinances = value; });
     Permissions.checkPermission('habits').then(value => { this.canSeeHabits = value; });
   },
-  router
+  router,
+  store,
 });

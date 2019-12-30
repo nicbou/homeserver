@@ -25,8 +25,11 @@ const ChromeCastButtonComponent = Vue.component('chromecast-button', {
 
       // Set the playback time to 1 second, so that the movie shows in unfinished movies
       if (episode.progress === 0) {
-        episode.progress = 1;
-        MoviesService.setProgress(episode.id, episode.progress);
+        this.$store.dispatch('setEpisodeProgress', {
+          tmdbId: this.movie.tmdbId,
+          episodeId: this.episode.id,
+          progress: this.videoElement.currentTime,
+        });
       }
     }
   },

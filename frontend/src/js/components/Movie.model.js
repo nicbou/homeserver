@@ -76,9 +76,10 @@ class Episode {
 
 class Movie {
   get watchStatus() {
-    if (this.episodes.every(p => p.watchStatus === WatchStatus.WATCHED)) {
+    const episodeList = this.episodeList;
+    if (episodeList.every(p => p.watchStatus === WatchStatus.WATCHED)) {
       return WatchStatus.WATCHED;
-    } else if (this.episodes.some(p => p.watchStatus === WatchStatus.WATCHING)) {
+    } else if (episodeList.some(p => p.watchStatus === WatchStatus.WATCHING)) {
       return WatchStatus.WATCHING;
     }
     return WatchStatus.NOT_WATCHED;
@@ -90,40 +91,42 @@ class Movie {
 
   get lastWatched() {
     // Only returns a date when all episodes have been watched
-    const lastWatchedDates = this.episodes.map(p => p.lastWatched).filter(Boolean);
-    if (lastWatchedDates.length === this.episodes.length) {
+    const lastWatchedDates = this.episodeList.map(p => p.lastWatched).filter(Boolean);
+    if (lastWatchedDates.length === episodeList.length) {
       return moment.max(lastWatchedDates);
     }
     return null;
   }
 
   get conversionStatus() {
-    if (this.episodes.every(p => p.conversionStatus === ConversionStatus.CONVERTED)) {
+    const episodeList = this.episodeList;
+    if (episodeList.every(p => p.conversionStatus === ConversionStatus.CONVERTED)) {
       return ConversionStatus.CONVERTED;
-    } else if (this.episodes.some(p => p.conversionStatus === ConversionStatus.CONVERTING)) {
+    } else if (episodeList.some(p => p.conversionStatus === ConversionStatus.CONVERTING)) {
       return ConversionStatus.CONVERTING;
-    } else if (this.episodes.some(p => p.conversionStatus === ConversionStatus.CONVERSION_FAILED)) {
+    } else if (episodeList.some(p => p.conversionStatus === ConversionStatus.CONVERSION_FAILED)) {
       return ConversionStatus.CONVERSION_FAILED;
     }
     return ConversionStatus.NOT_CONVERTED;
   }
 
   get nextEpisodeToPlay() {
-    return this.episodes.find(p => p.conversionStatus === ConversionStatus.CONVERTED && p.watchStatus === WatchStatus.WATCHING)
-      || this.episodes.find(p => p.conversionStatus === ConversionStatus.CONVERTED && p.watchStatus === WatchStatus.NOT_WATCHED)
-      || this.episodes[0];
+    const episodeList = this.episodeList;
+    return episodeList.find(p => p.isConverted && p.isWatching)
+      || episodeList.find(p => p.isConverted && !p.isWatched && !p.isWatching)
+      || episodeList[0];
   }
 
   get releaseYear() {
-    return this.episodes[0].releaseYear;
+    return this.episodeList[0].releaseYear;
   }
 
   get dateAdded() {
-    return moment.max(this.episodes.map(p => p.dateAdded));
+    return moment.max(this.episodeList.map(p => p.dateAdded));
   }
 
   get seasons() {
-    return this.episodes
+    return Object.values(this.episodeList)
       .reduce((seasons, episode) => {
         // episode.season can be null
         const seasonNumber = episode.season === null ? 1 : episode.season;
@@ -138,7 +141,11 @@ class Movie {
           return season.filter(e => e.watchStatus !== WatchStatus.WATCHED).length
         }
         return season;
-      });
+      })
+  }
+
+  get episodeList() {
+    return Object.values(this.episodeMap).sort(episodeSorter);
   }
 
   static fromMovieApiResponse(jsonResponse) {
@@ -149,28 +156,30 @@ class Movie {
     movie.coverUrl = jsonResponse.coverUrl;
     movie.rating = jsonResponse.rating;
     movie.mediaType = jsonResponse.mediaType;
-    movie.episodes = jsonResponse.episodes
-      .map((jsonEpisode) => {
-        const episode = new Episode();
-        episode.id = jsonEpisode.id;
-        episode.season = jsonEpisode.season;
-        episode.episode = jsonEpisode.episode;
-        episode.conversionStatus = jsonEpisode.conversionStatus;
-        episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
-        episode.convertedVideoUrl = jsonEpisode.convertedVideoUrl;
-        episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
-        episode.vttSubtitlesUrlEn = jsonEpisode.vttSubtitlesUrlEn;
-        episode.vttSubtitlesUrlDe = jsonEpisode.vttSubtitlesUrlDe;
-        episode.vttSubtitlesUrlFr = jsonEpisode.vttSubtitlesUrlFr;
-        episode.srtSubtitlesUrlEn = jsonEpisode.srtSubtitlesUrlEn;
-        episode.srtSubtitlesUrlDe = jsonEpisode.srtSubtitlesUrlDe;
-        episode.srtSubtitlesUrlFr = jsonEpisode.srtSubtitlesUrlFr;
-        episode.releaseYear = jsonEpisode.releaseYear;
-        episode.progress = jsonEpisode.progress;
-        episode.dateAdded = moment(jsonEpisode.dateAdded);
-        return episode;
-      })
-      .sort(episodeSorter);
+    movie.episodeMap = jsonResponse.episodes
+      .reduce(
+        (episodes, jsonEpisode) => {
+          const episode = new Episode();
+          episode.id = jsonEpisode.id;
+          episode.season = jsonEpisode.season;
+          episode.episode = jsonEpisode.episode;
+          episode.conversionStatus = jsonEpisode.conversionStatus;
+          episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
+          episode.convertedVideoUrl = jsonEpisode.convertedVideoUrl;
+          episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
+          episode.vttSubtitlesUrlEn = jsonEpisode.vttSubtitlesUrlEn;
+          episode.vttSubtitlesUrlDe = jsonEpisode.vttSubtitlesUrlDe;
+          episode.vttSubtitlesUrlFr = jsonEpisode.vttSubtitlesUrlFr;
+          episode.srtSubtitlesUrlEn = jsonEpisode.srtSubtitlesUrlEn;
+          episode.srtSubtitlesUrlDe = jsonEpisode.srtSubtitlesUrlDe;
+          episode.srtSubtitlesUrlFr = jsonEpisode.srtSubtitlesUrlFr;
+          episode.releaseYear = jsonEpisode.releaseYear;
+          episode.progress = jsonEpisode.progress;
+          episode.dateAdded = moment(jsonEpisode.dateAdded);
+          episodes[episode.id] = episode;
+          return episodes
+        },
+      {});
 
     return movie;
   }
@@ -204,7 +213,7 @@ class Movie {
     movie.coverUrl = coverRelativeUrl ? `https://image.tmdb.org/t/p/w500${coverRelativeUrl}` : null;
     movie.rating = null;
     movie.mediaType = result.media_type == 'tv' ? MediaType.TV_SHOW : MediaType.MOVIE;
-    movie.episodes = [episode];
+    movie.episodeMap = {[episode.id]: episode};
     return movie;
   }
 }

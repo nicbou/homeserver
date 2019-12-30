@@ -1,13 +1,15 @@
 const MoviesComponent = Vue.component('movies', {
   data: function() {
     return {
-      movies: [],
       page: 0,
       moviesPerPage: 20,
       query: '',
     }
   },
   computed: {
+    movies: function() {
+      return Object.values(this.$store.state.movies);
+    },
     trimmedQuery: function() {
       return this.query.trim().toLocaleLowerCase();
     },
@@ -37,12 +39,7 @@ const MoviesComponent = Vue.component('movies', {
     }
   },
   created: function () {
-    MoviesService.getMovies().then(
-      (movies) => {
-        movies.sort(movieSorter);
-        this.movies = movies;
-      }
-    )
+    this.$store.dispatch('getMovies');
   },
   methods: {
     openMovie: function(movie) {

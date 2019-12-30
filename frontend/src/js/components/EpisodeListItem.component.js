@@ -28,13 +28,22 @@ const EpisodeListItemComponent = Vue.component('episode-list-item', {
       });
     },
     deleteEpisode: function() {
-      this.$emit('episode-deleted', this.episode);
+      this.$store.dispatch('deleteEpisode', {
+        tmdbId: this.movie.tmdbId,
+        episodeId: this.episode.id,
+      });
     },
     markEpisodeAsWatched: function() {
-      this.$emit('episode-watched', this.episode);
+      this.$store.dispatch('markEpisodeAsWatched', {
+        tmdbId: this.movie.tmdbId,
+        episodeId: this.episode.id,
+      });
     },
     markEpisodeAsUnwatched: function() {
-      this.$emit('episode-unwatched', this.episode);
+      this.$store.dispatch('markEpisodeAsUnwatched', {
+        tmdbId: this.movie.tmdbId,
+        episodeId: this.episode.id,
+      });
     },
     hasChromecastSupport: function() {
       return !!ChromeCast;
@@ -49,7 +58,7 @@ const EpisodeListItemComponent = Vue.component('episode-list-item', {
         <a class="button" href="#" v-if="episode.lastWatched" @click.prevent="markEpisodeAsUnwatched">
           <i class="fas fa-check-circle"></i>
         </a>
-        <span class="title" @click="playEpisode">Episode {{ episode.episode }}</span>
+        <span class="title">Episode {{ episode.episode }}</span>
         <div class="button-group horizontal">
           <a class="button icon-only" href="#" v-if="canWatchMovies && episode.isConverted" :href="episode.playbackUrl" @click.prevent="playEpisode" title="Play in browser">
             <i class="fas fa-play"></i>
@@ -75,8 +84,7 @@ const EpisodeListItemComponent = Vue.component('episode-list-item', {
         v-if="adminMenuVisible"
         class="collapsible-body button-group vertical"
         :episode="episode"
-        :movie="movie"
-        @episode-deleted="deleteEpisode">
+        :movie="movie">
       </admin-menu>
     </div>
   `,
