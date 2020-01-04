@@ -13,7 +13,7 @@ const EpisodeAdminMenuComponent = Vue.component('admin-menu', {
   template: `
     <div>
       <a class="button" href="#" @click.prevent="deleteEpisode">
-        <i class="fas fa-trash-alt"></i> Delete from library
+        <i class="fas fa-trash-alt"></i> Delete episode
       </a>
     </div>
   `

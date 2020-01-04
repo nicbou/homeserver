@@ -1,7 +1,7 @@
 const MovieComponent = Vue.component('movie', {
   data: function() {
     return {
-      currentSeason: null,
+      currentSeasonNumber: null,
       canWatchMovies: false,
       canManageMovies: false,
       downloadMenuVisible: false,
@@ -21,9 +21,9 @@ const MovieComponent = Vue.component('movie', {
     episodeList: function () {
       return this.movie.episodeList;
     },
-    defaultSeason: function () {
-      if (!this.movie) { return null; }
-      return this.movie.seasons.find(s => s.seasonNumber === this.movie.nextEpisodeToPlay.season) || this.movie.seasons[0];
+    currentSeason: function () {
+      const seasonNumber = this.currentSeasonNumber || this.movie.nextEpisodeToPlay.season;
+      return this.movie.seasons.find(s => s.seasonNumber === seasonNumber) || this.seasons[0];
     },
     nextEpisodeName: function () {
       const nextEpisode = this.movie.nextEpisodeToPlay;
@@ -84,14 +84,14 @@ const MovieComponent = Vue.component('movie', {
             <div class="tab-group">
               <h3 class="title">Season</h3>
               <span
-                @click="currentSeason = season"
-                :class="{ selected: (currentSeason || defaultSeason).seasonNumber === season.seasonNumber }" class="tab"
+                @click="currentSeasonNumber = season.seasonNumber"
+                :class="{ selected: currentSeason.seasonNumber === season.seasonNumber }" class="tab"
                 v-for="season in movie.seasons">
                 {{ season.seasonNumber }}
               </span>
             </div>
             <div class="tab-body">
-              <episode-list-item v-for="episode in (currentSeason || defaultSeason)" :episode="episode" :movie="movie" :key="episode.id"></episode-list-item>
+              <episode-list-item v-for="episode in currentSeason" :episode="episode" :movie="movie" :key="episode.id"></episode-list-item>
             </div>
           </div>
         </div>
