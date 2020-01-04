@@ -53,4 +53,24 @@ class MoviesService {
   static delete(id) {
     return Api.request.delete(`/movies/${id}/`);
   }
+
+  static subtitlesExist(episode){
+    const requestConfig = {
+      validateStatus: function (status) {
+        return (status >= 200 && status < 300) || status === 404;
+      },
+    }
+
+    return Promise.all([
+      Api.fileRequest.head(episode.srtSubtitlesUrlEn, requestConfig),
+      Api.fileRequest.head(episode.srtSubtitlesUrlFr, requestConfig),
+      Api.fileRequest.head(episode.srtSubtitlesUrlDe, requestConfig)
+    ]).then(results => {
+      return {
+        'en': results[0].status !== 404,
+        'fr': results[1].status !== 404,
+        'de': results[2].status !== 404,
+      }
+    });
+  }
 }

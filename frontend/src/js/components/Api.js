@@ -1,11 +1,18 @@
 class ApiService {
   constructor(apiUrl = '/') {
-    this._axiosInstance = axios.create({
+    this._axiosInstanceApi = axios.create({
       baseURL: apiUrl
     });
+
+    this._axiosInstanceFiles = axios.create();
   }
 
   get request() {
-    return this._axiosInstance;
+    return this._axiosInstanceApi;
+  }
+
+  get fileRequest() {
+    // Static files rest in a different location
+    return this._axiosInstanceFiles;
   }
 }

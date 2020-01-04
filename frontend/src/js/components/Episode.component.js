@@ -5,6 +5,9 @@ const EpisodeComponent = Vue.component('episode', {
       episode: null,
       videoElement: null,
       progressInterval: null,
+      subtitlesExistEn: false,
+      subtitlesExistFr: false,
+      subtitlesExistDe: false,
     }
   },
   computed: {
@@ -57,6 +60,15 @@ const EpisodeComponent = Vue.component('episode', {
       movie => {
         this.movie = movie;
         this.episode = this.movie.episodeMap[this.$route.params.episodeId];
+
+        MoviesService.subtitlesExist(this.episode).then(
+          availableSubtitles => {
+            this.subtitlesExistEn = availableSubtitles.en;
+            this.subtitlesExistFr = availableSubtitles.fr;
+            this.subtitlesExistDe = availableSubtitles.de;
+          }
+        )
+
         this.$nextTick(function () {
           // Save video position
           if (this.episode.isConverted) {
@@ -77,9 +89,9 @@ const EpisodeComponent = Vue.component('episode', {
       <h2 class="container">{{ fullTitle }}</h2>
       <video id="video" controls autoplay v-if="episode.isConverted" :key="this.episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">
-        <track label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrlEn" default>
-        <track label="French" kind="captions" srclang="fr" :src="episode.vttSubtitlesUrlFr">
-        <track label="German" kind="captions" srclang="de" :src="episode.vttSubtitlesUrlDe">
+        <track v-if="subtitlesExistEn" label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrlEn" default>
+        <track v-if="subtitlesExistFr" label="French" kind="captions" srclang="fr" :src="episode.vttSubtitlesUrlFr">
+        <track v-if="subtitlesExistDe" label="German" kind="captions" srclang="de" :src="episode.vttSubtitlesUrlDe">
       </video>
       <div v-if="!episode.isConverted">This episode is not converted for web playback.</div>
       <div class="container episode-actions">
