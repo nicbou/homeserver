@@ -47,10 +47,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
-    'habits',
-    'finances',
     'movies',
     'authentication',
 )
@@ -60,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -77,7 +73,6 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -111,16 +106,7 @@ USE_X_FORWARDED_HOST = True
 # ==================================================
 
 LOGIN_REDIRECT_URL = '/'
-
 VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
-
-COMMERZBANK_ACCOUNT_NUMBER = os.environ.get('COMMERZBANK_ACCOUNT_NUMBER')
-COMMERZBANK_PASSWORD = os.environ.get('COMMERZBANK_PASSWORD')
-N26_USERNAME = os.environ.get('N26_USERNAME')
-N26_PASSWORD = os.environ.get('N26_PASSWORD')
-DEGIRO_USERNAME = os.environ.get('DEGIRO_USERNAME')
-DEGIRO_PASSWORD = os.environ.get('DEGIRO_PASSWORD')
-
 MOVIE_LIBRARY_PATH = os.environ.get('MOVIE_LIBRARY_PATH')  # The renamed, triaged movies and their artifacts go here
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')
 TRIAGE_PATH = os.environ.get('TRIAGE_PATH')  # The completed torrents go here until they are triaged

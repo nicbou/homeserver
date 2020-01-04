@@ -28,9 +28,6 @@
                         <li v-if="canManageMovies">
                             <router-link :to="{name: 'triage'}">Triage</router-link>
                         </li>
-                        <li v-if="canSeeFinances || canSeeHabits">
-                            <router-link :to="{name: 'dashboard'}">Status</router-link>
-                        </li>
                     </ul>
                 </nav>
             </div>
@@ -39,8 +36,6 @@
             <router-view :key="$route.fullPath"></router-view>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/accounting.js/0.4.1/accounting.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.1/vue.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.5.3/vue-router.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.1.2/vuex.min.js"></script>
@@ -48,22 +43,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
     <script src="js/components/PermissionsService.js"></script>
     <script src="js/components/ChromeCastService.js"></script>
-    <script src="js/components/Currency.filter.js"></script>
-    <script src="js/components/Date.filter.js"></script>
-    <script src="js/components/Habit.model.js"></script>
-    <script src="js/components/Account.model.js"></script>
-    <script src="js/components/Transaction.model.js"></script>
-    <script src="js/components/SavingsTarget.model.js"></script>
     <script src="js/components/Api.js"></script>
-    <script src="js/components/AccountsService.js"></script>
-    <script src="js/components/HabitsService.js"></script>
-    <script src="js/components/TransactionsService.js"></script>
     <script src="js/components/Spinner.component.js"></script>
-    <script src="js/components/AccountListItem.component.js"></script>
-    <script src="js/components/AccountList.component.js"></script>
-    <script src="js/components/TransactionList.component.js"></script>
-    <script src="js/components/AccountVariation.component.js"></script>
-    <script src="js/components/AccountsBalanceGraph.component.js"></script>
     <script src="js/components/ChromeCastButton.component.js"></script>
     <script src="js/components/Movie.model.js"></script>
     <script src="js/components/MoviesService.js"></script>
@@ -71,16 +52,12 @@
     <script src="js/components/EpisodeListItem.component.js"></script>
     <script src="js/components/EpisodeDownloadMenu.component.js"></script>
     <script src="js/components/EpisodeAdminMenu.component.js"></script>
-    <script src="js/components/Dashboard.component.js"></script>
-    <script src="js/components/HabitsPanel.component.js"></script>
-    <script src="js/components/FinancesPanel.component.js"></script>
     <script src="js/components/Movie.component.js"></script>
     <script src="js/components/Movies.component.js"></script>
     <script src="js/components/Torrents.component.js"></script>
     <script src="js/components/TriageService.js"></script>
     <script src="js/components/TriageItem.component.js"></script>
     <script src="js/components/Triage.component.js"></script>
-
     <script src="js/store.js"></script>
     <script src="js/routes.js"></script>
     <script src="js/app.js"></script>
