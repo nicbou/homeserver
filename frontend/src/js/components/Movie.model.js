@@ -91,7 +91,8 @@ class Movie {
 
   get lastWatched() {
     // Only returns a date when all episodes have been watched
-    const lastWatchedDates = this.episodeList.map(p => p.lastWatched).filter(Boolean);
+    const episodeList = this.episodeList;
+    const lastWatchedDates = episodeList.map(p => p.lastWatched).filter(Boolean);
     if (lastWatchedDates.length === episodeList.length) {
       return moment.max(lastWatchedDates);
     }

@@ -43,25 +43,36 @@ const MovieComponent = Vue.component('movie', {
     markEpisodeAsWatched: function(episode) {
       this.$store.dispatch('markEpisodeAsWatched', {
         tmdbId: this.movie.tmdbId,
-        episodeId: this.episode.id,
+        episodeId: episode.id,
       });
     },
     markEpisodeAsUnwatched: function(episode) {
       this.$store.dispatch('markEpisodeAsUnwatched', {
         tmdbId: this.movie.tmdbId,
-        episodeId: this.episode.id,
+        episodeId: episode.id,
       });
     },
   },
   template: `
     <div v-if="movie" class="container">
+      <router-link class="back" :to="{name: 'movies'}">
+        <i class="fas fa-arrow-left"></i>
+      </router-link>
       <div class="section movie-info">
-        <img class="cover" :src="movie.coverUrl" :key="movie.tmdbId"/>
+        <div class="cover">
+          <img :src="movie.coverUrl" :key="movie.tmdbId"/>
+        </div>
         <div class="information">
           <div class="section description">
             <h2>{{ movie.title }}</h2>
             <p>{{ movie.description }}</p>
             <div class="button-group horizontal">
+              <a class="button large" href="#" v-if="!movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsWatched(movie.nextEpisodeToPlay)">
+                <i class="far fa-check-circle"></i>
+              </a>
+              <a class="button large" href="#" v-if="movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsUnwatched(movie.nextEpisodeToPlay)">
+                <i class="fas fa-check-circle"></i>
+              </a>
               <a href="#" @click.prevent="playEpisode(movie.nextEpisodeToPlay)" v-if="canWatchMovies" class="button large main">
                 <i class="fas fa-play"></i>
                 <span v-if="episodeList.length === 1">Play</span>

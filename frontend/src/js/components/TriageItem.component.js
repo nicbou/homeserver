@@ -1,12 +1,12 @@
 function debounce(func, wait, immediate) {
-    var timeout;
+    let timeout;
     return function() {
-      var context = this, args = arguments;
-      var later = function() {
+      let context = this, args = arguments;
+      let later = function() {
         timeout = null;
         if (!immediate) func.apply(context, args);
       };
-      var callNow = immediate && !timeout;
+      let callNow = immediate && !timeout;
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
       if (callNow) func.apply(context, args);
@@ -56,17 +56,13 @@ const TriageItemComponent = Vue.component('triage-item', {
       else if (this.highlightedSuggestion !== null) {
         return this.suggestions[this.highlightedSuggestion].coverUrl;
       }
-      else {
-        return null;
-      }
+      return null;
     }
   },
   watch: {
     // whenever question changes, this function will run
     query: function (newQuery) {
-      if (!this.selectedMovie) { // Saves a useless query
-        this.getResults(newQuery);
-      }
+      this.getResults(newQuery);
     },
     suggestions: function () {
       this.highlightedSuggestion = this.suggestions.length ? 0 : null;
@@ -82,10 +78,15 @@ const TriageItemComponent = Vue.component('triage-item', {
       }
     },
     selectedMovie: function () {
-      this.selectedMovie.episodeList[0].season = this.sanitizedSeason;
-      this.selectedMovie.episodeList[0].episode = this.sanitizedEpisode;
-      this.query = this.selectedMovie.title;
-      this.description = this.selectedMovie.description;
+      if (this.selectedMovie) {
+        this.selectedMovie.episodeList[0].season = this.sanitizedSeason;
+        this.selectedMovie.episodeList[0].episode = this.sanitizedEpisode;
+        this.query = this.selectedMovie.title;
+        this.description = this.selectedMovie.description;
+      } else {
+        this.query = '';
+        this.description = '';
+      }
     },
     description: function () {
       if (this.selectedMovie) {
@@ -134,112 +135,94 @@ const TriageItemComponent = Vue.component('triage-item', {
     }
   },
   template: `
-    <div class="triage" v-if="!saved">
-      <div class="cover-wrapper" :class="{'no-cover': !coverUrl}">
-        <img v-if="coverUrl" class="cover img-responsive" :src="coverUrl">
-        <span class="no-cover-icon" v-if="!coverUrl"></span>
+    <div class="tab-body section movie-info" v-if="!saved">
+      <div class="cover">
+        <img v-if="coverUrl" :src="coverUrl">
+        <div v-if="!coverUrl" class="placeholder"></div>
       </div>
-      <div class="movie-info">
-        <h2 v-if="selectedMovie">
-          {{ fullTitle }}
-          <br><small>{{ selectedMovie.releaseYear }}</small>
-        </h2>
-
-        <h2 v-if="!selectedMovie">
-          {{ file }}
-        </h2>
-
-        <hr/>
-
-        <div class="form-horizontal">
-          <div class="form-group">
-            <label :for="_uid + '-title'" class="control-label col-sm-2">Title</label>
-            <div class="col-sm-10 col-md-8">
-              <input v-model="query" :id="_uid + '-title'" type="text" class="form-control" :placeholder="'/'+file" :disabled="selectedMovie"
-                  v-on:blur="blurred" 
-                  v-on:focus="focused"
-                  v-on:keyup.enter="movieInputEnter"
-                  v-on:keyup.prevent.up="highlightedSuggestion = (highlightedSuggestion + suggestions.length - 1) % suggestions.length"
-                  v-on:keyup.prevent.down="highlightedSuggestion = (highlightedSuggestion + 1) % suggestions.length">
-              <ul v-if="suggestionsVisible && suggestions.length > 0" class="suggestions">
-                  <li :class="{'highlighted': highlightedSuggestion===index}"
-                      v-for="(suggestion, index) in suggestions"
-                      v-on:click="selectedMovie = suggestion"
-                      v-on:mouseenter="highlightedSuggestion = index">
-                    <small class="text-muted pull-right">{{ suggestion.episodeList[0].releaseYear }}</small>
-                    {{ suggestion.title }}
-                  </li>
-              </ul>
-            </div>
+      <div class="information">
+        <div class="form">
+          <div class="control">
+            <label :for="_uid + '-title'">Title</label>
+            <input
+              class="input"
+              type="text"
+              v-model="query"
+              :id="_uid + '-title'"
+              :placeholder="'/'+file"
+              @blur="blurred" 
+              @focus="focused"
+              @keyup.enter="movieInputEnter"
+              @keyup.prevent.up="highlightedSuggestion = (highlightedSuggestion + suggestions.length - 1) % suggestions.length"
+              @keyup.prevent.down="highlightedSuggestion = (highlightedSuggestion + 1) % suggestions.length">
+            <ul v-if="suggestionsVisible && suggestions.length > 0" class="suggestions">
+              <li
+                :class="{'highlighted': highlightedSuggestion===index}"
+                v-for="(suggestion, index) in suggestions"
+                @click="selectedMovie = suggestion"
+                @mouseenter="highlightedSuggestion = index">
+                <small>{{ suggestion.episodeList[0].releaseYear }}</small>
+                {{ suggestion.title }}
+              </li>
+            </ul>
           </div>
 
-          <div class="form-group">
-            <div class="col-sm-10 col-lg-5 col-md-6 col-sm-offset-2">
-              <div class="input-group">
-                <label :for="_uid + '-season'" class="input-group-addon"><span class="visible-xs">S</span><span class="hidden-xs">Season</span></label>
-                <input v-model="season" type="number" class="form-control" :id="_uid + '-season'">
-                <label :for="_uid + '-episode'" class="input-group-addon"><span class="visible-xs">Ep</span><span class="hidden-xs">Episode</span></label>
-                <input v-model="episode" type="number" class="form-control" :id="_uid + '-episode'">
-              </div>
-            </div>
+          <div class="control">
+            <label class="label" :for="_uid + '-season'">Season</label>
+            <input class="input" v-model="season" type="number" :id="_uid + '-season'"/>
           </div>
 
-          <div class="form-group">
-            <label :for="_uid + '-description'" class="control-label col-sm-2">Plot</label>
-            <div class="col-sm-10 col-md-8">
-              <textarea v-model="description" class="form-control" :id="_uid + '-description'" placeholder="Enter something here..."></textarea>
-            </div>
+          <div class="control">
+            <label class="label" :for="_uid + '-episode'">Episode</label>
+            <input class="input" v-model="episode" type="number" :id="_uid + '-episode'"/>
           </div>
 
-          <div class="form-group">
-            <label :for="_uid + '-subtitles'" class="control-label col-sm-2">Subtitles (English)</label>
-            <div class="col-sm-10 col-md-8">
-              <select v-model="selectedSubtitlesEn" class="form-control" :id="_uid + '-subtitles'">
-                <option value="" selected>No subtitles file</option>
-                <option disabled>-----</option>
-                <option v-for="subtitle in subtitles">{{ subtitle }}</option>
-              </select>
-            </div>
+          <div class="control">
+            <label class="label" :for="_uid + '-description'">Plot</label>
+            <textarea class="input" v-model="description" :id="_uid + '-description'" placeholder="Enter something here..."></textarea>
           </div>
 
-          <div class="form-group">
-            <label :for="_uid + '-subtitles'" class="control-label col-sm-2">Subtitles (German)</label>
-            <div class="col-sm-10 col-md-8">
-              <select v-model="selectedSubtitlesDe" class="form-control" :id="_uid + '-subtitles'">
-                <option value="" selected>No subtitles file</option>
-                <option disabled>-----</option>
-                <option v-for="subtitle in subtitles">{{ subtitle }}</option>
-              </select>
-            </div>
+          <div class="control">
+            <label :for="_uid + '-subtitles-en'">English subs</label>
+            <select class="input" v-model="selectedSubtitlesEn" :id="_uid + '-subtitles-en'">
+              <option value="" selected>No subtitles file</option>
+              <option disabled>-----</option>
+              <option v-for="subtitle in subtitles">{{ subtitle }}</option>
+            </select>
           </div>
 
-          <div class="form-group">
-            <label :for="_uid + '-subtitles'" class="control-label col-sm-2">Subtitles (French)</label>
-            <div class="col-sm-10 col-md-8">
-              <select v-model="selectedSubtitlesFr" class="form-control" :id="_uid + '-subtitles'">
-                <option value="" selected>No subtitles file</option>
-                <option disabled>-----</option>
-                <option v-for="subtitle in subtitles">{{ subtitle }}</option>
-              </select>
-            </div>
+          <div class="control">
+            <label :for="_uid + '-subtitles-fr'">French subs</label>
+            <select class="input" v-model="selectedSubtitlesFr" :id="_uid + '-subtitles-fr'">
+              <option value="" selected>No subtitles file</option>
+              <option disabled>-----</option>
+              <option v-for="subtitle in subtitles">{{ subtitle }}</option>
+            </select>
           </div>
 
-          <div class="form-group">
-            <label :for="_uid + '-convert'" class="control-label col-sm-2">Conversion</label>
-            <div class="col-sm-10 checkbox">
-              <label>
-                <input v-model="convertToMp4" type="checkbox" :id="_uid + '-convert'"> Convert this movie to .mp4
-              </label>
-            </div>
+          <div class="control">
+            <label :for="_uid + '-subtitles-de'">German subs</label>
+            <select class="input" v-model="selectedSubtitlesDe" :id="_uid + '-subtitles-de'">
+              <option value="" selected>No subtitles file</option>
+              <option disabled>-----</option>
+              <option v-for="subtitle in subtitles">{{ subtitle }}</option>
+            </select>
           </div>
 
-          <hr/>
-          <div class="form-group">
-            <div class="col-sm-10 col-sm-offset-2">
-              <button class="btn btn-primary" v-on:click="addToLibrary" :disabled="!selectedMovie && !savingInProgress">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add to library
-              </button>
-            </div>
+          <div class="control">
+            <label :for="_uid + '-convert'">Conversion</label>
+            <label class="input checkbox">
+              <input v-model="convertToMp4" type="checkbox" :id="_uid + '-convert'"> Convert this movie to .mp4
+            </label>
+          </div>
+
+          <div class="button-group horizontal">
+            <button class="button main" @click="addToLibrary" :disabled="!selectedMovie && !savingInProgress">
+              Add to library
+            </button>
+            <button class="button" @click="selectedMovie = null; highlightedSuggestion = null;" :disabled="!selectedMovie">
+              Clear form
+            </button>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ const TriageComponent = Vue.component('triage', {
     return {
       movieFiles: [],
       subtitleFiles: [],
+      loading: true,
     }
   },
   created: function () {
@@ -11,13 +12,15 @@ const TriageComponent = Vue.component('triage', {
         data.subtitles.sort();
         this.subtitleFiles = data.subtitles;
         this.movieFiles = data.movies;
+        this.loading = false;
       }
     )
   },
   template: `
-    <div id="triage">
+    <div id="triage" class="container">
       <h2>Triage</h2>
-      <spinner v-if="movieFiles.length === 0"></spinner>
+      <spinner v-if="loading"></spinner>
+      <p v-if="!loading && movieFiles.length === 0">There are no movies in triage</p>
       <triage-item v-for="movie in movieFiles" :key="movie" :file="movie" :subtitles="subtitleFiles"></triage-item>
     </div>
   `

@@ -8,7 +8,7 @@ const MoviesComponent = Vue.component('movies', {
   },
   computed: {
     movies: function() {
-      return Object.values(this.$store.state.movies);
+      return Object.values(this.$store.state.movies).sort(movieSorter);
     },
     trimmedQuery: function() {
       return this.query.trim().toLocaleLowerCase();
@@ -48,14 +48,23 @@ const MoviesComponent = Vue.component('movies', {
   },
   template: `
     <div id="movies" class="container">
-      <h2 v-if="unfinishedMovies.length > 0">Unfinished movies</h2>
-      <div class="covers">
-        <img @click="openMovie(movie)" class="cover" :src="movie.coverUrl" v-for="movie in unfinishedMovies" :key="movie.tmdbId"/>
+      <div class="back" v-if="page > 0" @click="page = 0">
+        <i class="fas fa-arrow-left"></i>
       </div>
-      <input id="search-box" type="search" v-model="query" placeholder="Search movies"><h2>All movies</h2>
+      <h2 v-if="unfinishedMovies.length > 0 && page === 0">Unfinished movies</h2>
+      <div class="covers" v-if="page === 0">
+        <div class="cover" v-for="movie in unfinishedMovies" :key="movie.tmdbId">
+          <img @click="openMovie(movie)" :src="movie.coverUrl"/>
+        </div>
+      </div>
+      <input id="search-box" class="input" type="search" v-model="query" v-if="page === 0" placeholder="Search movies">
+      <h2 v-if="page === 0">All movies</h2>
+      <h2 v-if="page > 0">More movies...</h2>
       <spinner v-if="movies.length === 0"></spinner>
       <div class="covers">
-        <img @click="openMovie(movie)" class="cover" :src="movie.coverUrl" v-for="movie in paginatedMovies" :key="movie.tmdbId"/>
+        <div class="cover" v-for="movie in paginatedMovies" :key="movie.tmdbId">
+          <img @click="openMovie(movie)" :src="movie.coverUrl"/>
+        </div>
       </div>
       <div class="button-group horizontal">
         <button class="button" v-if="page > 0" @click="page-=1" type="button">Previous page</button>

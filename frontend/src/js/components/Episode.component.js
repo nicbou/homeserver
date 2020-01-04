@@ -85,8 +85,11 @@ const EpisodeComponent = Vue.component('episode', {
     this.saveProgress();
   },
   template: `
-    <div v-if="episode">
-      <h2 class="container">{{ fullTitle }}</h2>
+    <div v-if="episode" class="container">
+      <router-link class="back" :to="{name: 'movie', tmdbId: movie.tmdbId}">
+        <i class="fas fa-arrow-left"></i>
+      </router-link>
+      <h2>{{ fullTitle }}</h2>
       <video id="video" controls autoplay v-if="episode.isConverted" :key="this.episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">
         <track v-if="subtitlesExistEn" label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrlEn" default>
@@ -94,13 +97,13 @@ const EpisodeComponent = Vue.component('episode', {
         <track v-if="subtitlesExistDe" label="German" kind="captions" srclang="de" :src="episode.vttSubtitlesUrlDe">
       </video>
       <div v-if="!episode.isConverted">This episode is not converted for web playback.</div>
-      <div class="container episode-actions">
+      <div class="episode-actions">
         <div class="button-group horizontal">
           <a class="button" v-if="!episode.lastWatched" v-on:click.prevent="markEpisodeAsWatched">
-            <i class="fas fa-eye"></i>
+            <i class="far fa-check-circle"></i> Mark as seen
           </a>
           <a class="button" v-if="episode.lastWatched" v-on:click.prevent="markEpisodeAsUnwatched">
-            <i class="fas fa-eye-slash"></i>
+            <i class="fas fa-check-circle"></i> Mark as not seen
           </a>
           <chromecast-button v-if="episode.isConverted && hasChromecastSupport" :episode="episode" class="button">
             <i class="fab fa-chromecast"></i>
