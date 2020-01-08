@@ -84,7 +84,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
 .covers{display:grid;grid-template-columns:repeat(4, 1fr);grid-gap:15px;width: 100%;margin: 0 0 25px;}
     .covers .cover{}
         .covers .cover img{cursor:pointer;}
-    .cover{width: 100%;overflow:hidden;}
+    .cover{width: 100%;/* overflow:hidden; */}
         .cover img{max-width:100%;display: block;border-radius: 10px;}
 
 .movie-info{display:grid;grid-template-columns:30% 1fr;grid-gap:30px;}
