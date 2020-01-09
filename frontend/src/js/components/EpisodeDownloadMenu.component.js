@@ -18,19 +18,19 @@ const EpisodeDownloadMenuComponent = Vue.component('download-menu', {
   },
   template: `
     <div>
-      <a class="button" :href="episode.originalVideoUrl">
+      <a class="button" :href="episode.originalVideoUrl" download>
         <i class="fas fa-film"></i> <span>Download original video</span>
       </a>
-      <a class="button" :href="episode.convertedVideoUrl">
+      <a class="button" :href="episode.convertedVideoUrl" download>
         <i class="fas fa-film"></i> <span>Download converted video</span>
       </a>
-      <a class="button" :href="episode.srtSubtitlesUrlEn" v-if="subtitlesExistEn">
+      <a class="button" :href="episode.srtSubtitlesUrlEn" download v-if="subtitlesExistEn">
         <i class="far fa-closed-captioning"></i> <span>Download English subtitles</span>
       </a>
-      <a class="button" :href="episode.srtSubtitlesUrlFr" v-if="subtitlesExistFr">
+      <a class="button" :href="episode.srtSubtitlesUrlFr" download v-if="subtitlesExistFr">
         <i class="far fa-closed-captioning"></i> <span>Download French subtitles</span>
       </a>
-      <a class="button" :href="episode.srtSubtitlesUrlDe" v-if="subtitlesExistDe">
+      <a class="button" :href="episode.srtSubtitlesUrlDe" download v-if="subtitlesExistDe">
         <i class="far fa-closed-captioning"></i> <span>Download German subtitles</span>
       </a>
     </div>
