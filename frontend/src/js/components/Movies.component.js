@@ -1,26 +1,27 @@
 const MoviesComponent = Vue.component('movies', {
   data: function() {
     return {
-      page: 0,
       moviesPerPage: 20,
-      query: '',
     }
   },
   computed: {
     movies: function() {
       return Object.values(this.$store.state.movies).sort(movieSorter);
     },
-    trimmedQuery: function() {
-      return this.query.trim().toLocaleLowerCase();
+    query: function() {
+      return this.$store.state.currentQuery;
+    },
+    page: function() {
+      return this.$store.state.currentPage;
     },
     filteredMovies: function() {
-      if (this.trimmedQuery) {
+      if (this.query) {
         return this.movies
           .filter((movie) => {
             return (
-              this.trimmedQuery === ''
-              || movie.title.toLocaleLowerCase().includes(this.trimmedQuery)
-              || movie.description.toLocaleLowerCase().includes(this.trimmedQuery)
+              this.query === ''
+              || movie.title.toLocaleLowerCase().includes(this.query)
+              || movie.description.toLocaleLowerCase().includes(this.query)
             );
           })
       };
@@ -44,12 +45,24 @@ const MoviesComponent = Vue.component('movies', {
   methods: {
     openMovie: function(movie) {
       this.$router.push({ name: 'movie', params: { tmdbId: movie.tmdbId } });
+    },
+    setPage: function(page) {
+      this.$store.commit('SET_CURRENT_PAGE', page);
+    },
+    setQuery: function(event) {
+      this.$store.dispatch('setCurrentQuery', event.target.value);
+    },
+    clearQuery: function(event) {
+      this.$store.dispatch('setCurrentQuery', '');
     }
   },
   template: `
     <div id="movies" class="container">
-      <div class="back" v-if="page > 0" @click="page = 0">
-        <i class="fas fa-arrow-left"></i>
+      <div class="back" v-if="page > 0" @click="setPage(0)" title="Back to first page">
+        <i class="fas fa-arrow-left"></i><span class="label">First page</span>
+      </div>
+      <div class="back" v-if="query && page === 0" @click="clearQuery()" title="Back to first page">
+        <i class="fas fa-arrow-left"></i><span class="label">All movies</span>
       </div>
       <h2 v-if="unfinishedMovies.length > 0 && page === 0">Unfinished movies</h2>
       <div class="covers" v-if="page === 0">
@@ -57,9 +70,10 @@ const MoviesComponent = Vue.component('movies', {
           <img @click="openMovie(movie)" :src="movie.coverUrl"/>
         </div>
       </div>
-      <input id="search-box" class="input" type="search" v-model="query" v-if="page === 0" placeholder="Search movies">
-      <h2 v-if="page === 0">All movies</h2>
-      <h2 v-if="page > 0">More movies...</h2>
+      <input id="search-box" class="input" type="search" :value="query" @input="setQuery" placeholder="Search movies">
+      <h2 v-if="query">Results</h2>
+      <h2 v-if="!query && page === 0">All movies</h2>
+      <h2 v-if="!query && page > 0">More movies...</h2>
       <spinner v-if="movies.length === 0"></spinner>
       <div class="covers">
         <div class="cover" v-for="movie in paginatedMovies" :key="movie.tmdbId">
@@ -67,8 +81,8 @@ const MoviesComponent = Vue.component('movies', {
         </div>
       </div>
       <div class="button-group horizontal">
-        <button class="button" v-if="page > 0" @click="page-=1" type="button">Previous page</button>
-        <button class="button" v-if="page < maxPage" @click="page+=1" type="button">Next page</button>
+        <button @click="setPage(page - 1)" class="button" v-if="page > 0">Previous page</button>
+        <button @click="setPage(page + 1)" class="button" v-if="page < maxPage">Next page</button>
       </div>
     </div>
   `

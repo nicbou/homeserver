@@ -7,6 +7,8 @@ const RequestStatus = {
 
 const store = new Vuex.Store({
   state: {
+    currentPage: 0,
+    currentQuery: '',
     movies: {},
     moviesRequestStatus: RequestStatus.NONE,
   },
@@ -43,7 +45,13 @@ const store = new Vuex.Store({
     },
     MOVIES_REQUEST_FAILURE(state) {
       state.moviesRequestStatus = RequestStatus.FAILURE;
-    }
+    },
+    SET_CURRENT_PAGE(state, page) {
+      state.currentPage = page;
+    },
+    SET_CURRENT_QUERY(state, query) {
+      state.currentQuery = query.trim().toLocaleLowerCase();
+    },
   },
   actions: {
     async getMovies(context) {
@@ -85,5 +93,9 @@ const store = new Vuex.Store({
       context.commit('MARK_EPISODE_UNWATCHED', {tmdbId, episodeId});
       return await MoviesService.markAsUnwatched(episodeId);
     },
+    setCurrentQuery(context, query) {
+      context.commit('SET_CURRENT_PAGE', 0);
+      context.commit('SET_CURRENT_QUERY', query);
+    }
   }
 });

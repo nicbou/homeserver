@@ -8,11 +8,12 @@ const EpisodeComponent = Vue.component('episode', {
       subtitlesExistEn: false,
       subtitlesExistFr: false,
       subtitlesExistDe: false,
+      canWatchMovies: false,
     }
   },
   computed: {
     fullTitle: function() {
-      if (this.movie.mediaType === MediaType.MOVIE) {
+      if (this.isMovie) {
         return `${this.movie.title}`;
       }
       return `${this.movie.title}, S${this.episode.season || '?'}E${this.episode.episode || '?'}`;
@@ -29,6 +30,9 @@ const EpisodeComponent = Vue.component('episode', {
     hasChromecastSupport: function() {
       return !!ChromeCast;
     },
+    isMovie: function() {
+      return this.movie.mediaType === MediaType.MOVIE;
+    }
   },
   methods: {
     saveProgress() {
@@ -56,38 +60,44 @@ const EpisodeComponent = Vue.component('episode', {
     },
   },
   mounted: function () {
-    this.$store.dispatch('getMovie', this.$route.params.tmdbId).then(
-      movie => {
-        this.movie = movie;
-        this.episode = this.movie.episodeMap[this.$route.params.episodeId];
-
-        MoviesService.subtitlesExist(this.episode).then(
-          availableSubtitles => {
-            this.subtitlesExistEn = availableSubtitles.en;
-            this.subtitlesExistFr = availableSubtitles.fr;
-            this.subtitlesExistDe = availableSubtitles.de;
-          }
-        )
-
-        this.$nextTick(function () {
-          // Save video position
-          if (this.episode.isConverted) {
-            this.videoElement = document.getElementById("video");
-            this.videoElement.currentTime = this.episode.progress;
-            this.progressInterval = setInterval(this.saveProgress, 3000);
-          }
-        });
+    Permissions.checkPermission('movies_watch').then(canWatchMovies => {
+      this.canWatchMovies = canWatchMovies;
+      if(!this.canWatchMovies) {
+        return;
       }
-    );
+      this.$store.dispatch('getMovie', this.$route.params.tmdbId).then(
+        movie => {
+          this.movie = movie;
+          this.episode = this.movie.episodeMap[this.$route.params.episodeId];
+
+          MoviesService.subtitlesExist(this.episode).then(
+            availableSubtitles => {
+              this.subtitlesExistEn = availableSubtitles.en;
+              this.subtitlesExistFr = availableSubtitles.fr;
+              this.subtitlesExistDe = availableSubtitles.de;
+            }
+          )
+
+          this.$nextTick(function () {
+            // Save video position
+            if (this.episode.isConverted) {
+              this.videoElement = document.getElementById("video");
+              this.videoElement.currentTime = this.episode.progress;
+              this.progressInterval = setInterval(this.saveProgress, 3000);
+            }
+          });
+        }
+      );
+    });
   },
   beforeDestroy: function () {
     clearInterval(this.progressInterval);
     this.saveProgress();
   },
   template: `
-    <div v-if="episode" class="container">
-      <router-link class="back" :to="{name: 'movie', tmdbId: movie.tmdbId}">
-        <i class="fas fa-arrow-left"></i>
+    <div v-if="episode && canWatchMovies" class="container">
+      <router-link title="Back to movie details" class="back" :to="{name: 'movie', tmdbId: movie.tmdbId}">
+        <i class="fas fa-arrow-left"></i><span v-if="isMovie" class="label">Movie details</span><span v-if="!isMovie" class="label">Series details</span>
       </router-link>
       <h2>{{ fullTitle }}</h2>
       <video id="video" controls autoplay v-if="episode.isConverted" :key="this.episode.id">

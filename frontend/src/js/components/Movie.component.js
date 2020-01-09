@@ -29,6 +29,9 @@ const MovieComponent = Vue.component('movie', {
       const nextEpisode = this.movie.nextEpisodeToPlay;
       return `S${nextEpisode.season}E${nextEpisode.episode}`
     },
+    query: function() {
+      return this.$store.state.currentQuery;
+    }
   },
   methods: {
     playEpisode: function(episode) {
@@ -55,8 +58,8 @@ const MovieComponent = Vue.component('movie', {
   },
   template: `
     <div v-if="movie" class="container">
-      <router-link class="back" :to="{name: 'movies'}">
-        <i class="fas fa-arrow-left"></i>
+      <router-link title="Back to movie list" class="back" :to="{name: 'movies'}">
+        <i class="fas fa-arrow-left"></i><span v-if="query" class="label">Results</span><span v-if="!query" class="label">Movie list</span>
       </router-link>
       <div class="section movie-info">
         <div class="cover">
@@ -67,24 +70,24 @@ const MovieComponent = Vue.component('movie', {
             <h2>{{ movie.title }}</h2>
             <p>{{ movie.description }}</p>
             <div class="button-group horizontal">
-              <a class="button large" href="#" v-if="!movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsWatched(movie.nextEpisodeToPlay)">
+              <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && !movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsWatched(movie.nextEpisodeToPlay)">
                 <i class="far fa-check-circle"></i>
               </a>
-              <a class="button large" href="#" v-if="movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsUnwatched(movie.nextEpisodeToPlay)">
+              <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsUnwatched(movie.nextEpisodeToPlay)">
                 <i class="fas fa-check-circle"></i>
               </a>
-              <a href="#" @click.prevent="playEpisode(movie.nextEpisodeToPlay)" v-if="canWatchMovies" class="button large main">
+              <a title="Play in browser" href="#" @click.prevent="playEpisode(movie.nextEpisodeToPlay)" v-if="canWatchMovies" class="button large main">
                 <i class="fas fa-play"></i>
                 <span v-if="episodeList.length === 1">Play</span>
                 <span v-if="episodeList.length > 1">Play {{ nextEpisodeName }}</span>
               </a>
-              <chromecast-button :episode="movie.nextEpisodeToPlay" v-if="canWatchMovies" class="button large">
+              <chromecast-button title="Play on ChromeCast" :episode="movie.nextEpisodeToPlay" v-if="canWatchMovies" class="button large">
                 <i class="fab fa-chromecast"></i>
               </chromecast-button>
-              <a href="#" class="button large" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
+              <a title="Download movie and subtitles" href="#" class="button large" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
                 <i class="fas fa-download"></i>
               </a>
-              <a class="button large" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
+              <a title="Administrator options" class="button large" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
                 <i class="fas fa-ellipsis-h"></i>
               </a>
             </div>

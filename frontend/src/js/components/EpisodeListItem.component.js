@@ -52,24 +52,24 @@ const EpisodeListItemComponent = Vue.component('episode-list-item', {
   template: `
     <div class="episode collapsible" :class="{expanded: expanded}">
       <div class="collapsible-header">
-        <a class="button" href="#" v-if="!episode.lastWatched" @click.prevent="markEpisodeAsWatched">
+        <a title="Mark as seen" class="button" href="#" v-if="!episode.lastWatched" @click.prevent="markEpisodeAsWatched">
           <i class="far fa-circle"></i>
         </a>
-        <a class="button" href="#" v-if="episode.lastWatched" @click.prevent="markEpisodeAsUnwatched">
+        <a title="Mark as not seen" class="button" href="#" v-if="episode.lastWatched" @click.prevent="markEpisodeAsUnwatched">
           <i class="fas fa-check-circle"></i>
         </a>
         <span class="title">Episode {{ episode.episode }}</span>
         <div class="button-group horizontal">
-          <a class="button icon-only" href="#" v-if="canWatchMovies && episode.isConverted" :href="episode.playbackUrl" @click.prevent="playEpisode" title="Play in browser">
+          <a title="Play in browser" class="button icon-only" href="#" v-if="canWatchMovies && episode.isConverted" :href="episode.playbackUrl" @click.prevent="playEpisode">
             <i class="fas fa-play"></i>
           </a>
-          <chromecast-button class="button icon-only" v-if="canWatchMovies && episode.isConverted && hasChromecastSupport" :episode="episode">
+          <chromecast-button title="Play on ChromeCast" class="button icon-only" v-if="canWatchMovies && episode.isConverted && hasChromecastSupport" :episode="episode">
             <i class="fab fa-chromecast"></i>
           </chromecast-button>
-          <a class="button icon-only" :class="{selected: downloadMenuVisible}" href="#" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
+          <a title="Download movie and subtitles" class="button icon-only" :class="{selected: downloadMenuVisible}" href="#" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
             <i class="fas fa-download"></i>
           </a>
-          <a class="button icon-only" :class="{selected: adminMenuVisible}" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
+          <a title="Administrator options" class="button icon-only" :class="{selected: adminMenuVisible}" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
             <i class="fas fa-ellipsis-h"></i>
           </a>
         </div>
