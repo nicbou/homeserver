@@ -3,6 +3,7 @@ const moviesStore = {
   state: {
     movies: {},
     moviesRequestStatus: RequestStatus.NONE,
+    moviesRequestPromise: null,
   },
   mutations: {
     SET_MOVIES(state, movies) {
@@ -29,6 +30,9 @@ const moviesStore = {
     SET_EPISODE_PROGRESS(state, {tmdbId, episodeId, progress}) {
       state.movies[tmdbId].episodeMap[episodeId].progress = progress;
     },
+    SET_MOVIES_REQUEST_PROMISE(state, promise) {
+      state.moviesRequestPromise = promise;
+    },
     MOVIES_REQUEST_SUCCESS(state) {
       state.moviesRequestStatus = RequestStatus.SUCCESS;
     },
@@ -41,9 +45,9 @@ const moviesStore = {
   },
   actions: {
     async getMovies(context) {
-      if (context.state.moviesRequestStatus !== RequestStatus.SUCCESS) {
+      if (context.state.moviesRequestStatus === RequestStatus.NONE) {
         context.commit('MOVIES_REQUEST_PENDING');
-        return await MoviesService.getMovies()
+        const moviesRequestPromise = MoviesService.getMovies()
           .then(movies => {
             context.commit('SET_MOVIES', movies);
             context.commit('MOVIES_REQUEST_SUCCESS');
@@ -54,10 +58,10 @@ const moviesStore = {
             context.commit('MOVIES_REQUEST_FAILURE');
             return context.state.movies;
           });
+        context.commit('SET_MOVIES_REQUEST_PROMISE', moviesRequestPromise);
+        return moviesRequestPromise;
       }
-      else {
-        return context.state.movies;
-      }
+      return context.state.moviesRequestPromise;
     },
     async getMovie(context, tmdbId) {
       const movies = await context.dispatch('getMovies');

@@ -60,8 +60,9 @@ const EpisodeComponent = Vue.component('episode', {
     },
   },
   mounted: function () {
-    this.$store.dispatch('permissions/hasPermission', 'movies_watch').then(canWatchMovies => {
-      this.canWatchMovies = canWatchMovies;
+
+    this.$store.dispatch('permissions/getPermissions').then(permissions => {
+      this.canWatchMovies = permissions.includes('movies_watch');
       if(!this.canWatchMovies) {
         return;
       }

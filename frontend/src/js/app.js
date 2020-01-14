@@ -7,8 +7,10 @@ const app = new Vue({
     canManageTorrents: false,
   },
   created: function(){
-    this.$store.dispatch('permissions/hasPermission', 'movies_manage').then(value => this.canManageMovies = value);
-    this.$store.dispatch('permissions/hasPermission', 'torrents').then(value => this.canManageTorrents = value);
+    this.$store.dispatch('permissions/getPermissions').then(permissions => {
+      this.canManageMovies = permissions.includes('movies_manage');
+      this.canManageTorrents = permissions.includes('torrents');
+    });
   },
   router,
   store,

@@ -1,46 +1,22 @@
 const permissionsStore = {
   namespaced: true,
   state: {
-    permissions: {},
-    permissionsRequestStatus: RequestStatus.NONE,
+    permissionsPromise: null,
   },
   mutations: {
-    SET_PERMISSIONS(state, permissions) {
-      state.permissions = permissions;
-    },
-    PERMISSIONS_REQUEST_SUCCESS(state) {
-      state.permissionsRequestStatus = RequestStatus.SUCCESS;
-    },
-    PERMISSIONS_REQUEST_PENDING(state) {
-      state.permissionsRequestStatus = RequestStatus.PENDING;
-    },
-    PERMISSIONS_REQUEST_FAILURE(state) {
-      state.permissionsRequestStatus = RequestStatus.FAILURE;
+    SET_PERMISSIONS_PROMISE(state, promise) {
+      state.permissionsPromise = promise;
     },
   },
   actions: {
     async getPermissions(context) {
-      if (context.state.permissionsRequestStatus !== RequestStatus.SUCCESS) {
-        context.commit('PERMISSIONS_REQUEST_PENDING');
-        return await Api.request.get('/auth/info/')
-          .then(response => {
-            context.commit('SET_PERMISSIONS', response.data);
-            context.commit('PERMISSIONS_REQUEST_SUCCESS');
-            return context.state.permissions;
-          }) 
-          .catch(err => {
-            context.commit('SET_PERMISSIONS', {});
-            context.commit('PERMISSIONS_REQUEST_FAILURE');
-            return context.state.permissions;
-          });
+      if (context.state.permissionsPromise === null) {
+        const permissionsPromise = Api.request.get('/auth/info/')
+          .then(response => response.data.permissions)
+          .catch(err => []);
+        context.commit('SET_PERMISSIONS_PROMISE', permissionsPromise);
       }
-      else {
-        return context.state.permissions;
-      }
-    },
-    async hasPermission(context, permission) {
-      const userPermissions = await context.dispatch('getPermissions');
-      return userPermissions.isAdmin || userPermissions.permissions.includes(permission);
+      return context.state.permissionsPromise;
     },
   },
 };
