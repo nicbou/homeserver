@@ -9,8 +9,8 @@ const EpisodeListItemComponent = Vue.component('episode-list-item', {
     };
   },
   mounted: function () {
-    Permissions.checkPermission('movies_watch').then(value => this.canWatchMovies = value);
-    Permissions.checkPermission('movies_manage').then(value => this.canManageMovies = value);
+    this.$store.dispatch('hasPermission', 'movies_watch').then(value => this.canWatchMovies = value);
+    this.$store.dispatch('hasPermission', 'movies_manage').then(value => this.canManageMovies = value);
   },
   computed: {
     expanded: function() {

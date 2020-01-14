@@ -11,8 +11,8 @@ const MovieComponent = Vue.component('movie', {
   },
   mounted: function () {
     this.$store.dispatch('getMovie', this.$route.params.tmdbId);
-    Permissions.checkPermission('movies_watch').then(value => this.canWatchMovies = value);
-    Permissions.checkPermission('movies_manage').then(value => this.canManageMovies = value);
+    this.$store.dispatch('hasPermission', 'movies_watch').then(value => this.canWatchMovies = value);
+    this.$store.dispatch('hasPermission', 'movies_manage').then(value => this.canManageMovies = value);
   },
   computed: {
     movie: function () {

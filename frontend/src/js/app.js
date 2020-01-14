@@ -8,8 +8,8 @@ const app = new Vue({
     canManageTorrents: false,
   },
   created: function(){
-    Permissions.checkPermission('movies_manage').then(value => { this.canManageMovies = value; });
-    Permissions.checkPermission('torrents').then(value => { this.canManageTorrents = value; });
+    this.$store.dispatch('hasPermission', 'movies_manage').then(value => this.canManageMovies = value);
+    this.$store.dispatch('hasPermission', 'torrents').then(value => this.canManageTorrents = value);
   },
   router,
   store,
