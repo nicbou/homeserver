@@ -6,7 +6,7 @@ const MoviesComponent = Vue.component('movies', {
   },
   computed: {
     movies: function() {
-      return Object.values(this.$store.state.movies).sort(movieSorter);
+      return Object.values(this.$store.state.movies.movies).sort(movieSorter);
     },
     query: function() {
       return this.$store.state.currentQuery;
@@ -40,7 +40,7 @@ const MoviesComponent = Vue.component('movies', {
     }
   },
   created: function () {
-    this.$store.dispatch('getMovies');
+    this.$store.dispatch('movies/getMovies');
   },
   methods: {
     openMovie: function(movie) {

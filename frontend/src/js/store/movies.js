@@ -1,18 +1,8 @@
-const RequestStatus = {
-  NONE: 'NONE',
-  PENDING: 'PENDING',
-  SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
-}
-
-const store = new Vuex.Store({
+const moviesStore = {
+  namespaced: true,
   state: {
-    currentPage: 0,
-    currentQuery: '',
     movies: {},
     moviesRequestStatus: RequestStatus.NONE,
-    permissions: {},
-    permissionsRequestStatus: RequestStatus.NONE,
   },
   mutations: {
     SET_MOVIES(state, movies) {
@@ -23,9 +13,6 @@ const store = new Vuex.Store({
         },
         {}
       );
-    },
-    SET_PERMISSIONS(state, permissions) {
-      state.permissions = permissions;
     },
     DELETE_EPISODE(state, {tmdbId, episodeId}) {
       Vue.delete(state.movies[tmdbId].episodeMap, episodeId);
@@ -50,21 +37,6 @@ const store = new Vuex.Store({
     },
     MOVIES_REQUEST_FAILURE(state) {
       state.moviesRequestStatus = RequestStatus.FAILURE;
-    },
-    PERMISSIONS_REQUEST_SUCCESS(state) {
-      state.permissionsRequestStatus = RequestStatus.SUCCESS;
-    },
-    PERMISSIONS_REQUEST_PENDING(state) {
-      state.permissionsRequestStatus = RequestStatus.PENDING;
-    },
-    PERMISSIONS_REQUEST_FAILURE(state) {
-      state.permissionsRequestStatus = RequestStatus.FAILURE;
-    },
-    SET_CURRENT_PAGE(state, page) {
-      state.currentPage = page;
-    },
-    SET_CURRENT_QUERY(state, query) {
-      state.currentQuery = query.trim().toLocaleLowerCase();
     },
   },
   actions: {
@@ -107,32 +79,5 @@ const store = new Vuex.Store({
       context.commit('MARK_EPISODE_UNWATCHED', {tmdbId, episodeId});
       return await MoviesService.markAsUnwatched(episodeId);
     },
-    async getPermissions(context) {
-      if (context.state.permissionsRequestStatus !== RequestStatus.SUCCESS) {
-        context.commit('PERMISSIONS_REQUEST_PENDING');
-        return await PermissionsService.getPermissions()
-          .then(permissions => {
-            context.commit('SET_PERMISSIONS', permissions);
-            context.commit('PERMISSIONS_REQUEST_SUCCESS');
-            return context.state.permissions;
-          })
-          .catch(err => {
-            context.commit('SET_PERMISSIONS', {});
-            context.commit('PERMISSIONS_REQUEST_FAILURE');
-            return context.state.permissions;
-          });
-      }
-      else {
-        return context.state.permissions;
-      }
-    },
-    async hasPermission(context, permission) {
-      const userPermissions = await context.dispatch('getPermissions');
-      return userPermissions.isAdmin || userPermissions.permissions.includes(permission);
-    },
-    setCurrentQuery(context, query) {
-      context.commit('SET_CURRENT_PAGE', 0);
-      context.commit('SET_CURRENT_QUERY', query);
-    }
   }
-});
+};

@@ -4,7 +4,7 @@ const EpisodeAdminMenuComponent = Vue.component('admin-menu', {
   },
   methods: {
     deleteEpisode: function() {
-      this.$store.dispatch('deleteEpisode', {
+      this.$store.dispatch('movies/deleteEpisode', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });

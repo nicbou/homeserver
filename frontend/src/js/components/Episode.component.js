@@ -39,7 +39,7 @@ const EpisodeComponent = Vue.component('episode', {
       // Only save position when video is loaded so a slow connection doesn't
       // erase the previous playback position.
       if (this.videoElement.readyState >= 3) {
-        this.$store.dispatch('setEpisodeProgress', {
+        this.$store.dispatch('movies/setEpisodeProgress', {
           tmdbId: this.movie.tmdbId,
           episodeId: this.episode.id,
           progress: this.videoElement.currentTime,
@@ -47,25 +47,25 @@ const EpisodeComponent = Vue.component('episode', {
       }
     },
     markEpisodeAsWatched: function() {
-      this.$store.dispatch('markEpisodeAsWatched', {
+      this.$store.dispatch('movies/markEpisodeAsWatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
     markEpisodeAsUnwatched: function() {
-      this.$store.dispatch('markEpisodeAsUnwatched', {
+      this.$store.dispatch('movies/markEpisodeAsUnwatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
   },
   mounted: function () {
-    Permissions.checkPermission('movies_watch').then(canWatchMovies => {
+    this.$store.dispatch('permissions/hasPermission', 'movies_watch').then(canWatchMovies => {
       this.canWatchMovies = canWatchMovies;
       if(!this.canWatchMovies) {
         return;
       }
-      this.$store.dispatch('getMovie', this.$route.params.tmdbId).then(
+      this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId).then(
         movie => {
           this.movie = movie;
           this.episode = this.movie.episodeMap[this.$route.params.episodeId];

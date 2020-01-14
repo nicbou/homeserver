@@ -10,13 +10,13 @@ const MovieComponent = Vue.component('movie', {
     }
   },
   mounted: function () {
-    this.$store.dispatch('getMovie', this.$route.params.tmdbId);
-    this.$store.dispatch('hasPermission', 'movies_watch').then(value => this.canWatchMovies = value);
-    this.$store.dispatch('hasPermission', 'movies_manage').then(value => this.canManageMovies = value);
+    this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
+    this.$store.dispatch('permissions/hasPermission', 'movies_watch').then(value => this.canWatchMovies = value);
+    this.$store.dispatch('permissions/hasPermission', 'movies_manage').then(value => this.canManageMovies = value);
   },
   computed: {
     movie: function () {
-      return this.$store.state.movies[this.$route.params.tmdbId] || null;
+      return this.$store.state.movies.movies[this.$route.params.tmdbId] || null;
     },
     episodeList: function () {
       return this.movie.episodeList;
@@ -44,13 +44,13 @@ const MovieComponent = Vue.component('movie', {
       });
     },
     markEpisodeAsWatched: function(episode) {
-      this.$store.dispatch('markEpisodeAsWatched', {
+      this.$store.dispatch('movies/markEpisodeAsWatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: episode.id,
       });
     },
     markEpisodeAsUnwatched: function(episode) {
-      this.$store.dispatch('markEpisodeAsUnwatched', {
+      this.$store.dispatch('movies/markEpisodeAsUnwatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: episode.id,
       });
