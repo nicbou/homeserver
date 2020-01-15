@@ -52,7 +52,7 @@ class ChromeCastService {
     return this.castSession && this.castSession.status === "connected";
   }
 
-  setMedia(mediaUrl, subtitlesUrl, startTime) {
+  setMedia(mediaUrl, subtitlesUrl, startTime=0) {
     const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl);
     let subtitlesPreparationPromise = Promise.resolve();
     if (subtitlesUrl) { // Check if the subs exist

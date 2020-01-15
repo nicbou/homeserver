@@ -13,7 +13,7 @@ const ChromeCastButtonComponent = Vue.component('chromecast-button', {
           const subtitlesAttribute = `vttSubtitlesUrl${capitalizedLanguageCode}`;
           const subtitlesUrl = `${location.origin}${episode[subtitlesAttribute]}?token=${token}`;
 
-          ChromeCast.setMedia(mediaUrl, subtitlesUrl);
+          ChromeCast.setMedia(mediaUrl, subtitlesUrl, this.episode.progress || 0);
         })
       }
 
