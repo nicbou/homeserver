@@ -52,8 +52,8 @@ class ChromeCastService {
     return this.castSession && this.castSession.status === "connected";
   }
 
-  setMedia(mediaUrl, subtitlesUrl, contentType) {
-    const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl, contentType);
+  setMedia(mediaUrl, subtitlesUrl, startTime) {
+    const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl);
     let subtitlesPreparationPromise = Promise.resolve();
     if (subtitlesUrl) { // Check if the subs exist
       subtitlesPreparationPromise = axios.head(subtitlesUrl).then(
@@ -83,7 +83,19 @@ class ChromeCastService {
         },
         (errorCode) => { console.error(errorCode); }
       );
-    })
+    });
+
+    this.seek(startTime);
+  }
+
+  seek(time) {
+    const seekRequest = new chrome.cast.media.SeekRequest();
+    seekRequest.currentTime = time;
+    this.castSession.media[0].seek(
+      seekRequest,
+      () => {},
+      err => console.log(err),
+    );
   }
 }
 
