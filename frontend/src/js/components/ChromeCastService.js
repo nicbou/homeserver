@@ -74,6 +74,7 @@ class ChromeCastService {
 
     subtitlesPreparationPromise.then(() => {
       const loadRequest = new chrome.cast.media.LoadRequest(mediaInfo);
+      loadRequest.currentTime = startTime;
       this.castSession.loadMedia(
         loadRequest,
         (media) => {
@@ -84,8 +85,6 @@ class ChromeCastService {
         (errorCode) => { console.error(errorCode); }
       );
     });
-
-    this.seek(startTime);
   }
 
   seek(time) {
