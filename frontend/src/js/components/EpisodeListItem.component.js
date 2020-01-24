@@ -30,19 +30,19 @@ const EpisodeListItemComponent = Vue.component('episode-list-item', {
       });
     },
     deleteEpisode: function() {
-      this.$store.dispatch('deleteEpisode', {
+      this.$store.dispatch('movies/deleteEpisode', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
     markEpisodeAsWatched: function() {
-      this.$store.dispatch('markEpisodeAsWatched', {
+      this.$store.dispatch('movies/markEpisodeAsWatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
     markEpisodeAsUnwatched: function() {
-      this.$store.dispatch('markEpisodeAsUnwatched', {
+      this.$store.dispatch('movies/markEpisodeAsUnwatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
