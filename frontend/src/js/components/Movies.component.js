@@ -75,6 +75,7 @@ const MoviesComponent = Vue.component('movies', {
       <h2 v-if="!query && page === 0">All movies</h2>
       <h2 v-if="!query && page > 0">More movies...</h2>
       <spinner v-if="movies.length === 0"></spinner>
+      <p v-if="movies.length > 0 && filteredMovies.length === 0">No movies found</p>
       <div class="covers">
         <div class="cover" v-for="movie in paginatedMovies" :key="movie.tmdbId">
           <img @click="openMovie(movie)" :src="movie.coverUrl"/>
