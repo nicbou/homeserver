@@ -44,8 +44,8 @@ const moviesStore = {
     },
   },
   actions: {
-    async getMovies(context) {
-      if (context.state.moviesRequestStatus === RequestStatus.NONE) {
+    async getMovies(context, forceRefresh = false) {
+      if (context.state.moviesRequestStatus === RequestStatus.NONE || forceRefresh) {
         context.commit('MOVIES_REQUEST_PENDING');
         const moviesRequestPromise = MoviesService.getMovies()
           .then(movies => {

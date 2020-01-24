@@ -131,6 +131,7 @@ const TriageItemComponent = Vue.component('triage-item', {
       ).then(() => {
         this.savingInProgress = false;
         this.saved = true;
+        this.$store.dispatch('movies/getMovies', true);
       })
     }
   },
