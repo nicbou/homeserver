@@ -27,8 +27,6 @@ class Movie(models.Model):
     type_choices = (
         (TV_SHOW, 'tv'),
         (MOVIE, 'movie'),
-        (CONVERSION_FAILED, 'conversion-failed'),
-        (CONVERTED, 'converted'),
     )
     status_map = {status[1]: status[0] for status in status_choices}
 
