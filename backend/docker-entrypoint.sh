@@ -17,12 +17,6 @@ service rsyslog start
 > /srv/cronenv
 printf "export BACKEND_SECRET_KEY=%q\n" "${BACKEND_SECRET_KEY}" >> /srv/cronenv
 printf "export DB_PERSISTENCE_PATH=%q\n" "${DB_PERSISTENCE_PATH}" >> /srv/cronenv
-printf "export COMMERZBANK_ACCOUNT_NUMBER=%q\n" "${COMMERZBANK_ACCOUNT_NUMBER}" >> /srv/cronenv
-printf "export COMMERZBANK_PASSWORD=%q\n" "${COMMERZBANK_PASSWORD}" >> /srv/cronenv
-printf "export N26_USERNAME=%q\n" "${N26_USERNAME}" >> /srv/cronenv
-printf "export N26_PASSWORD=%q\n" "${N26_PASSWORD}" >> /srv/cronenv
-printf "export DEGIRO_USERNAME=%q\n" "${DEGIRO_USERNAME}" >> /srv/cronenv
-printf "export DEGIRO_PASSWORD=%q\n" "${DEGIRO_PASSWORD}" >> /srv/cronenv
 
 crontab /srv/crontab
 service cron start

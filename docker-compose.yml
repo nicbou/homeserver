@@ -15,12 +15,6 @@ services:
     environment:
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
-      - COMMERZBANK_ACCOUNT_NUMBER
-      - COMMERZBANK_PASSWORD
-      - N26_USERNAME
-      - N26_PASSWORD
-      - DEGIRO_USERNAME
-      - DEGIRO_PASSWORD
       - MOVIE_LIBRARY_PATH=/movies/library
       - MOVIE_LIBRARY_URL=/movies
       - TRIAGE_PATH=/movies/triage
