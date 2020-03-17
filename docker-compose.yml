@@ -69,6 +69,22 @@ services:
     cap_add:
       - NET_ADMIN
     userns_mode: "host"
+  pihole:
+    image: pihole/pihole:latest
+    hostname: pihole
+    environment:
+      - DNS1=1.1.1.1
+      - DNS2=1.0.0.1
+      - VIRTUAL_HOST=pihole
+    ports:
+      - '53:53/tcp'
+      - '53:53/udp'
+    restart: unless-stopped
+    volumes:
+      - pihole_persistence:/etc/pihole
+      - pihole_config:/etc/dnsmasq.d
+    cap_add:
+      - NET_ADMIN
   proxy:
     build: proxy
     ports:
@@ -79,6 +95,7 @@ services:
       - backend
       - videoprocessing
       - torrents
+      - pihole
     volumes:
       - django_staticfiles:/static
       - ${MOVIE_LIBRARY_PATH}:/movies
@@ -86,3 +103,5 @@ services:
 volumes:
   django_staticfiles:
   redis_persistence:
+  pihole_persistence:
+  pihole_config:
