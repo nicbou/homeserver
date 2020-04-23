@@ -60,7 +60,18 @@ const TriageItemComponent = Vue.component('triage-item', {
     }
   },
   watch: {
-    // whenever question changes, this function will run
+    file: function (newFile) {
+      const seasonRegex = /S([0-9]+)/i;
+      const episodeRegex = /[0-9 \.]E([0-9]+)/i;
+      const episodeMatch = newFile.match(episodeRegex);
+
+      if (episodeMatch) {
+        this.episode = Number(episodeMatch[1]);
+        if (seasonMatch) {
+          this.season = Number(seasonMatch[1]);
+        }
+      }
+    },
     query: function (newQuery) {
       this.getResults(newQuery);
     },
@@ -146,6 +157,7 @@ const TriageItemComponent = Vue.component('triage-item', {
           <div class="control">
             <label :for="_uid + '-title'">Title</label>
             <input
+              autocomplete="off"
               class="input"
               type="text"
               v-model="query"
@@ -170,12 +182,12 @@ const TriageItemComponent = Vue.component('triage-item', {
 
           <div class="control">
             <label class="label" :for="_uid + '-season'">Season</label>
-            <input class="input" v-model="season" type="number" :id="_uid + '-season'"/>
+            <input class="input" v-model="season" type="number" autocomplete="off" :id="_uid + '-season'"/>
           </div>
 
           <div class="control">
             <label class="label" :for="_uid + '-episode'">Episode</label>
-            <input class="input" v-model="episode" type="number" :id="_uid + '-episode'"/>
+            <input class="input" v-model="episode" type="number" autocomplete="off" :id="_uid + '-episode'"/>
           </div>
 
           <div class="control">

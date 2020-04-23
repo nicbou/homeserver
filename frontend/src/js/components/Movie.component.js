@@ -33,6 +33,9 @@ const MovieComponent = Vue.component('movie', {
     },
     query: function() {
       return this.$store.state.currentQuery;
+    },
+    hasChromecastSupport: function() {
+      return !!ChromeCast;
     }
   },
   methods: {
@@ -83,7 +86,7 @@ const MovieComponent = Vue.component('movie', {
                 <span v-if="episodeList.length === 1">Play</span>
                 <span v-if="episodeList.length > 1">Play {{ nextEpisodeName }}</span>
               </a>
-              <chromecast-button title="Play on ChromeCast" :episode="movie.nextEpisodeToPlay" v-if="canWatchMovies" class="button large">
+              <chromecast-button title="Play on ChromeCast" :episode="movie.nextEpisodeToPlay" v-if="canWatchMovies && movie.nextEpisodeToPlay.isConverted && hasChromecastSupport" class="button large">
                 <i class="fab fa-chromecast"></i>
               </chromecast-button>
               <a title="Download movie and subtitles" href="#" class="button large" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
