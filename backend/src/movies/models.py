@@ -36,7 +36,7 @@ class Movie(models.Model):
     conversion_status = models.SmallIntegerField(default=NOT_CONVERTED, choices=status_choices)
 
     # Movie
-    title = models.CharField(max_length=75)
+    title = models.CharField(max_length=150)
     description = models.TextField(blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)
     release_year = models.CharField(max_length=4, blank=True)
