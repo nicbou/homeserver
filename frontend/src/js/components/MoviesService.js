@@ -1,6 +1,6 @@
 class MoviesService {
   static getMovies() {
-    return Api.request.get('/movies')
+    return Api.request.get('/movies/')
       .then((response) => {
         return response.data.movies.map(movie => Movie.fromMovieApiResponse(movie));
       });

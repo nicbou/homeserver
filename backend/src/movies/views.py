@@ -10,6 +10,10 @@ import logging
 import os
 import requests
 import datetime
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +22,7 @@ def movie_conversion_callback_token(movie):
     return salted_hmac(movie.tmdb_id, movie.id).hexdigest()
 
 
+@method_decorator([cache_page(3600 * 24 * 30)], name='get')
 class JSONMovieListView(View):
     def get(self, request, *args, **kwargs):
         movies_by_tmdb_id = {}
@@ -164,6 +169,8 @@ class JSONMovieListView(View):
                     token=movie_conversion_callback_token(episode)
                 )
                 requests.post(api_url, json={'input': episode.library_filename, 'callbackUrl': callback_url})
+
+        cache.clear()
 
         return JsonResponse({'result': 'success'})
 

@@ -6,6 +6,8 @@ from django.contrib.auth.models import Permission
 from urllib.parse import urlparse, parse_qs, unquote
 import logging
 from django.utils import timezone
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 
 permission_checks = (
@@ -56,6 +58,7 @@ def check_auth(request):
         return HttpResponse(status=401)
 
 
+@method_decorator([cache_page(3600 * 24 * 30)], name='get')
 class JSONPermissionsView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
