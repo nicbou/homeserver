@@ -1,2 +1,1 @@
-FROM kyma/docker-nginx
-CMD 'nginx'
+FROM nginx:latest

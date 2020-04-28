@@ -26,9 +26,9 @@ services:
     privileged: true
     userns_mode: "host"
   frontend:
-    build: frontend
+    image: nginx
     volumes:
-      - ./frontend/src:/var/www
+      - ./frontend/src:/usr/share/nginx/html:ro
     depends_on:
       - backend
       - torrents
