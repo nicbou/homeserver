@@ -1,3 +1,4 @@
+// List of movie covers
 const MoviesComponent = Vue.component('movies', {
   data: function() {
     return {
@@ -67,7 +68,7 @@ const MoviesComponent = Vue.component('movies', {
       <h2 v-if="unfinishedMovies.length > 0 && page === 0">Unfinished movies</h2>
       <div class="covers" v-if="page === 0">
         <div class="cover" v-for="movie in unfinishedMovies" :key="movie.tmdbId">
-          <img @click="openMovie(movie)" :src="movie.coverUrl"/>
+          <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
         </div>
       </div>
       <input id="search-box" class="input" type="search" :value="query" @input="setQuery" placeholder="Search movies">
@@ -78,7 +79,7 @@ const MoviesComponent = Vue.component('movies', {
       <p v-if="movies.length > 0 && filteredMovies.length === 0">No movies found</p>
       <div class="covers">
         <div class="cover" v-for="movie in paginatedMovies" :key="movie.tmdbId">
-          <img @click="openMovie(movie)" :src="movie.coverUrl"/>
+          <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
         </div>
       </div>
       <div class="button-group horizontal">
