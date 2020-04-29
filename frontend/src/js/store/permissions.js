@@ -11,8 +11,10 @@ const permissionsStore = {
   actions: {
     async getPermissions(context) {
       if (context.state.permissionsPromise === null) {
-        const permissionsPromise = Api.request.get('/auth/info/')
-          .then(response => response.data.permissions)
+        const permissionsPromise = fetch('/api/auth/info/')
+          .then((response) => {
+            return response.json().then(data => data.permissions);
+          })
           .catch(err => []);
         context.commit('SET_PERMISSIONS_PROMISE', permissionsPromise);
       }

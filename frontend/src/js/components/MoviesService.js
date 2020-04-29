@@ -1,32 +1,44 @@
 class MoviesService {
   static getMovies() {
-    return Api.request.get('/movies/')
-      .then((response) => {
-        return response.data.movies.map(movie => Movie.fromMovieApiResponse(movie));
-      });
+    return fetch('/api/movies/').then((response) => {
+      return response.json().then(data => data.movies.map(movie => Movie.fromMovieApiResponse(movie)));
+    });
   }
 
   static markAsWatched(id) {
-    return Api.request.post(`/movies/${id}/watched/`);
+    return fetch(
+      `/api/movies/${id}/watched/`,
+      {method: 'POST'}
+    ).then((response) => {
+      return response.json();
+    });
   }
 
   static markAsUnwatched(id) {
-    return Api.request.post(`/movies/${id}/unwatched/`);
+    return fetch(
+      `/api/movies/${id}/unwatched/`,
+      {method: 'POST'}
+    ).then((response) => {
+      return response.json();
+    });
   }
 
   static setProgress(id, progressInSeconds) {
-    return Api.request.post(`/movies/${id}/progress/`, {'progress': progressInSeconds});
+    return fetch(
+      `/api/movies/${id}/unwatched/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          progress: progressInSeconds
+        }),
+      }
+    ).then(response => response.json());
   }
 
   static save(movie, params={}) {
-    const triageParams = {
-      movieFile: params.movieFile || null,
-      subtitlesFileEn: params.subtitlesFileEn || null,
-      subtitlesFileDe: params.subtitlesFileDe || null,
-      subtitlesFileFr: params.subtitlesFileFr || null,
-      convertToMp4: params.convertToMp4 || false,
-    };
-
     const jsonEpisodes = movie.episodeList.map((episode) => {
       return {
         lastWatched: episode.lastWatched,
@@ -34,42 +46,68 @@ class MoviesService {
         episode: episode.episode,
         progress: episode.progress,
         releaseYear: episode.releaseYear,
-        triage: triageParams,
+        triage: {
+          movieFile: params.movieFile || null,
+          subtitlesFileEn: params.subtitlesFileEn || null,
+          subtitlesFileDe: params.subtitlesFileDe || null,
+          subtitlesFileFr: params.subtitlesFileFr || null,
+          convertToMp4: params.convertToMp4 || false,
+        },
       }
     })
 
-    // Create/update the movie, then its episodes
-    return Api.request.post('/movies/', {
-      tmdbId: movie.tmdbId,
-      title: movie.title,
-      mediaType: movie.mediaType,
-      description: movie.description,
-      coverUrl: movie.coverUrl,
-      rating: movie.rating,
-      episodes: jsonEpisodes
+    return fetch(
+      '/api/movies/',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tmdbId: movie.tmdbId,
+          title: movie.title,
+          mediaType: movie.mediaType,
+          description: movie.description,
+          coverUrl: movie.coverUrl,
+          rating: movie.rating,
+          episodes: jsonEpisodes
+        }),
+      }
+    ).then((response) => {
+      return response.json();
     });
   }
 
   static delete(id) {
-    return Api.request.delete(`/movies/${id}/`);
+    return fetch(
+      `/api/movies/${id}/`,
+      {method: 'DELETE'}
+    ).then((response) => {
+      return response.json();
+    });
   }
 
   static subtitlesExist(episode){
-    const requestConfig = {
-      validateStatus: function (status) {
-        return (status >= 200 && status < 300) || status === 404;
-      },
-    }
+    function fileExists(url) {
+      return fetch(url, {
+        method: 'HEAD',
+        cache: 'no-cache',
+      })
+      .then((response) => {
+        return (response.status >= 200 && response.status < 300);
+      })
+      .catch(err => false)
+    };
 
     return Promise.all([
-      Api.fileRequest.head(episode.srtSubtitlesUrlEn, requestConfig),
-      Api.fileRequest.head(episode.srtSubtitlesUrlFr, requestConfig),
-      Api.fileRequest.head(episode.srtSubtitlesUrlDe, requestConfig)
+      fileExists(episode.srtSubtitlesUrlEn),
+      fileExists(episode.srtSubtitlesUrlFr),
+      fileExists(episode.srtSubtitlesUrlDe)
     ]).then(results => {
       return {
-        'en': results[0].status !== 404,
-        'fr': results[1].status !== 404,
-        'de': results[2].status !== 404,
+        'en': results[0],
+        'fr': results[1],
+        'de': results[2],
       }
     });
   }

@@ -15,6 +15,9 @@
     <link rel="preload" href="fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+    <link rel="preload" href="/api/movies/" type="application/json" as="fetch" crossorigin="anonymous">
+    <link rel="preload" href="/api/auth/info/" type="application/json" as="fetch" crossorigin="anonymous">
 </head>
 <body>
     <div id="page">
@@ -45,7 +48,6 @@
     <script src="js/libs/moment.min.js"></script>
     <script src="js/libs/axios.min.js"></script>
     <script src="js/components/ChromeCastService.js"></script>
-    <script src="js/components/Api.js"></script>
     <script src="js/components/Spinner.component.js"></script>
     <script src="js/components/ChromeCastButton.component.js"></script>
     <script src="js/models/movies.js"></script>

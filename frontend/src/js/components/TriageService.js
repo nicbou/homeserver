@@ -4,10 +4,9 @@ class TriageService {
   }
 
   static getFilesToTriage() {
-    return Api.request.get('/movies/triage')
-      .then((response) => {
-        return response.data
-      });
+    return fetch('/api/movies/triage/').then((response) => {
+      return response.json();
+    });
   }
 
   static getSuggestions(query) {
@@ -16,19 +15,23 @@ class TriageService {
       return Promise.resolve([]);
     }
 
-    return axios.get('https://api.themoviedb.org/3/search/multi', {
-      params: {
-        search_type: 'ngram',
-        api_key: '9606c6bb1f60afb5a30ef4e830d95936', 
-        query: query,
-        language: 'en',
-      }
-    }).then((response) => {
-      return response.data.results
-        .filter(movie => ['movie', 'tv'].includes(movie.media_type))
-        .map((result) => {
-          return Movie.fromTMDBSearchResult(result);
-        })
+    const searchUrl = new URL('https://api.themoviedb.org/3/search/multi');
+    searchUrl.search = new URLSearchParams({
+      search_type: 'ngram',
+      api_key: '9606c6bb1f60afb5a30ef4e830d95936', 
+      query: query,
+      language: 'en',
+    })
+
+    return fetch(searchUrl).then((response) => {
+      return response.json().then(response => {
+        return response.results
+          .filter(movie => ['movie', 'tv'].includes(movie.media_type))
+          .map((result) => {
+            return Movie.fromTMDBSearchResult(result);
+          })
+        }
+      );
     })
   }
 }
