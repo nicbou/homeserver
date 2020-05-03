@@ -31,9 +31,6 @@ const MovieComponent = Vue.component('movie', {
       const nextEpisode = this.movie.nextEpisodeToPlay;
       return `S${nextEpisode.season}E${nextEpisode.episode}`
     },
-    query: function() {
-      return this.$store.state.currentQuery;
-    },
     hasChromecastSupport: function() {
       return !!ChromeCast;
     }
@@ -63,9 +60,6 @@ const MovieComponent = Vue.component('movie', {
   },
   template: `
     <div v-if="movie" class="container">
-      <router-link title="Back to movie list" class="back" :to="{name: 'movies'}">
-        <i class="fas fa-arrow-left"></i><span v-if="query" class="label">Results</span><span v-if="!query" class="label">Movie list</span>
-      </router-link>
       <div class="section movie-info">
         <div class="cover">
           <img :src="movie.coverUrl" :key="movie.tmdbId"/>

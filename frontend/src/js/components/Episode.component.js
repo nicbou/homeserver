@@ -97,9 +97,6 @@ const EpisodeComponent = Vue.component('episode', {
   },
   template: `
     <div v-if="episode && canWatchMovies" class="container">
-      <router-link title="Back to movie details" class="back" :to="{name: 'movie', tmdbId: movie.tmdbId}">
-        <i class="fas fa-arrow-left"></i><span v-if="isMovie" class="label">Movie details</span><span v-if="!isMovie" class="label">Series details</span>
-      </router-link>
       <h2>{{ fullTitle }}</h2>
       <video id="video" controls autoplay v-if="episode.isConverted" :key="this.episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">

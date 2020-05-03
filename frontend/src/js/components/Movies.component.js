@@ -10,10 +10,10 @@ const MoviesComponent = Vue.component('movies', {
       return Object.values(this.$store.state.movies.movies).sort(movieSorter);
     },
     query: function() {
-      return this.$store.state.currentQuery;
+      return this.$route.query.q || null;
     },
     page: function() {
-      return this.$store.state.currentPage;
+      return parseInt(this.$route.query.p) || 0;
     },
     filteredMovies: function() {
       if (this.query) {
@@ -48,30 +48,40 @@ const MoviesComponent = Vue.component('movies', {
       this.$router.push({ name: 'movie', params: { tmdbId: movie.tmdbId } });
     },
     setPage: function(page) {
-      this.$store.commit('SET_CURRENT_PAGE', page);
+      const navParams = {
+        name: 'movies',
+        query: {}
+      };
+      if (page > 0) navParams.query.p = page;
+      if (this.query) navParams.query.q = this.query;
+
+      this.$router.push(navParams);
     },
-    setQuery: function(event) {
-      this.$store.dispatch('setCurrentQuery', event.target.value);
+    setQuery: function(query) {
+      // Note: the page number is reset when the query changes
+      const navParams = {
+        name: 'movies',
+        query: {}
+      };
+      if (query) navParams.query.q = query;
+
+      // Don't amend browser history for each keystroke
+      this.query ? this.$router.replace(navParams) : this.$router.push(navParams);
+
     },
-    clearQuery: function(event) {
-      this.$store.dispatch('setCurrentQuery', '');
-    }
+    onSearchChanged: function(event) {
+      this.setQuery(event.target.value.trim());
+    },
   },
   template: `
     <div id="movies" class="container">
-      <div class="back" v-if="page > 0" @click="setPage(0)" title="Back to first page">
-        <i class="fas fa-arrow-left"></i><span class="label">First page</span>
-      </div>
-      <div class="back" v-if="query && page === 0" @click="clearQuery()" title="Back to first page">
-        <i class="fas fa-arrow-left"></i><span class="label">All movies</span>
-      </div>
       <h2 v-if="unfinishedMovies.length > 0 && page === 0">Unfinished movies</h2>
       <div class="covers" v-if="page === 0">
         <div class="cover" v-for="movie in unfinishedMovies" :key="movie.tmdbId">
           <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
         </div>
       </div>
-      <input id="search-box" class="input" type="search" :value="query" @input="setQuery" placeholder="Search movies">
+      <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
       <h2 v-if="query">Results</h2>
       <h2 v-if="!query && page === 0">All movies</h2>
       <h2 v-if="!query && page > 0">More movies...</h2>
