@@ -77,8 +77,7 @@ const MovieComponent = Vue.component('movie', {
               </a>
               <a title="Play in browser" href="#" @click.prevent="playEpisode(movie.nextEpisodeToPlay)" v-if="canWatchMovies" class="button large main">
                 <i class="fas fa-play"></i>
-                <span v-if="episodeList.length === 1">Play</span>
-                <span v-if="episodeList.length > 1">Play {{ nextEpisodeName }}</span>
+                <span class="label" v-if="episodeList.length > 1">{{ nextEpisodeName }}</span>
               </a>
               <chromecast-button title="Play on ChromeCast" :episode="movie.nextEpisodeToPlay" v-if="canWatchMovies && movie.nextEpisodeToPlay.isConverted && hasChromecastSupport" class="button large">
                 <i class="fab fa-chromecast"></i>

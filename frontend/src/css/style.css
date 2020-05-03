@@ -19,7 +19,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
         .button:active, .button:hover{background:#555;}
         .button.icon-only{width: 35px;padding:0;}
         .button.main{background: #2758e2;}
-        .button.large{font-size: 18px;padding: 0 20px;line-height: 50px;font-weight: 400;flex: 0 0 auto;}
+        .button.large{font-size:18px;padding:12px 20px;line-height:26px;font-weight: 400;flex: 0 0 auto;}
 
     .button[disabled], .button[disabled]:active, .button[disabled]:hover{cursor:default;background:#444;color:#666;}
     .button i{margin-right:5px;}
