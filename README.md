@@ -15,8 +15,10 @@ Home server backend and frontend. The backend is built with Django and the front
 
 ### Environment variables
 
-These environment variables are used by the project. Some of these are set automatically when you run `script/setup.sh`.
+Put these environment variables in a .env file. These environment variables are used by the project.
 
+* `COMPOSE_PROJECT_NAME`: A unique value for this project, to avoid docker container and volume conflicts.
+* `NEXTCLOUD_FILES_PATH`: Where your Nextcloud files are stored
 * `BACKEND_SECRET_KEY`: A random string used by Django. Keep this secret.
 * `BACKEND_DEBUG`: '1'. Any other value sets debugging to false.
 * `TRANSMISSION_DATA_PATH`: Local path that will be mounted as Transmission's data folder (for incomplete torrents, settings etc)

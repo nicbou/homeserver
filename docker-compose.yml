@@ -95,14 +95,19 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=nextcloud
       - POSTGRES_PASSWORD=postgres
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITEHOST=home.nicolasbouliane.com
       - OVERWRITEWEBROOT=/cloud
+      - NEXTCLOUD_DATA_DIR=/opt/nextcloud/files
     volumes:
       - "nextcloud:/var/www/html"
+      - "${NEXTCLOUD_FILES_PATH}:/opt/nextcloud/files"
     restart: always
   nextcloud-nginx:
     build: nextcloud-nginx
     volumes:
       - "nextcloud:/var/www/html:ro"
+      - "${NEXTCLOUD_FILES_PATH}:/opt/nextcloud/files:ro"
     depends_on:
       - nextcloud-php
     restart: always
@@ -119,8 +124,8 @@ services:
       - pihole
       - nextcloud-php
     volumes:
-      - django_staticfiles:/static
-      - ${MOVIE_LIBRARY_PATH}:/movies
+      - django_staticfiles:/static:ro
+      - ${MOVIE_LIBRARY_PATH}:/movies:ro
       - "./proxy/ssl-certs:/etc/ssl/certs"
       - "nextcloud:/var/www/html"
 volumes:
