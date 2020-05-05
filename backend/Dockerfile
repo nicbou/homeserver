@@ -1,4 +1,4 @@
-FROM ubuntu:19.04
+FROM ubuntu:20.04
 MAINTAINER Nicolas Bouliane
 
 # Update the default application repository sources list

@@ -16,7 +16,6 @@ service rsyslog start
 # Activate cron with all Django environment variables
 > /srv/cronenv
 printf "export BACKEND_SECRET_KEY=%q\n" "${BACKEND_SECRET_KEY}" >> /srv/cronenv
-printf "export DB_PERSISTENCE_PATH=%q\n" "${DB_PERSISTENCE_PATH}" >> /srv/cronenv
 
 crontab /srv/crontab
 service cron start

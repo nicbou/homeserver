@@ -57,7 +57,6 @@ mkdir -p "${torrents_path}"
 
 touch .env
 echo '' > .env
-echo "DB_PERSISTENCE_PATH=${db_path}" >> .env
 echo "MOVIE_LIBRARY_PATH=${movies_path}" >> .env
 echo "TRANSMISSION_DATA_PATH=${torrents_path}" >> .env
 echo "BACKEND_SECRET_KEY=${secret_key}" >> .env

@@ -3,9 +3,11 @@ services:
   db:
     image: postgres:9.6
     environment:
-      - DB_PERSISTENCE_PATH
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
-      - ${DB_PERSISTENCE_PATH}:/var/lib/postgresql/data
+      - db_persistence:/var/lib/postgresql/data
     userns_mode: "host"
   backend:
     build: backend
@@ -50,7 +52,7 @@ services:
     privileged: true
     userns_mode: "host"
   torrents:
-    build: torrents
+    image: haugene/transmission-openvpn:1.13
     privileged: true
     environment:
       - OPENVPN_PROVIDER
@@ -59,6 +61,7 @@ services:
       - TRANSMISSION_DOWNLOAD_DIR=/triage
       - TRANSMISSION_RATIO_LIMIT=3
       - TRANSMISSION_RATIO_LIMIT_ENABLED=true
+      - "OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60"
     volumes:
       - ${TRANSMISSION_DATA_PATH}:/data
       - ${MOVIE_LIBRARY_PATH}/triage:/triage
@@ -85,6 +88,24 @@ services:
       - pihole_config:/etc/dnsmasq.d
     cap_add:
       - NET_ADMIN
+  nextcloud-php:
+    image: nextcloud:fpm
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_PASSWORD=postgres
+      - OVERWRITEWEBROOT=/cloud
+    volumes:
+      - "nextcloud:/var/www/html"
+    restart: always
+  nextcloud-nginx:
+    build: nextcloud-nginx
+    volumes:
+      - "nextcloud:/var/www/html:ro"
+    depends_on:
+      - nextcloud-php
+    restart: always
   proxy:
     build: proxy
     ports:
@@ -96,12 +117,16 @@ services:
       - videoprocessing
       - torrents
       - pihole
+      - nextcloud-php
     volumes:
       - django_staticfiles:/static
       - ${MOVIE_LIBRARY_PATH}:/movies
       - "./proxy/ssl-certs:/etc/ssl/certs"
+      - "nextcloud:/var/www/html"
 volumes:
   django_staticfiles:
+  db_persistence:
   redis_persistence:
   pihole_persistence:
   pihole_config:
+  nextcloud:

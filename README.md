@@ -19,7 +19,6 @@ These environment variables are used by the project. Some of these are set autom
 
 * `BACKEND_SECRET_KEY`: A random string used by Django. Keep this secret.
 * `BACKEND_DEBUG`: '1'. Any other value sets debugging to false.
-* `DB_PERSISTENCE_PATH`: A folder to persist the database data.
 * `TRANSMISSION_DATA_PATH`: Local path that will be mounted as Transmission's data folder (for incomplete torrents, settings etc)
 * `MOVIE_LIBRARY_PATH`: The directory where the completed torrents awaiting triage and the organized movies, covers and subtitles are stored.
 * OpenVPN configuration for [the Transmission/OpenVPN image](https://hub.docker.com/r/haugene/transmission-openvpn/):
