@@ -107,10 +107,10 @@ const EpisodeComponent = Vue.component('episode', {
       <div v-if="!episode.isConverted">This episode is not converted for web playback.</div>
       <div class="episode-actions">
         <div class="button-group horizontal">
-          <a class="button" v-if="!episode.lastWatched" v-on:click.prevent="markEpisodeAsWatched">
+          <a class="button" v-if="!episode.isWatched" v-on:click.prevent="markEpisodeAsWatched">
             <i class="far fa-check-circle"></i> Mark as seen
           </a>
-          <a class="button" v-if="episode.lastWatched" v-on:click.prevent="markEpisodeAsUnwatched">
+          <a class="button" v-if="episode.isWatched" v-on:click.prevent="markEpisodeAsUnwatched">
             <i class="fas fa-check-circle"></i> Mark as not seen
           </a>
           <chromecast-button v-if="episode.isConverted && hasChromecastSupport" :episode="episode" class="button">

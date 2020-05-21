@@ -25,7 +25,7 @@ class MoviesService {
 
   static setProgress(id, progressInSeconds) {
     return fetch(
-      `/api/movies/${id}/unwatched/`,
+      `/api/movies/${id}/progress/`,
       {
         method: 'POST',
         headers: {

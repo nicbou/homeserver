@@ -54,10 +54,10 @@ const EpisodeListItemComponent = Vue.component('episode-list-item', {
   template: `
     <div class="episode collapsible" :class="{expanded: expanded}">
       <div class="collapsible-header">
-        <a title="Mark as seen" class="button" href="#" v-if="!episode.lastWatched" @click.prevent="markEpisodeAsWatched">
+        <a title="Mark as seen" class="button" href="#" v-if="!episode.isWatched" @click.prevent="markEpisodeAsWatched">
           <i class="far fa-circle"></i>
         </a>
-        <a title="Mark as not seen" class="button" href="#" v-if="episode.lastWatched" @click.prevent="markEpisodeAsUnwatched">
+        <a title="Mark as not seen" class="button" href="#" v-if="episode.isWatched" @click.prevent="markEpisodeAsUnwatched">
           <i class="fas fa-check-circle"></i>
         </a>
         <span class="title">Episode {{ episode.episode }}</span>

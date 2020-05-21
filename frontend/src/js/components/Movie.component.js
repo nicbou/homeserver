@@ -69,10 +69,10 @@ const MovieComponent = Vue.component('movie', {
             <h2>{{ movie.title }}</h2>
             <p>{{ movie.description }}</p>
             <div class="button-group horizontal">
-              <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && !movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsWatched(movie.nextEpisodeToPlay)">
+              <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && !movie.nextEpisodeToPlay.isWatched" @click.prevent="markEpisodeAsWatched(movie.nextEpisodeToPlay)">
                 <i class="far fa-check-circle"></i>
               </a>
-              <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && movie.nextEpisodeToPlay.lastWatched" @click.prevent="markEpisodeAsUnwatched(movie.nextEpisodeToPlay)">
+              <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && movie.nextEpisodeToPlay.isWatched" @click.prevent="markEpisodeAsUnwatched(movie.nextEpisodeToPlay)">
                 <i class="fas fa-check-circle"></i>
               </a>
               <a title="Play in browser" href="#" @click.prevent="playEpisode(movie.nextEpisodeToPlay)" v-if="canWatchMovies" class="button large main">
