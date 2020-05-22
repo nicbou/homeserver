@@ -1,3 +1,6 @@
+import MoviesService from './../services/movies-service.js';
+import TriageService from './../services/triage-service.js';
+
 function debounce(func, wait, immediate) {
     let timeout;
     return function() {
@@ -12,9 +15,6 @@ function debounce(func, wait, immediate) {
       if (callNow) func.apply(context, args);
     };
 };
-
-import MoviesService from './MoviesService.js';
-import TriageService from './TriageService.js';
 
 export default Vue.component('triage-item', {
   props: ['file', 'subtitles'],

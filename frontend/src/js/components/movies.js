@@ -1,4 +1,5 @@
 import { movieSorter, WatchStatus } from './../models/movies.js';
+import SpinnerComponent from './spinner.js';
 
 // List of movie covers
 export default Vue.component('movies', {

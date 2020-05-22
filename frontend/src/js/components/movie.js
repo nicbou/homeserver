@@ -1,4 +1,4 @@
-import ChromeCast from './ChromeCastService.js';
+import ChromeCast from './../services/chromecast.js';
 
 export default Vue.component('movie', {
   data: function() {

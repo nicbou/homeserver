@@ -1,4 +1,4 @@
-import MoviesService from './../components/MoviesService.js';
+import MoviesService from './../services/movies-service.js';
 import { RequestStatus } from './../models/requests.js';
 
 export default {

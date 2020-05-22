@@ -1,8 +1,8 @@
-import TorrentsComponent from './components/Torrents.component.js';
-import TriageComponent from './components/Triage.component.js';
-import MoviesComponent from './components/Movies.component.js';
-import EpisodeComponent from './components/Episode.component.js';
-import MovieComponent from './components/Movie.component.js';
+import TorrentsComponent from './components/torrents.js';
+import TriageComponent from './components/triage.js';
+import MoviesComponent from './components/movies.js';
+import EpisodeComponent from './components/episode.js';
+import MovieComponent from './components/movie.js';
 
 export default new VueRouter({
   routes: [

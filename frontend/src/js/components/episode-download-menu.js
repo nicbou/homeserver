@@ -1,4 +1,4 @@
-import MoviesService from './MoviesService.js';
+import MoviesService from './../services/movies-service.js';
 
 export default Vue.component('download-menu', {
   props: ['episode', 'movie'],

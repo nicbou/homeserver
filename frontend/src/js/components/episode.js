@@ -1,6 +1,6 @@
-import MoviesService from './MoviesService.js';
+import MoviesService from './../services/movies-service.js';
 import { MediaType } from './../models/movies.js';
-import ChromeCast from './ChromeCastService.js';
+import ChromeCast from './../services/chromecast.js';
 
 export default Vue.component('episode', {
   data: function() {
