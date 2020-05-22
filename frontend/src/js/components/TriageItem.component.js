@@ -13,7 +13,10 @@ function debounce(func, wait, immediate) {
     };
 };
 
-const TriageItemComponent = Vue.component('triage-item', {
+import MoviesService from './MoviesService.js';
+import TriageService from './TriageService.js';
+
+export default Vue.component('triage-item', {
   props: ['file', 'subtitles'],
   data: function() {
     return {

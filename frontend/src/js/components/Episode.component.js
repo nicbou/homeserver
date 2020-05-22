@@ -1,4 +1,8 @@
-const EpisodeComponent = Vue.component('episode', {
+import MoviesService from './MoviesService.js';
+import { MediaType } from './../models/movies.js';
+import ChromeCast from './ChromeCastService.js';
+
+export default Vue.component('episode', {
   data: function() {
     return {
       movie: null,

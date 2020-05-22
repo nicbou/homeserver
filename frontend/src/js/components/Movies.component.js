@@ -1,5 +1,7 @@
+import { movieSorter, WatchStatus } from './../models/movies.js';
+
 // List of movie covers
-const MoviesComponent = Vue.component('movies', {
+export default Vue.component('movies', {
   data: function() {
     return {
       moviesPerPage: 20,

@@ -1,4 +1,4 @@
-const TorrentsComponent = Vue.component('torrents', {
+export default Vue.component('torrents', {
   template: `
     <iframe id="torrents" src="/torrents"></iframe>
   `

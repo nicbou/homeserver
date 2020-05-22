@@ -1,4 +1,4 @@
-const permissionsStore = {
+export default {
   namespaced: true,
   state: {
     permissionsPromise: null,

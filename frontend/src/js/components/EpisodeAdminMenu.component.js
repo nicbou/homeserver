@@ -1,4 +1,4 @@
-const EpisodeAdminMenuComponent = Vue.component('admin-menu', {
+export default Vue.component('admin-menu', {
   props: ['episode', 'movie'],
   computed: {
   },

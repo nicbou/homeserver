@@ -1,5 +1,5 @@
 class ChromeCastService {
-  constructor() {
+  init() {
     this.castSession = null;
 
     this.sessionRequest = new chrome.cast.SessionRequest(chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
@@ -98,9 +98,11 @@ class ChromeCastService {
   }
 }
 
-let ChromeCast = null;
+const ChromeCast = new ChromeCastService();
+export default ChromeCast;
+
 window['__onGCastApiAvailable'] = function(isAvailable) {
   if (isAvailable) {
-    ChromeCast = new ChromeCastService();
+    ChromeCast.init();
   }
 };

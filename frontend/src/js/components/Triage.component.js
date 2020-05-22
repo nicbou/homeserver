@@ -1,4 +1,6 @@
-const TriageComponent = Vue.component('triage', {
+import TriageService from './TriageService.js';
+
+export default Vue.component('triage', {
   data: function() {
     return {
       movieFiles: [],

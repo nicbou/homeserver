@@ -1,4 +1,4 @@
-const EpisodeListItemComponent = Vue.component('episode-list-item', {
+export default Vue.component('episode-list-item', {
   props: ['episode', 'movie'],
   data: function() {
     return {

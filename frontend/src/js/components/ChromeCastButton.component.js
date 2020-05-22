@@ -1,4 +1,6 @@
-const ChromeCastButtonComponent = Vue.component('chromecast-button', {
+import ChromeCast from './ChromeCastService.js';
+
+export default Vue.component('chromecast-button', {
   props: ['episode'],
   methods: {
     play: function(episode, subtitlesLanguage='en') {

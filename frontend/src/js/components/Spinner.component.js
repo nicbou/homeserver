@@ -1,4 +1,4 @@
-const SpinnerComponent = Vue.component('spinner', {
+export default Vue.component('spinner', {
   template: `
     <div class="spinner"></div>
   `

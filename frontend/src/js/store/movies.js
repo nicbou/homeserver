@@ -1,4 +1,7 @@
-const moviesStore = {
+import MoviesService from './../components/MoviesService.js';
+import { RequestStatus } from './../models/requests.js';
+
+export default {
   namespaced: true,
   state: {
     movies: {},

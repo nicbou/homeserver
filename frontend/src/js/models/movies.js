@@ -1,22 +1,22 @@
-const ConversionStatus = {
+export const ConversionStatus = {
   NOT_CONVERTED: 0,
   CONVERTING: 1,
   CONVERSION_FAILED: 2,
   CONVERTED: 3
 };
 
-const WatchStatus = {
+export const WatchStatus = {
   NOT_WATCHED: 0,
   WATCHING: 1,
   WATCHED: 2,
 };
 
-const MediaType = {
+export const MediaType = {
   TV_SHOW: 1,
   MOVIE: 2,
 };
 
-const movieSorter = (a, b) => {
+export const movieSorter = (a, b) => {
   // New additions, old additions, watched a long time ago, watched recently
   if (a.lastWatched && b.lastWatched) {
     return a.lastWatched - b.lastWatched;
@@ -29,11 +29,11 @@ const movieSorter = (a, b) => {
   }
 };
 
-const episodeSorter = (a, b) => {
+export const episodeSorter = (a, b) => {
   return a.season - b.season || a.episode - b.episode;
 };
 
-class Episode {
+export class Episode {
   get episodeString() {
     if (this.episode) {
       if (this.season) {
@@ -74,7 +74,7 @@ class Episode {
   }
 }
 
-class Movie {
+export class Movie {
   get watchStatus() {
     const episodeList = this.episodeList;
     if (episodeList.every(p => p.watchStatus === WatchStatus.WATCHED)) {

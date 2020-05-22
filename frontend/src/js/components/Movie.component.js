@@ -1,4 +1,6 @@
-const MovieComponent = Vue.component('movie', {
+import ChromeCast from './ChromeCastService.js';
+
+export default Vue.component('movie', {
   data: function() {
     return {
       currentSeasonNumber: null,

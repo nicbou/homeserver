@@ -1,4 +1,6 @@
-class MoviesService {
+import { Movie } from './../models/movies.js';
+
+export default class {
   static getMovies() {
     return fetch('/api/movies/').then((response) => {
       return response.json().then(data => data.movies.map(movie => Movie.fromMovieApiResponse(movie)));

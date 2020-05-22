@@ -1,4 +1,6 @@
-class TriageService {
+import { Movie } from './../models/movies.js';
+
+export default class {
   constructor(omdbApiKey = '') {
     this.omdbApiKey = omdbApiKey;
   }

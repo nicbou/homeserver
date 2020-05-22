@@ -1,4 +1,7 @@
-const app = new Vue({
+import router from './routes.js';
+import store from './store/store.js';
+
+export const app = new Vue({
   el: '#page',
   data: {
     canManageMovies: false,
