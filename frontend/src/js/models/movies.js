@@ -115,7 +115,7 @@ export class Movie {
     const episodeList = this.episodeList;
     return episodeList.find(p => p.isConverted && p.isWatching)
       || episodeList.find(p => p.isConverted && !p.isWatched && !p.isWatching)
-      || episodeList[0];
+      || episodeList.find(p => p.isConverted) || null;
   }
 
   get releaseYear() {
