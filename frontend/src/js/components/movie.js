@@ -27,7 +27,7 @@ export default Vue.component('movie', {
     },
     currentSeason: function () {
       const seasonNumber = this.currentSeasonNumber || (this.movie.nextEpisodeToPlay && this.movie.nextEpisodeToPlay.season);
-      return this.movie.seasons.find(s => s.seasonNumber === seasonNumber) || this.seasons[0];
+      return this.movie.seasons.find(s => s.seasonNumber === seasonNumber) || this.movie.seasons[0];
     },
     nextEpisodeName: function () {
       const nextEpisode = this.movie.nextEpisodeToPlay;
