@@ -59,8 +59,8 @@ services:
       - OPENVPN_USERNAME
       - OPENVPN_PASSWORD
       - TRANSMISSION_DOWNLOAD_DIR=/triage
-      - TRANSMISSION_RATIO_LIMIT=30
-      - TRANSMISSION_RATIO_LIMIT_ENABLED=true
+      - TRANSMISSION_SPEED_LIMIT_UP=250
+      - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
       - "OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60"
     volumes:
       - ${TRANSMISSION_DATA_PATH}:/data
