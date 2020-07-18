@@ -59,7 +59,7 @@ services:
       - OPENVPN_USERNAME
       - OPENVPN_PASSWORD
       - TRANSMISSION_DOWNLOAD_DIR=/triage
-      - TRANSMISSION_RATIO_LIMIT=3
+      - TRANSMISSION_RATIO_LIMIT=30
       - TRANSMISSION_RATIO_LIMIT_ENABLED=true
       - "OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60"
     volumes:
