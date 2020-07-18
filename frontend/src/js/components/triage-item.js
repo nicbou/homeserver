@@ -242,10 +242,10 @@ export default Vue.component('triage-item', {
           </div>
 
           <div class="button-group horizontal">
-            <button class="button main" @click="addToLibrary" :disabled="!selectedMovie && !savingInProgress">
-              Add to library
+            <button class="button main" @click="addToLibrary" :disabled="!selectedMovie || savingInProgress">
+              <i class="fa fa-spinner fa-spin" v-if="savingInProgress"></i> Add to library
             </button>
-            <button class="button" @click="selectedMovie = null; highlightedSuggestion = null;" :disabled="!selectedMovie">
+            <button class="button" @click="selectedMovie = null; highlightedSuggestion = null;" :disabled="!selectedMovie || savingInProgress">
               Clear form
             </button>
           </div>
