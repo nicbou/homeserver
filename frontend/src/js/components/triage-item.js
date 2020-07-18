@@ -63,17 +63,21 @@ export default Vue.component('triage-item', {
     }
   },
   watch: {
-    file: function (newFile) {
-      const seasonRegex = /S([0-9]+)/i;
-      const episodeRegex = /[0-9 \.]E([0-9]+)/i;
-      const episodeMatch = newFile.match(episodeRegex);
+    file: {
+      immediate: true,
+      handler(newFile) {
+        const seasonRegex = /S([0-9]+)/i;
+        const seasonMatch = newFile.match(seasonRegex);
+        const episodeRegex = /[0-9 \.]E([0-9]+)/i;
+        const episodeMatch = newFile.match(episodeRegex);
 
-      if (episodeMatch) {
-        this.episode = Number(episodeMatch[1]);
-        if (seasonMatch) {
-          this.season = Number(seasonMatch[1]);
+        if (episodeMatch) {
+          this.episode = Number(episodeMatch[1]);
+          if (seasonMatch) {
+            this.season = Number(seasonMatch[1]);
+          }
         }
-      }
+      },
     },
     query: function (newQuery) {
       this.getResults(newQuery);
@@ -158,6 +162,12 @@ export default Vue.component('triage-item', {
       <div class="information">
         <div class="form">
           <div class="control">
+            <label>File</label>
+            <span class="input filename">
+              /{{ file }}
+            </span>
+          </div>
+          <div class="control">
             <label :for="_uid + '-title'">Title</label>
             <input
               autocomplete="off"
@@ -165,7 +175,6 @@ export default Vue.component('triage-item', {
               type="text"
               v-model="query"
               :id="_uid + '-title'"
-              :placeholder="'/'+file"
               @blur="blurred" 
               @focus="focused"
               @keyup.enter="movieInputEnter"

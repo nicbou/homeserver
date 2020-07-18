@@ -38,6 +38,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
         .input{float:right;border-radius:10px;width:30%;padding: 0 10px;font:15px/30px sans-serif;background:none;border:1px solid #444;color:#fff;margin: 5px 0;min-width: 135px;display: block;width: 100%;box-sizing: border-box;-webkit-appearance: none;}
         .input:focus, .input:active, .input:hover{border-color:#666;}
         .input::placeholder{color:#666;}
+        .input.filename{font-family:monospace;line-height:20px;padding:5px 10px;}
         textarea.input{line-height:22px;height:100px;padding: 5px 10px;}
         .checkbox{border:0;padding: 0;color:inherit;cursor:pointer;}
             .checkbox input{width: 15px;height: 30px;position: relative;display: inline-block;line-height: 30px;}
