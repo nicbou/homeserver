@@ -91,8 +91,8 @@ export default Vue.component('movie', {
                 <i class="fas fa-ellipsis-h"></i>
               </a>
             </div>
-            <download-menu v-if="downloadMenuVisible && movie.nextEpisodeToPlay" class="button-group vertical" :episode="movie.nextEpisodeToPlay" :movie="movie"></download-menu>
-            <admin-menu v-if="adminMenuVisible && movie.nextEpisodeToPlay" class="button-group vertical" :episode="movie.nextEpisodeToPlay" :movie="movie"></admin-menu>
+            <download-menu v-if="downloadMenuVisible && movie.nextEpisodeToPlay" class="button-group vertical" :episode="movie.nextEpisodeToPlay || movie.episodeList[0]" :movie="movie"></download-menu>
+            <admin-menu v-if="adminMenuVisible && movie.nextEpisodeToPlay" class="button-group vertical" :episode="movie.nextEpisodeToPlay || movie.episodeList[0]" :movie="movie"></admin-menu>
           </div>
           <div class="section episodes" v-if="episodeList.length > 1">
             <div class="tab-group">
