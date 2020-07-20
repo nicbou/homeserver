@@ -69,6 +69,10 @@ export class Episode {
     return this.conversionStatus === ConversionStatus.CONVERTED;
   }
 
+  get isConversionFailed() {
+    return this.conversionStatus === ConversionStatus.CONVERSION_FAILED;
+  }
+
   get playbackUrl() {
     return `/player/play/${ this.id }/`;
   }
