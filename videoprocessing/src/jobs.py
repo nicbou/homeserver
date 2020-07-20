@@ -24,7 +24,6 @@ def convert_to_mp4(input_file, output_file, callback_url):
             requests.post(callback_url, json={'status': 'converted'})
         else:
             requests.post(callback_url, json={'status': 'conversion-failed'})
-
     return return_code
 
 

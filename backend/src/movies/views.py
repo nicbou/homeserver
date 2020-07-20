@@ -155,16 +155,7 @@ class JSONMovieListView(View):
 
             # Queue movies for conversion
             for episode in conversion_queue:
-                episode.conversion_status = Movie.CONVERTING
-                episode.save()
-
-                api_url = "{host}/videoToMp4".format(host=settings.VIDEO_PROCESSING_API_URL)
-                callback_url = "http://{host}/movies/videoToMp4/callback/?id={id}&token={token}".format(
-                    host=request.get_host(),  # Note: this might fail behind multiple proxies. See Django docs.
-                    id=episode.id,
-                    token=movie_conversion_callback_token(episode)
-                )
-                requests.post(api_url, json={'input': episode.library_filename, 'callbackUrl': callback_url})
+                convert_movie(episode, request.get_host())
 
         return JsonResponse({'result': 'success'})
 
@@ -174,6 +165,32 @@ class JSONMovieListView(View):
             with open(filename.encode('utf-8'), 'wb') as cover_file:
                 for chunk in req:
                     cover_file.write(chunk)
+
+
+class JSONMovieConvertView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            movie_id = kwargs.get('id')
+            try:
+                movie = Movie.objects.get(pk=movie_id)
+                convert_movie(movie, request.get_host())
+            except Movie.DoesNotExist:
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
+            return JsonResponse({'result': 'success'})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+
+def convert_movie(movie, callback_host):
+    movie.conversion_status = Movie.CONVERTING
+    movie.save()
+    api_url = "{host}/videoToMp4".format(host=settings.VIDEO_PROCESSING_API_URL)
+    callback_url = "http://{host}/movies/videoToMp4/callback/?id={id}&token={token}".format(
+        host=callback_host,
+        id=movie.id,
+        token=movie_conversion_callback_token(movie)
+    )
+    requests.post(api_url, json={'input': movie.library_filename, 'callbackUrl': callback_url})
 
 
 class JSONMovieView(View):

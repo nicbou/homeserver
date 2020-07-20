@@ -1,5 +1,6 @@
 import MoviesService from './../services/movies-service.js';
 import { RequestStatus } from './../models/requests.js';
+import { ConversionStatus } from './../models/movies.js';
 
 export default {
   namespaced: true,
@@ -23,6 +24,9 @@ export default {
       if(state.movies[tmdbId].episodeList.length === 0) {
         Vue.delete(state.movies, tmdbId);
       }
+    },
+    CONVERT_EPISODE(state, {tmdbId, episodeId}) {
+      state.movies[tmdbId].episodeMap[episodeId].conversionStatus = ConversionStatus.CONVERTING;
     },
     MARK_EPISODE_WATCHED(state, {tmdbId, episodeId}) {
       state.movies[tmdbId].episodeMap[episodeId].lastWatched = new Date();
@@ -73,6 +77,10 @@ export default {
     async deleteEpisode(context, {tmdbId, episodeId}) {
       context.commit('DELETE_EPISODE', {tmdbId, episodeId});
       return await MoviesService.delete(episodeId);
+    },
+    async convertEpisode(context, {tmdbId, episodeId}) {
+      context.commit('CONVERT_EPISODE', {tmdbId, episodeId});
+      return await MoviesService.convert(episodeId);
     },
     async setEpisodeProgress(context, {tmdbId, episodeId, progress}) {
       context.commit('SET_EPISODE_PROGRESS', {tmdbId, episodeId, progress});
