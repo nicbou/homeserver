@@ -1,5 +1,6 @@
 import { movieSorter, WatchStatus } from './../models/movies.js';
 import SpinnerComponent from './spinner.js';
+import StarComponent from './star.js';
 
 // List of movie covers
 export default Vue.component('movies', {
@@ -39,8 +40,8 @@ export default Vue.component('movies', {
     maxPage: function() {
       return Math.ceil(this.filteredMovies.length / this.moviesPerPage) - 1;
     },
-    unfinishedMovies: function() {
-      return this.filteredMovies.filter(m => m.watchStatus === WatchStatus.WATCHING);
+    starredOrUnfinishedMovies: function() {
+      return this.filteredMovies.filter(m => (m.isStarred || m.watchStatus === WatchStatus.WATCHING));
     }
   },
   created: function () {
@@ -78,10 +79,11 @@ export default Vue.component('movies', {
   },
   template: `
     <div id="movies" class="container">
-      <h2 v-if="unfinishedMovies.length > 0 && page === 0">Unfinished movies</h2>
+      <h2 v-if="starredOrUnfinishedMovies.length > 0 && page === 0">Starred or unfinished</h2>
       <div class="covers" v-if="page === 0">
-        <div class="cover" v-for="movie in unfinishedMovies" :key="movie.tmdbId">
+        <div class="cover" v-for="movie in starredOrUnfinishedMovies" :key="movie.tmdbId">
           <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
+          <star :movie="movie"></star>
         </div>
       </div>
       <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
@@ -93,6 +95,7 @@ export default Vue.component('movies', {
       <div class="covers">
         <div class="cover" v-for="movie in paginatedMovies" :key="movie.tmdbId">
           <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
+          <star :movie="movie"></star>
         </div>
       </div>
       <div class="button-group horizontal">

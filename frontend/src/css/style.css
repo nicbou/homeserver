@@ -79,12 +79,22 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
 
 #search-box{float:right;width:30%;margin: 15px 0;min-width: 135px;}
 .covers{display:grid;grid-template-columns:repeat(4, 1fr);grid-gap:15px;width: 100%;margin: 0 0 25px;}
-    .covers .cover{}
+    .covers .cover{border-radius: 10px;overflow:hidden;background:#191919;}
         .covers .cover img{cursor:pointer;}
-    .cover{width: 100%;/* overflow:hidden; */}
-        .cover img{max-width:100%;display: block;border-radius: 10px;}
+    .cover{width: 100%;position:relative;}
+        .cover img{max-width:100%;display: block;}
+
+        .cover .star{position:absolute;top:10px;right:10px;font-size:24px;text-shadow:0 2px 3px #0005}
+        .cover .star.not-starred{opacity:0;color:#fffa;}
+            .cover:hover .star.not-starred{opacity:1;}
+            .cover .star.not-starred:hover{color:#fff;}
+        .cover .star.starred{color:#ff0}
 
 .movie-info{display:grid;grid-template-columns:30% 1fr;grid-gap:30px;}
+    h2 .star{margin-left:10px;float:right;font-size:24px;}
+        h2 .star.not-starred{color:#999;}
+        h2 .star.not-starred:hover{color:#fff;}
+    h2 .star.starred{color:#ff0}
     .episodes{}
         .episode{}
         .episode:first-child{margin-top: -10px;}
@@ -111,7 +121,8 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
     iframe{border-radius:10px}
     .container{padding-left:15px;padding-right:15px;}
     .covers{grid-template-columns:repeat(2, 1fr);grid-gap:0;margin:0 -15px;width:calc(100% + 30px);}
-        .covers .cover img{border-radius:0}
+        .covers .cover{border-radius:0}
+        .cover .star{opacity:1!important;}
 
     .movie-info{grid-template-columns:1fr;}
         .movie-info .cover{display:none;}

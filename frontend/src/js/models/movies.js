@@ -155,6 +155,7 @@ export class Movie {
 
   static fromMovieApiResponse(jsonResponse) {
     const movie = new Movie();
+    movie.isStarred = !!jsonResponse.isStarred;
     movie.tmdbId = jsonResponse.tmdbId;
     movie.title = jsonResponse.title;
     movie.description = jsonResponse.description;

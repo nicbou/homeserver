@@ -40,6 +40,24 @@ export default class {
     ).then(response => response.json());
   }
 
+  static starEpisode(id) {
+    return fetch(
+      `/api/movies/${id}/star/`,
+      {method: 'POST'}
+    ).then((response) => {
+      return response.json();
+    });
+  }
+
+  static unstarEpisode(id) {
+    return fetch(
+      `/api/movies/${id}/unstar/`,
+      {method: 'POST'}
+    ).then((response) => {
+      return response.json();
+    });
+  }
+
   static save(movie, params={}) {
     const jsonEpisodes = movie.episodeList.map((episode) => {
       return {

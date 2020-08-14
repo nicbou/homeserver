@@ -1,4 +1,5 @@
 import ChromeCast from './../services/chromecast.js';
+import StarComponent from './star.js';
 
 export default Vue.component('movie', {
   data: function() {
@@ -68,7 +69,10 @@ export default Vue.component('movie', {
         </div>
         <div class="information">
           <div class="section description">
-            <h2>{{ movie.title }}</h2>
+            <h2>
+              {{ movie.title }}
+              <star :movie="movie"></star>
+            </h2>
             <p>{{ movie.description }}</p>
             <div class="button-group horizontal">
               <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && movie.nextEpisodeToPlay && !movie.nextEpisodeToPlay.isWatched" @click.prevent="markEpisodeAsWatched(movie.nextEpisodeToPlay)">

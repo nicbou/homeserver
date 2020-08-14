@@ -40,6 +40,12 @@ export default {
     SET_MOVIES_REQUEST_PROMISE(state, promise) {
       state.moviesRequestPromise = promise;
     },
+    STAR_MOVIE(state, {tmdbId}) {
+      state.movies[tmdbId].isStarred = true;
+    },
+    UNSTAR_MOVIE(state, {tmdbId}) {
+      state.movies[tmdbId].isStarred = false;
+    },
     MOVIES_REQUEST_SUCCESS(state) {
       state.moviesRequestStatus = RequestStatus.SUCCESS;
     },
@@ -93,6 +99,18 @@ export default {
     async markEpisodeAsUnwatched(context, {tmdbId, episodeId}) {
       context.commit('MARK_EPISODE_UNWATCHED', {tmdbId, episodeId});
       return await MoviesService.markAsUnwatched(episodeId);
+    },
+    async starMovie(context, {tmdbId}) {
+      context.commit('STAR_MOVIE', {tmdbId});
+      return await Promise.all(
+        context.state.movies[tmdbId].episodeList.map(e => MoviesService.starEpisode(e.id))
+      );
+    },
+    async unstarMovie(context, {tmdbId}) {
+      context.commit('UNSTAR_MOVIE', {tmdbId});
+      return await Promise.all(
+        context.state.movies[tmdbId].episodeList.map(e => MoviesService.unstarEpisode(e.id))
+      );
     },
   }
 };

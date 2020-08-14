@@ -39,7 +39,8 @@ class JSONMovieListView(View):
                 'description': movies[0].description,
                 'coverUrl': movies[0].cover_url,
                 'rating': movies[0].rating,
-                'episodes': []
+                'episodes': [],
+                'isStarred': movies[0].is_starred,
             }
 
             for movie in movies:
@@ -328,6 +329,40 @@ class JSONMovieUnwatchedView(View):
                 movie = Movie.objects.get(pk=movie_id)
                 watch_status = MovieWatchStatus.objects.get(user=request.user, movie=movie)
                 watch_status.delete()
+            except MovieWatchStatus.DoesNotExist:
+                pass
+            except Movie.DoesNotExist:
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
+            return JsonResponse({'result': 'success'})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+
+class JSONMovieStarView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            movie_id = kwargs.get('id')
+            try:
+                movie = Movie.objects.get(pk=movie_id)
+                movie.is_starred = True
+                movie.save()
+            except MovieWatchStatus.DoesNotExist:
+                pass
+            except Movie.DoesNotExist:
+                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
+            return JsonResponse({'result': 'success'})
+        else:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+
+class JSONMovieUnstarView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            movie_id = kwargs.get('id')
+            try:
+                movie = Movie.objects.get(pk=movie_id)
+                movie.is_starred = False
+                movie.save()
             except MovieWatchStatus.DoesNotExist:
                 pass
             except Movie.DoesNotExist:
