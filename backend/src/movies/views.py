@@ -362,7 +362,7 @@ class JSONMovieUnstarView(View):
             movie_id = kwargs.get('id')
             try:
                 movie = Movie.objects.get(pk=movie_id)
-                star = StarredMovie.objects.get_or_create(user=request.user, tmdb_id=movie.tmdb_id)
+                star = StarredMovie.objects.get(user=request.user, tmdb_id=movie.tmdb_id)
                 star.delete()
             except StarredMovie.DoesNotExist:
                 pass
