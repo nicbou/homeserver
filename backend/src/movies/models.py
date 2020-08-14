@@ -257,6 +257,17 @@ class MovieWatchStatus(models.Model):
         unique_together = (('movie', 'user'),)
 
 
+class StarredMovie(models.Model):
+    tmdb_id = models.CharField(max_length=12, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return u"{} for user {}".format(self.tmdb_id, self.user)
+
+    class Meta:
+        unique_together = (('tmdb_id', 'user'),)
+
+
 class MovieAccessToken(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import JsonResponse
-from .models import Movie, MovieWatchStatus, MovieAccessToken
+from .models import Movie, MovieWatchStatus, MovieAccessToken, StarredMovie
 from django.views import View
 from django.conf import settings
 from django.db import transaction
@@ -24,6 +24,7 @@ class JSONMovieListView(View):
         movies_by_tmdb_id = {}
 
         watch_statuses = {wp.movie_id: wp for wp in MovieWatchStatus.objects.filter(user=request.user)}
+        starred_movies = {s.tmdb_id: s for s in StarredMovie.objects.filter(user=request.user)}
 
         for movie in Movie.objects.all():
             if not movies_by_tmdb_id.get(movie.tmdb_id):
@@ -40,7 +41,7 @@ class JSONMovieListView(View):
                 'coverUrl': movies[0].cover_url,
                 'rating': movies[0].rating,
                 'episodes': [],
-                'isStarred': movies[0].is_starred,
+                'isStarred': tmdb_id in starred_movies,
             }
 
             for movie in movies:
@@ -344,9 +345,9 @@ class JSONMovieStarView(View):
             movie_id = kwargs.get('id')
             try:
                 movie = Movie.objects.get(pk=movie_id)
-                movie.is_starred = True
-                movie.save()
-            except MovieWatchStatus.DoesNotExist:
+                star = StarredMovie.objects.get_or_create(user=request.user, tmdb_id=movie.tmdb_id)[0]
+                star.save()
+            except StarredMovie.DoesNotExist:
                 pass
             except Movie.DoesNotExist:
                 return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
@@ -361,9 +362,9 @@ class JSONMovieUnstarView(View):
             movie_id = kwargs.get('id')
             try:
                 movie = Movie.objects.get(pk=movie_id)
-                movie.is_starred = False
-                movie.save()
-            except MovieWatchStatus.DoesNotExist:
+                star = StarredMovie.objects.get_or_create(user=request.user, tmdb_id=movie.tmdb_id)
+                star.delete()
+            except StarredMovie.DoesNotExist:
                 pass
             except Movie.DoesNotExist:
                 return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
