@@ -44,7 +44,6 @@ class Movie(models.Model):
     media_type = models.SmallIntegerField(default=MOVIE, choices=type_choices)
     season = models.SmallIntegerField(null=True, blank=True)
     episode = models.SmallIntegerField(null=True, blank=True)
-    is_starred = models.BooleanField()
 
     # Library
     date_added = models.DateField(auto_now_add=True)
