@@ -21,12 +21,13 @@ export default Vue.component('movies', {
     },
     filteredMovies: function() {
       if (this.query) {
+        const lowerCaseQuery = this.query.toLocaleLowerCase();
         return this.movies
           .filter((movie) => {
             return (
-              this.query === ''
-              || movie.title.toLocaleLowerCase().includes(this.query)
-              || movie.description.toLocaleLowerCase().includes(this.query)
+              lowerCaseQuery === ''
+              || movie.title.toLocaleLowerCase().includes(lowerCaseQuery)
+              || movie.description.toLocaleLowerCase().includes(lowerCaseQuery)
             );
           })
       };
