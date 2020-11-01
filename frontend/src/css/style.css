@@ -15,7 +15,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
 .section + .section{margin-top:15px;}
 
 .button-group{display:flex;max-width: 100%;margin:10px 0;}
-    .button{cursor:pointer;line-height:40px;text-align:center;color:#fff;display: inline-block;background: #444;margin-left:1px;flex: 1;border: none;padding: 0 15px;}
+    .button{border-radius:10px;cursor:pointer;line-height:40px;text-align:center;color:#fff;display: inline-block;background: #444;margin-left:1px;flex: 1;border: none;padding: 0 15px;}
         .button:active, .button:hover{background:#555;}
         .button.icon-only{width: 35px;padding:0;}
         .button.main{background: #2758e2;}
@@ -24,6 +24,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
     .button[disabled], .button[disabled]:active, .button[disabled]:hover{cursor:default;background:#444;color:#666;}
     .button i{margin-right:5px;}
     .button i:last-child{margin-right:0;}
+    .button-group .button{border-radius:0}
     .button-group.horizontal .button:first-child{margin-left:0;border-top-left-radius:7px;border-bottom-left-radius:7px}
     .button-group.horizontal .button:last-child{border-top-right-radius:7px;border-bottom-right-radius:7px}
 
@@ -77,7 +78,10 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
             #main-menu a:hover{color:#fff;}
 #main-content{border-radius:10px;background:#222;margin: 0 5px;}
 
-#search-box{float:right;width:30%;margin: 15px 0;min-width: 135px;}
+.header-with-controls{display:flex;flex-wrap:wrap}
+    .header-with-controls h2{flex:2;line-height:40px;}
+    .header-with-controls input[type=search]{float:right;width:30%;margin: 15px 0;min-width: 135px;line-height:40px;flex:1;}
+    .header-with-controls .button{float:right;margin: 15px 15px 15px 0;flex:0 auto;}
 .covers{display:grid;grid-template-columns:repeat(4, 1fr);grid-gap:15px;width: 100%;margin: 0 0 25px;}
     .covers .cover{border-radius: 10px;overflow:hidden;background:#191919;}
         .covers .cover img{cursor:pointer;}
@@ -123,7 +127,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
     .covers{grid-template-columns:repeat(2, 1fr);grid-gap:0;margin:0 -15px;width:calc(100% + 30px);}
         .covers .cover{border-radius:0}
         .cover .star{opacity:1!important;}
-
+    .header-with-controls h2{flex-basis:100%;margin-bottom:0}
     .movie-info{grid-template-columns:1fr;}
         .movie-info .cover{display:none;}
         .movie-info .button-group .button{flex:1 1 auto;}

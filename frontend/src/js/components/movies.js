@@ -11,7 +11,16 @@ export default Vue.component('movies', {
   },
   computed: {
     movies: function() {
-      return Object.values(this.$store.state.movies.movies).sort(movieSorter);
+      return Object.values(this.$store.state.movies.movies).sort(this.movieSorter);
+    },
+    movieSorter: function() {
+      if (this.$route.query.shuffle) {
+        Math.seedrandom(this.$route.query.shuffle);
+        return () => .5 - Math.random();
+      }
+      else {
+        return movieSorter;
+      }
     },
     query: function() {
       return this.$route.query.q || null;
@@ -77,6 +86,17 @@ export default Vue.component('movies', {
     onSearchChanged: function(event) {
       this.setQuery(event.target.value.trim());
     },
+    shuffleMovies: function() {
+      const seed = Math.random().toString(36).substr(2, 5);
+
+      // Add the seed to history, to make the shuffling persist navigation
+      this.$router.push({
+        name: 'movies',
+        query: {
+          shuffle: seed,
+        }
+      });
+    }
   },
   template: `
     <div id="movies" class="container">
@@ -87,10 +107,13 @@ export default Vue.component('movies', {
           <star :movie="movie"></star>
         </div>
       </div>
-      <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
-      <h2 v-if="query">Results</h2>
-      <h2 v-if="!query && page === 0">All movies</h2>
-      <h2 v-if="!query && page > 0">More movies...</h2>
+      <div class="header-with-controls">
+        <h2 v-if="query">Results</h2>
+        <h2 v-if="!query && page === 0">All movies</h2>
+        <h2 v-if="!query && page > 0">More movies...</h2>
+        <button id="shuffle-button" class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
+        <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
+      </div>
       <spinner v-if="movies.length === 0"></spinner>
       <p v-if="movies.length > 0 && filteredMovies.length === 0">No movies found</p>
       <div class="covers">
