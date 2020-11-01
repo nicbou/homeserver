@@ -131,4 +131,5 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
     .movie-info{grid-template-columns:1fr;}
         .movie-info .cover{display:none;}
         .movie-info .button-group .button{flex:1 1 auto;}
+    .no-mobile{display:none;}
 }

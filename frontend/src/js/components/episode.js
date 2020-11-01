@@ -112,11 +112,12 @@ export default Vue.component('episode', {
       <div class="episode-actions">
         <div class="button-group horizontal">
           <a class="button" v-if="!episode.isWatched" v-on:click.prevent="markEpisodeAsWatched">
-            <i class="far fa-check-circle"></i> Mark as seen
+            <i class="far fa-check-circle"></i> <span class="no-mobile">Mark as seen</span>
           </a>
           <a class="button" v-if="episode.isWatched" v-on:click.prevent="markEpisodeAsUnwatched">
-            <i class="fas fa-check-circle"></i> Mark as not seen
+            <i class="fas fa-check-circle"></i> <span class="no-mobile">Mark as not seen</span>
           </a>
+          <star class="button" :movie="movie"></star>
           <chromecast-button v-if="episode.isConverted && hasChromecastSupport" :episode="episode" class="button">
             <i class="fab fa-chromecast"></i>
           </chromecast-button>
