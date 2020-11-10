@@ -1,4 +1,4 @@
-version: "2.1"
+version: "3.5"
 services:
   db:
     image: postgres:9.6
@@ -141,3 +141,6 @@ volumes:
   pihole_persistence:
   pihole_config:
   nextcloud:
+networks:
+  default:
+    name: homeserver
