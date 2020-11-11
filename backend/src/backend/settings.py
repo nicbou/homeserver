@@ -12,7 +12,7 @@ SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
 DEBUG = os.environ.get('BACKEND_DEBUG', False) == '1'
 
-ALLOWED_HOSTS = ['home.nicolasbouliane.com']
+ALLOWED_HOSTS = ['*']
 
 LOGGING = {
     'version': 1,
@@ -84,6 +84,7 @@ TEMPLATES = [
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+SESSION_COOKIE_DOMAIN=".nicolasbouliane.com"
 
 ROOT_URLCONF = 'backend.urls'
 WSGI_APPLICATION = 'backend.wsgi.application'
