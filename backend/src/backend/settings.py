@@ -12,7 +12,7 @@ SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
 DEBUG = os.environ.get('BACKEND_DEBUG', False) == '1'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['home.nicolasbouliane.com']
 
 LOGGING = {
     'version': 1,
