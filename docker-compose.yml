@@ -52,7 +52,7 @@ services:
     privileged: true
     userns_mode: "host"
   torrents:
-    image: haugene/transmission-openvpn:1.13
+    image: haugene/transmission-openvpn:latest
     privileged: true
     environment:
       - OPENVPN_PROVIDER
@@ -61,7 +61,10 @@ services:
       - TRANSMISSION_DOWNLOAD_DIR=/triage
       - TRANSMISSION_SPEED_LIMIT_UP=250
       - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
-      - "OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60"
+      - PIA_OPENVPN_CONFIG_BUNDLE=openvpn
+      - OPENVPN_CONFIG=netherlands
+      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
+      - LOCAL_NETWORK=192.168.0.0/24
     volumes:
       - ${TRANSMISSION_DATA_PATH}:/data
       - ${MOVIE_LIBRARY_PATH}/triage:/triage
@@ -70,7 +73,7 @@ services:
       - 8.8.8.8
       - 8.8.4.4
     cap_add:
-      - NET_ADMIN
+      - ALL
     userns_mode: "host"
   pihole:
     image: pihole/pihole:latest
