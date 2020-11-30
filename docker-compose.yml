@@ -61,6 +61,7 @@ services:
       - TRANSMISSION_DOWNLOAD_DIR=/triage
       - TRANSMISSION_SPEED_LIMIT_UP=250
       - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
+      - TRANSMISSION_RPC_HOST_WHITELIST_ENABLED=false
       - PIA_OPENVPN_CONFIG_BUNDLE=openvpn
       - OPENVPN_CONFIG=netherlands
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
