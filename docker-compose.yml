@@ -25,7 +25,6 @@ services:
       - django_staticfiles:/srv/static
       - ./backend/src:/srv/src
       - ${MOVIE_LIBRARY_PATH}:/movies
-    privileged: true
     userns_mode: "host"
   frontend:
     image: nginx
@@ -49,33 +48,28 @@ services:
       - "9181:9181"
     depends_on:
       - redis
-    privileged: true
     userns_mode: "host"
   torrents:
     image: haugene/transmission-openvpn:latest
-    privileged: true
     environment:
       - OPENVPN_PROVIDER
       - OPENVPN_USERNAME
       - OPENVPN_PASSWORD
+      - OPENVPN_CONFIG=netherlands
       - TRANSMISSION_DOWNLOAD_DIR=/triage
       - TRANSMISSION_SPEED_LIMIT_UP=250
       - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
       - TRANSMISSION_RPC_HOST_WHITELIST_ENABLED=false
       - PIA_OPENVPN_CONFIG_BUNDLE=openvpn
-      - OPENVPN_CONFIG=netherlands
-      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
-      - LOCAL_NETWORK=192.168.0.0/24
+      - LOCAL_NETWORK=192.168.0.0/16
     volumes:
       - ${TRANSMISSION_DATA_PATH}:/data
       - ${MOVIE_LIBRARY_PATH}/triage:/triage
     restart: on-failure
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    devices:
+      - /dev/net/tun:/dev/net/tun
     cap_add:
-      - ALL
-    userns_mode: "host"
+      - NET_ADMIN
   pihole:
     image: pihole/pihole:latest
     hostname: pihole
