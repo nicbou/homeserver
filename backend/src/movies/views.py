@@ -157,7 +157,7 @@ class JSONMovieListView(View):
 
             # Queue movies for conversion
             for episode in conversion_queue:
-                convert_movie(episode, request.get_host())
+                convert_movie(episode)
 
         return JsonResponse({'result': 'success'})
 
@@ -175,7 +175,7 @@ class JSONMovieConvertView(View):
             movie_id = kwargs.get('id')
             try:
                 movie = Movie.objects.get(pk=movie_id)
-                convert_movie(movie, request.get_host())
+                convert_movie(movie)
             except Movie.DoesNotExist:
                 return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
             return JsonResponse({'result': 'success'})
@@ -184,11 +184,12 @@ class JSONMovieConvertView(View):
 
 
 def convert_movie(movie, callback_host):
+    logger.info(f"Queuing \"{movie}\" for convertion")
     movie.conversion_status = Movie.CONVERTING
     movie.save()
     api_url = "{host}/videoToMp4".format(host=settings.VIDEO_PROCESSING_API_URL)
     callback_url = "http://{host}/movies/videoToMp4/callback/?id={id}&token={token}".format(
-        host=callback_host,
+        host= os.environ['HOSTNAME'],
         id=movie.id,
         token=movie_conversion_callback_token(movie)
     )

@@ -25,7 +25,6 @@ services:
       - django_staticfiles:/srv/static
       - ./backend/src:/srv/src
       - ${MOVIE_LIBRARY_PATH}:/movies
-    userns_mode: "host"
   frontend:
     image: nginx
     volumes:
