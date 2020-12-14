@@ -113,6 +113,7 @@ USE_X_FORWARDED_HOST = True
 # ==================================================
 
 LOGIN_REDIRECT_URL = '/'
+SESSION_COOKIE_DOMAIN=".nicolasbouliane.com"
 VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
 MOVIE_LIBRARY_PATH = os.environ.get('MOVIE_LIBRARY_PATH')  # The renamed, triaged movies and their artifacts go here
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')
