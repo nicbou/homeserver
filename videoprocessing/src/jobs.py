@@ -9,9 +9,9 @@ import chardet
 WebVTTWriter._encode = lambda self, s: s
 
 
-def convert_to_mp4(input_file, output_file, callback_url):
+def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     """Convert input_file to MP4, saves it to output_file."""
-    command = (u'/srv/src/convert.sh {input_path} {output_path}').format(
+    command = '/srv/src/convert.sh {input_path} {output_path}'.format(
         input_path=shlex.quote(input_file),
         output_path=shlex.quote(output_file),
     )
@@ -27,7 +27,7 @@ def convert_to_mp4(input_file, output_file, callback_url):
     return return_code
 
 
-def convert_subtitles_to_vtt(input_file, output_file):
+def convert_subtitles_to_vtt(input_file: str, output_file: str):
     """Convert .srt subtitles to .vtt for web playback."""
     with open(input_file, mode='rb') as raw_input_content:
         encoding = chardet.detect(raw_input_content.read())['encoding']
@@ -48,7 +48,7 @@ def convert_subtitles_to_vtt(input_file, output_file):
     return True
 
 
-def extract_mkv_subtitles(input_file, callback_url):
+def extract_mkv_subtitles(input_file: str, callback_url: str):
     """
     Extract .srt subtitles from an .mkv file.
 
