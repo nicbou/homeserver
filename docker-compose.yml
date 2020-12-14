@@ -65,22 +65,6 @@ services:
       - /dev/net/tun:/dev/net/tun
     cap_add:
       - NET_ADMIN
-  pihole:
-    image: pihole/pihole:latest
-    hostname: pihole
-    environment:
-      - DNS1=1.1.1.1
-      - DNS2=1.0.0.1
-      - VIRTUAL_HOST=pihole
-    ports:
-      - '53:53/tcp'
-      - '53:53/udp'
-    restart: unless-stopped
-    volumes:
-      - pihole_persistence:/etc/pihole
-      - pihole_config:/etc/dnsmasq.d
-    cap_add:
-      - NET_ADMIN
   nextcloud-php:
     image: nextcloud:fpm
     environment:
@@ -114,7 +98,6 @@ services:
       - backend
       - videoprocessing
       - torrents
-      - pihole
       - nextcloud-php
     volumes:
       - django_staticfiles:/static:ro
@@ -131,8 +114,6 @@ volumes:
   django_staticfiles:
   db_persistence:
   redis_persistence:
-  pihole_persistence:
-  pihole_config:
   nextcloud:
 networks:
   default:
