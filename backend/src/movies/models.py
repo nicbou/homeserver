@@ -11,13 +11,15 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 
 
-class Movie(models.Model):
+class Episode(models.Model):
     NOT_CONVERTED = 0
     CONVERTING = 1
     CONVERSION_FAILED = 2
     CONVERTED = 3
+
     TV_SHOW = 1
     MOVIE = 2
+
     status_choices = (
         (NOT_CONVERTED, 'not-converted'),
         (CONVERTING, 'converting'),
@@ -31,14 +33,13 @@ class Movie(models.Model):
     status_map = {status[1]: status[0] for status in status_choices}
 
     # File
-    original_extension = models.CharField(max_length=12, null=True)
+    original_extension = models.CharField(max_length=12, null=True)  # TODO: Might be unnecessary
     triage_path = models.CharField(max_length=200, null=True)
     conversion_status = models.SmallIntegerField(default=NOT_CONVERTED, choices=status_choices)
 
     # Movie
     title = models.CharField(max_length=150)
     description = models.TextField(blank=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)  # TODO: Remove this field
     release_year = models.CharField(max_length=4, blank=True)
     tmdb_id = models.CharField(max_length=12, null=True)
     media_type = models.SmallIntegerField(default=MOVIE, choices=type_choices)
@@ -209,8 +210,8 @@ class Movie(models.Model):
         )
 
 
-@receiver(pre_delete, sender=Movie)
-def movie_delete(sender, instance, **kwargs):
+@receiver(pre_delete, sender=Episode)
+def episode_delete(sender, instance, **kwargs):
     files_to_delete = [
         instance.library_path,
         instance.converted_path,
@@ -223,15 +224,15 @@ def movie_delete(sender, instance, **kwargs):
         instance.temporary_conversion_path,
     ]
 
-    episode_count = Movie.objects.filter(tmdb_id=instance.tmdb_id).count()
+    episode_count = Episode.objects.filter(tmdb_id=instance.tmdb_id).count()
     if episode_count == 1:
         files_to_delete.append(instance.cover_path)  # All episodes share the same cover
 
-    # Delete the renamed movie
+    # Delete the renamed episode
     for path in files_to_delete:
         try:
             os.unlink(path)
-        except:
+        except OSError:
             pass
 
 
@@ -243,17 +244,17 @@ def random_uuid():
     return uuid.uuid4().hex
 
 
-class MovieWatchStatus(models.Model):
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+class EpisodeWatchStatus(models.Model):
+    episode = models.ForeignKey(Episode, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     stopped_at = models.PositiveIntegerField(default=0)
     last_watched = models.DateField(default=None, blank=True, null=True)
 
     def __str__(self):
-        return u"{} for user {}".format(self.movie.title, self.user)
+        return u"{} for user {}".format(self.episode.title, self.user)
 
     class Meta:
-        unique_together = (('movie', 'user'),)
+        unique_together = (('episode', 'user'),)
 
 
 class StarredMovie(models.Model):
@@ -267,8 +268,8 @@ class StarredMovie(models.Model):
         unique_together = (('tmdb_id', 'user'),)
 
 
-class MovieAccessToken(models.Model):
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+class EpisodeAccessToken(models.Model):
+    episode = models.ForeignKey(Episode, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     expiration_date = models.DateTimeField(default=tomorrow)
     token = models.CharField(max_length=32, default=random_uuid)

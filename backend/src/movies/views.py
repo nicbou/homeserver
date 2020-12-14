@@ -2,7 +2,7 @@
 from django.http import JsonResponse
 from requests import HTTPError, Timeout
 
-from .models import Movie, MovieWatchStatus, MovieAccessToken, StarredMovie
+from .models import Episode, EpisodeWatchStatus, EpisodeAccessToken, StarredMovie
 from django.views import View
 from django.conf import settings
 from django.db import transaction
@@ -20,10 +20,10 @@ class JSONMovieListView(View):
     def get(self, request, *args, **kwargs):
         movies_by_tmdb_id = {}
 
-        watch_statuses = {wp.movie_id: wp for wp in MovieWatchStatus.objects.filter(user=request.user)}
+        watch_statuses = {wp.episode_id: wp for wp in EpisodeWatchStatus.objects.filter(user=request.user)}
         starred_movies = {s.tmdb_id: s for s in StarredMovie.objects.filter(user=request.user)}
 
-        for movie in Movie.objects.all():
+        for movie in Episode.objects.all():
             if not movies_by_tmdb_id.get(movie.tmdb_id):
                 movies_by_tmdb_id[movie.tmdb_id] = []
             movies_by_tmdb_id[movie.tmdb_id].append(movie)
@@ -36,7 +36,6 @@ class JSONMovieListView(View):
                 'title': movies[0].title,
                 'description': movies[0].description,
                 'coverUrl': movies[0].cover_url,
-                'rating': movies[0].rating,
                 'episodes': [],
                 'isStarred': tmdb_id in starred_movies,
             }
@@ -80,11 +79,11 @@ class JSONMovieListView(View):
             # Create the episodes
             episodes = []
             for json_episode in payload.get('episodes', []):
-                episode = Movie.objects.get_or_create(
+                episode = Episode.objects.get_or_create(
                     tmdb_id=payload.get('tmdbId'),
                     episode=json_episode.get('episode', None),
                     season=json_episode.get('season', None),
-                    media_type=payload.get('mediaType', Movie.MOVIE)
+                    media_type=payload.get('mediaType', Episode.MOVIE)
                 )[0]
 
                 if payload.get('title'):
@@ -95,7 +94,7 @@ class JSONMovieListView(View):
                     episode.date_added = json_episode.get('dateAdded')
 
                 if 'progress' in json_episode or 'lastWatched' in json_episode:
-                    watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+                    watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
                     if 'progress' in json_episode:
                         watch_status.stopped_at = json_episode.get('progress', 0)
                     if 'lastWatched' in json_episode:
@@ -172,7 +171,7 @@ class JSONMovieListView(View):
             logger.error(f"Could not download file at {url}.")
 
 
-class JSONMovieConvertView(View):
+class JSONEpisodeConvertView(View):
     def post(self, request, *args, **kwargs):
         """
         Queue an episode for conversion
@@ -183,8 +182,8 @@ class JSONMovieConvertView(View):
 
         episode_id = kwargs.get('id')
         try:
-            queue_episode_for_conversion(Movie.objects.get(pk=episode_id))
-        except Movie.DoesNotExist:
+            queue_episode_for_conversion(Episode.objects.get(pk=episode_id))
+        except Episode.DoesNotExist:
             message = 'Episode does not exist'
             logger.error(f"Failed to convert episode #{episode_id}. {message}")
             return JsonResponse({'result': 'failure', 'message': message}, status=404)
@@ -195,20 +194,20 @@ class JSONMovieConvertView(View):
         return JsonResponse({'result': 'success'})
 
 
-def queue_episode_for_conversion(episode: Movie):
+def queue_episode_for_conversion(episode: Episode):
     api_url = f"{settings.VIDEO_PROCESSING_API_URL}/videoToMp4"
     callback_url = f"http://{os.environ['HOSTNAME']}/movies/videoToMp4/callback/?id={episode.pk}"
 
     try:
-        episode.conversion_status = Movie.CONVERTING
+        episode.conversion_status = Episode.CONVERTING
         requests.post(api_url, json={'input': episode.library_filename, 'callbackUrl': callback_url})
     except (HTTPError, Timeout):
-        episode.conversion_status = Movie.CONVERSION_FAILED
+        episode.conversion_status = Episode.CONVERSION_FAILED
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
     episode.save()
 
 
-def queue_subtitles_for_conversion(episode: Movie):
+def queue_subtitles_for_conversion(episode: Episode):
     """
     Queue episode subtitles for conversion
     """
@@ -238,9 +237,9 @@ class JSONEpisodeView(View):
 
         episode_id = kwargs.get('id')
         try:
-            Movie.objects.get(pk=episode_id).delete()
+            Episode.objects.get(pk=episode_id).delete()
             logger.info(f'Deleted episode #{episode_id}. Episode does not exist.')
-        except Movie.DoesNotExist:
+        except Episode.DoesNotExist:
             logger.warning(f'Could not delete episode #{episode_id}. Episode does not exist.')
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
         return JsonResponse({'result': 'success'})
@@ -268,7 +267,7 @@ class JSONTriageListView(View):
                     subtitle_files.append(relative_path)
 
         # These movies are still in the completed downloads, but they are already triaged. They're seeding.
-        triaged_movie_files = Movie.objects.filter(triage_path__in=video_files).values_list('triage_path', flat=True)
+        triaged_movie_files = Episode.objects.filter(triage_path__in=video_files).values_list('triage_path', flat=True)
         untriaged_video_files = set(video_files).difference(set(triaged_movie_files))
 
         return JsonResponse({'movies': list(untriaged_video_files), 'subtitles': subtitle_files})
@@ -288,15 +287,15 @@ class JSONEpisodeConversionCallbackView(View):
                 {'result': 'failure', 'message': '`status` is missing from request payload'}, status=400)
 
         try:
-            episode = Movie.objects.get(pk=request.GET['id'])
-        except Movie.DoesNotExist:
+            episode = Episode.objects.get(pk=request.GET['id'])
+        except Episode.DoesNotExist:
             logger.warning(f"Conversion callback was called for an episode that does not exist (#{request.GET['id']})")
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=204)
 
         conversion_status = payload['status']
 
         try:
-            episode.conversion_status = Movie.status_map[conversion_status]
+            episode.conversion_status = Episode.status_map[conversion_status]
             episode.save()
             logger.info(f"{episode} has finished converting. Conversion status: {conversion_status}")
         except KeyError:
@@ -321,10 +320,10 @@ class JSONEpisodeAccessTokenView(View):
 
         episode_id = kwargs.get('id')
         try:
-            episode = Movie.objects.get(pk=episode_id)
-        except Movie.DoesNotExist:
+            episode = Episode.objects.get(pk=episode_id)
+        except Episode.DoesNotExist:
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
-        access_token = MovieAccessToken(movie=episode, user=request.user)
+        access_token = EpisodeAccessToken(movie=episode, user=request.user)
         access_token.save()
         return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
 
@@ -337,11 +336,11 @@ class JSONEpisodeWatchedView(View):
 
         episode_id = kwargs.get('id')
         try:
-            episode = Movie.objects.get(pk=episode_id)
-            watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+            episode = Episode.objects.get(pk=episode_id)
+            watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
             watch_status.last_watched = datetime.date.today()
             watch_status.save()
-        except Movie.DoesNotExist:
+        except Episode.DoesNotExist:
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
         return JsonResponse({'result': 'success'})
 
@@ -354,12 +353,12 @@ class JSONEpisodeUnwatchedView(View):
 
         episode_id = kwargs.get('id')
         try:
-            episode = Movie.objects.get(pk=episode_id)
-            watch_status = MovieWatchStatus.objects.get(user=request.user, movie=episode)
+            episode = Episode.objects.get(pk=episode_id)
+            watch_status = EpisodeWatchStatus.objects.get(user=request.user, movie=episode)
             watch_status.delete()
-        except MovieWatchStatus.DoesNotExist:
+        except EpisodeWatchStatus.DoesNotExist:
             pass
-        except Movie.DoesNotExist:
+        except Episode.DoesNotExist:
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
         return JsonResponse({'result': 'success'})
 
@@ -372,10 +371,10 @@ class JSONEpisodeStarView(View):
 
         episode_id = kwargs.get('id')
         try:
-            episode = Movie.objects.get(pk=episode_id)
+            episode = Episode.objects.get(pk=episode_id)
             star = StarredMovie.objects.get_or_create(user=request.user, tmdb_id=episode.tmdb_id)[0]
             star.save()
-        except Movie.DoesNotExist:
+        except Episode.DoesNotExist:
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
         return JsonResponse({'result': 'success'})
 
@@ -388,12 +387,12 @@ class JSONEpisodeUnstarView(View):
 
         episode_id = kwargs.get('id')
         try:
-            episode = Movie.objects.get(pk=episode_id)
+            episode = Episode.objects.get(pk=episode_id)
             star = StarredMovie.objects.get(user=request.user, tmdb_id=episode.tmdb_id)
             star.delete()
         except StarredMovie.DoesNotExist:
             pass
-        except Movie.DoesNotExist:
+        except Episode.DoesNotExist:
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
         return JsonResponse({'result': 'success'})
 
@@ -407,11 +406,11 @@ class JSONEpisodeProgressView(View):
         episode_id = kwargs.get('id')
         payload = json.loads(request.body, encoding='UTF-8')
         try:
-            episode = Movie.objects.get(pk=episode_id)
-            watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+            episode = Episode.objects.get(pk=episode_id)
+            watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
             watch_status.stopped_at = int(payload['progress'])
             watch_status.save()
-        except Movie.DoesNotExist:
+        except Episode.DoesNotExist:
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
         except KeyError:
             return JsonResponse(

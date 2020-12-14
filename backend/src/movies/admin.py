@@ -1,15 +1,15 @@
 from django.contrib import admin
-from .models import Movie, MovieWatchStatus, StarredMovie
+from .models import Episode, EpisodeWatchStatus, StarredMovie
 
 
-@admin.register(Movie)
-class MovieAdmin(admin.ModelAdmin):
-    list_display = ('title', 'season', 'episode', 'date_added')
+@admin.register(Episode)
+class EpisodeAdmin(admin.ModelAdmin):
+    list_display = ('title', 'season', 'episode', 'date_added', 'conversion_status')
 
 
-@admin.register(MovieWatchStatus)
-class MovieWatchStatusAdmin(admin.ModelAdmin):
-    list_display = ('movie', 'user', 'last_watched', 'stopped_at')
+@admin.register(EpisodeWatchStatus)
+class EpisodeWatchStatusAdmin(admin.ModelAdmin):
+    list_display = ('episode', 'user', 'last_watched', 'stopped_at')
 
 
 @admin.register(StarredMovie)

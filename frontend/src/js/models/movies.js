@@ -160,7 +160,6 @@ export class Movie {
     movie.title = jsonResponse.title;
     movie.description = jsonResponse.description;
     movie.coverUrl = jsonResponse.coverUrl;
-    movie.rating = jsonResponse.rating;
     movie.mediaType = jsonResponse.mediaType;
     movie.episodeMap = jsonResponse.episodes
       .reduce(
@@ -217,7 +216,6 @@ export class Movie {
     movie.title = result.title || result.name;
     movie.description = result.overview;
     movie.coverUrl = coverRelativeUrl ? `https://image.tmdb.org/t/p/w500${coverRelativeUrl}` : null;
-    movie.rating = null;
     movie.mediaType = result.media_type == 'tv' ? MediaType.TV_SHOW : MediaType.MOVIE;
     movie.episodeMap = {[episode.id]: episode};
     return movie;

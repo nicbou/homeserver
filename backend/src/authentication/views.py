@@ -1,6 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 import re
-from movies.models import MovieAccessToken
+from movies.models import EpisodeAccessToken
 from django.views import View
 from django.contrib.auth.models import Permission
 from urllib.parse import urlparse, parse_qs, unquote
@@ -31,21 +31,21 @@ def check_auth(request):
         return HttpResponse()
     elif parsed_url.path.startswith('/movies') and 'token' in querystring:
         try:
-            access_token = MovieAccessToken.objects.get(token=querystring['token'][0])
-        except MovieAccessToken.DoesNotExist:
+            access_token = EpisodeAccessToken.objects.get(token=querystring['token'][0])
+        except EpisodeAccessToken.DoesNotExist:
             return HttpResponse(status=403)
         if (
             access_token.expiration_date < timezone.now() or
             unquote(parsed_url.path) not in (
-                access_token.movie.library_url,
-                access_token.movie.converted_url,
-                access_token.movie.srt_subtitles_url_en,
-                access_token.movie.vtt_subtitles_url_en,
-                access_token.movie.srt_subtitles_url_de,
-                access_token.movie.vtt_subtitles_url_de,
-                access_token.movie.srt_subtitles_url_fr,
-                access_token.movie.vtt_subtitles_url_fr,
-                access_token.movie.cover_url,
+                access_token.episode.library_url,
+                access_token.episode.converted_url,
+                access_token.episode.srt_subtitles_url_en,
+                access_token.episode.vtt_subtitles_url_en,
+                access_token.episode.srt_subtitles_url_de,
+                access_token.episode.vtt_subtitles_url_de,
+                access_token.episode.srt_subtitles_url_fr,
+                access_token.episode.vtt_subtitles_url_fr,
+                access_token.episode.cover_url,
             )
         ):
             access_token.delete()

@@ -89,7 +89,6 @@ export default class {
           mediaType: movie.mediaType,
           description: movie.description,
           coverUrl: movie.coverUrl,
-          rating: movie.rating,
           episodes: jsonEpisodes
         }),
       }
