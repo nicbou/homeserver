@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.http import JsonResponse
+from requests import HTTPError, Timeout
+
 from .models import Movie, MovieWatchStatus, MovieAccessToken, StarredMovie
 from django.views import View
 from django.conf import settings
 from django.db import transaction
-from django.utils.crypto import salted_hmac
 import json
 import logging
 import os
@@ -13,10 +14,6 @@ import datetime
 
 
 logger = logging.getLogger(__name__)
-
-
-def movie_conversion_callback_token(movie):
-    return salted_hmac(movie.tmdb_id, movie.id).hexdigest()
 
 
 class JSONMovieListView(View):
@@ -122,18 +119,19 @@ class JSONMovieListView(View):
 
             # Link the movies and subtitles from the triage dir to the the library dir
             # If the movie is already in the library, overwrite the file
+            # TODO: Make this section more readable
             conversion_queue = []
             for episode, triage_options in zip(episodes, triage_options):
-                movie_file = triage_options.get('movieFile')
-                movie_file_abs = os.path.join(settings.TRIAGE_PATH, movie_file) if movie_file else None
-                if movie_file and os.path.exists(movie_file_abs.encode('utf-8')):
-                    episode.triage_path = movie_file
-                    episode.original_extension = os.path.splitext(movie_file)[1][1:].lower()  # extension without dot
+                episode_original_file = triage_options.get('movieFile')
+                episode_original_file_path = os.path.join(settings.TRIAGE_PATH, episode_original_file) if episode_original_file else None
+                if episode_original_file and os.path.exists(episode_original_file_path.encode('utf-8')):
+                    episode.triage_path = episode_original_file
+                    episode.original_extension = os.path.splitext(episode_original_file)[1][1:].lower()  # extension without dot
                     try:
                         os.unlink(episode.library_path.encode('utf-8'))
-                    except:
+                    except OSError:
                         pass
-                    os.link(movie_file_abs.encode('utf-8'), episode.library_path.encode('utf-8'))
+                    os.link(episode_original_file_path.encode('utf-8'), episode.library_path.encode('utf-8'))
                     episode.save()
 
                 for subtitles_language in ('En', 'De', 'Fr'):
@@ -153,50 +151,84 @@ class JSONMovieListView(View):
             # Download the cover URL if necessary
             new_cover_url = payload.get('coverUrl')
             if new_cover_url and new_cover_url != episodes[0].cover_url:
-                self.download_image(new_cover_url, episodes[0].cover_path)
+                self.download_file(new_cover_url, episodes[0].cover_path)
 
-            # Queue movies for conversion
+            # Queue episodes for conversion
             for episode in conversion_queue:
-                convert_movie(episode)
+                try:
+                    queue_episode_for_conversion(episode)
+                except ConnectionError:
+                    logger.error(f"Failed to convert {episode}. Could not queue the episode for conversion.")
 
         return JsonResponse({'result': 'success'})
 
-    def download_image(self, url, filename):
+    def download_file(self, url: str, filename: str):
         req = requests.get(url, stream=True)
         if req.status_code == 200:
             with open(filename.encode('utf-8'), 'wb') as cover_file:
                 for chunk in req:
                     cover_file.write(chunk)
+        else:
+            logger.error(f"Could not download file at {url}.")
 
 
 class JSONMovieConvertView(View):
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            movie_id = kwargs.get('id')
-            try:
-                movie = Movie.objects.get(pk=movie_id)
-                convert_movie(movie)
-            except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
-            return JsonResponse({'result': 'success'})
-        else:
+        """
+        Queue an episode for conversion
+        """
+        # TODO: Permission check
+        if not request.user.is_authenticated:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
 
+        episode_id = kwargs.get('id')
+        try:
+            queue_episode_for_conversion(Movie.objects.get(pk=episode_id))
+        except Movie.DoesNotExist:
+            message = 'Episode does not exist'
+            logger.error(f"Failed to convert episode #{episode_id}. {message}")
+            return JsonResponse({'result': 'failure', 'message': message}, status=404)
+        except ConnectionError:
+            message = 'Could not queue the episode for conversion.'
+            logger.error(f"Failed to convert episode #{episode_id}. {message}")
+            return JsonResponse({'result': 'failure', 'message': message}, status=500)
+        return JsonResponse({'result': 'success'})
 
-def convert_movie(movie, callback_host):
-    logger.info(f"Queuing \"{movie}\" for convertion")
-    movie.conversion_status = Movie.CONVERTING
-    movie.save()
-    api_url = "{host}/videoToMp4".format(host=settings.VIDEO_PROCESSING_API_URL)
-    callback_url = "http://{host}/movies/videoToMp4/callback/?id={id}&token={token}".format(
-        host= os.environ['HOSTNAME'],
-        id=movie.id,
-        token=movie_conversion_callback_token(movie)
+
+def queue_episode_for_conversion(episode: Movie):
+    api_url = f"{settings.VIDEO_PROCESSING_API_URL}/videoToMp4"
+    callback_url = f"http://{os.environ['HOSTNAME']}/movies/videoToMp4/callback/?id={episode.pk}"
+
+    try:
+        episode.conversion_status = Movie.CONVERTING
+        requests.post(api_url, json={'input': episode.library_filename, 'callbackUrl': callback_url})
+    except (HTTPError, Timeout):
+        episode.conversion_status = Movie.CONVERSION_FAILED
+        raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
+    episode.save()
+
+
+def queue_subtitles_for_conversion(episode: Movie):
+    """
+    Queue episode subtitles for conversion
+    """
+    subtitles_paths_and_filenames = (
+        (episode.srt_subtitles_path_en, episode.srt_subtitles_filename_en),
+        (episode.srt_subtitles_path_de, episode.srt_subtitles_filename_de),
+        (episode.srt_subtitles_path_fr, episode.srt_subtitles_filename_fr),
     )
-    requests.post(api_url, json={'input': movie.library_filename, 'callbackUrl': callback_url})
+    for srt_subtitles_path, srt_subtitles_filename in subtitles_paths_and_filenames:
+        if os.path.exists(srt_subtitles_path.encode('utf-8')):
+            try:
+                requests.post(
+                    f"{settings.VIDEO_PROCESSING_API_URL}/subtitlesToVTT",
+                    json={'input': srt_subtitles_filename}
+                )
+            except (HTTPError, Timeout):
+                raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
 
 
-class JSONMovieView(View):
+class JSONEpisodeView(View):
     def delete(self, request, *args, **kwargs):
         if not request.user.has_perm('authentication.movies_manage'):
             return JsonResponse({
@@ -204,17 +236,20 @@ class JSONMovieView(View):
                 'message': 'You do not have the permission to access this feature'
             }, status=403)
 
-        movie_id = kwargs.get('id')
+        episode_id = kwargs.get('id')
         try:
-            Movie.objects.get(pk=movie_id).delete()
+            Movie.objects.get(pk=episode_id).delete()
+            logger.info(f'Deleted episode #{episode_id}. Episode does not exist.')
         except Movie.DoesNotExist:
-            return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
+            logger.warning(f'Could not delete episode #{episode_id}. Episode does not exist.')
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
         return JsonResponse({'result': 'success'})
 
 
-class JSONMovieTriageListView(View):
-    """Return a list of untriaged movie and subtitle files."""
-
+class JSONTriageListView(View):
+    """
+    List of untriaged video and subtitle files
+    """
     def get(self, request, *args, **kwargs):
         if not request.user.has_perm('authentication.movies_manage'):
             return JsonResponse({
@@ -222,31 +257,27 @@ class JSONMovieTriageListView(View):
                 'message': 'You do not have the permission to access this feature'
             }, status=403)
 
-        movie_extensions = (
-            '.mkv', '.avi', '.mpg', '.wmv', '.mov', '.m4v', '.3gp', '.mpeg', '.mpe', '.ogm', '.flv', '.divx', '.mp4'
-        )
-        subtitle_extensions = ('.srt', '.vtt')
-
-        movie_files = []
+        video_files = []
         subtitle_files = []
         for root, dirs, files in os.walk(settings.TRIAGE_PATH):
             for filename in files:
                 relative_path = os.path.relpath(os.path.join(root, filename), settings.TRIAGE_PATH)
-                if filename.lower().endswith(movie_extensions):
-                    movie_files.append(relative_path)
-                if filename.lower().endswith(subtitle_extensions):
+                if filename.lower().endswith(settings.MOVIE_EXTENSIONS):
+                    video_files.append(relative_path)
+                if filename.lower().endswith(settings.SUBTITLE_EXTENSIONS):
                     subtitle_files.append(relative_path)
 
         # These movies are still in the completed downloads, but they are already triaged. They're seeding.
-        triaged_movie_files = Movie.objects.filter(triage_path__in=movie_files).values_list('triage_path', flat=True)
-        untriaged_movie_files = set(movie_files).difference(set(triaged_movie_files))
+        triaged_movie_files = Movie.objects.filter(triage_path__in=video_files).values_list('triage_path', flat=True)
+        untriaged_video_files = set(video_files).difference(set(triaged_movie_files))
 
-        return JsonResponse({'movies': list(untriaged_movie_files), 'subtitles': subtitle_files})
+        return JsonResponse({'movies': list(untriaged_video_files), 'subtitles': subtitle_files})
 
 
-class JSONMovieConversionCallbackView(View):
-    """Called when a movie conversion task is finished."""
-
+class JSONEpisodeConversionCallbackView(View):
+    """
+    Called when an episode conversion task is finished.
+    """
     def post(self, request, *args, **kwargs):
         payload = json.loads(request.body, encoding='UTF-8')
 
@@ -255,143 +286,137 @@ class JSONMovieConversionCallbackView(View):
         if 'status' not in payload:
             return JsonResponse(
                 {'result': 'failure', 'message': '`status` is missing from request payload'}, status=400)
-        if 'token' not in request.GET:
-            return JsonResponse(
-                {'result': 'failure', 'message': '`token` parameter is missing from query string'}, status=400)
 
         try:
-            movie = Movie.objects.get(pk=request.GET['id'])
+            episode = Movie.objects.get(pk=request.GET['id'])
         except Movie.DoesNotExist:
-            return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=204)
+            logger.warning(f"Conversion callback was called for an episode that does not exist (#{request.GET['id']})")
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=204)
 
         conversion_status = payload['status']
 
-        if request.GET['token'] == movie_conversion_callback_token(movie):
-            try:
-                movie.conversion_status = Movie.status_map[conversion_status]
-                movie.save()
-            except KeyError:
-                return JsonResponse(
-                    {'result': 'failure', 'message': '`{}` is not a valid `status` value'.format(conversion_status)},
-                    status=400
-                )
-
-            # Queue the subtitles for conversion
-            subtitles_paths_and_filenames = (
-                (movie.srt_subtitles_path_en, movie.srt_subtitles_filename_en),
-                (movie.srt_subtitles_path_de, movie.srt_subtitles_filename_de),
-                (movie.srt_subtitles_path_fr, movie.srt_subtitles_filename_fr),
+        try:
+            episode.conversion_status = Movie.status_map[conversion_status]
+            episode.save()
+            logger.info(f"{episode} has finished converting. Conversion status: {conversion_status}")
+        except KeyError:
+            logger.warning(f"Conversion callback was called with an invalid conversion status: {conversion_status}")
+            return JsonResponse(
+                {'result': 'failure', 'message': f'`{conversion_status}` is not a valid `status` value'},
+                status=400
             )
-            for srt_subtitles_path, srt_subtitles_filename in subtitles_paths_and_filenames:
-                if os.path.exists(srt_subtitles_path.encode('utf-8')):
-                    api_url = "{host}/subtitlesToVTT".format(host=settings.VIDEO_PROCESSING_API_URL)
-                    requests.post(api_url, json={'input': srt_subtitles_filename})
 
-            return JsonResponse({'result': 'success'})
-        else:
-            return JsonResponse({'result': 'failure', 'message': 'Invalid `token`'}, status=400)
+        try:
+            queue_subtitles_for_conversion(episode)
+        except ConnectionError:
+            pass
+
+        return JsonResponse({'result': 'success'})
 
 
-class JSONMovieAccessTokenView(View):
+class JSONEpisodeAccessTokenView(View):
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            movie_id = kwargs.get('id')
-            try:
-                movie = Movie.objects.get(pk=movie_id)
-            except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
-            access_token = MovieAccessToken(movie=movie, user=request.user)
-            access_token.save()
-            return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
-        else:
+        if not request.user.is_authenticated:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
 
+        episode_id = kwargs.get('id')
+        try:
+            episode = Movie.objects.get(pk=episode_id)
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
+        access_token = MovieAccessToken(movie=episode, user=request.user)
+        access_token.save()
+        return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
 
-class JSONMovieWatchedView(View):
+
+class JSONEpisodeWatchedView(View):
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            movie_id = kwargs.get('id')
-            try:
-                movie = Movie.objects.get(pk=movie_id)
-                watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=movie)[0]
-                watch_status.last_watched = datetime.date.today()
-                watch_status.save()
-            except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
-            return JsonResponse({'result': 'success'})
-        else:
+        # TODO: Check for movie permissions
+        if not request.user.is_authenticated:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
 
+        episode_id = kwargs.get('id')
+        try:
+            episode = Movie.objects.get(pk=episode_id)
+            watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+            watch_status.last_watched = datetime.date.today()
+            watch_status.save()
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
+        return JsonResponse({'result': 'success'})
 
-class JSONMovieUnwatchedView(View):
+
+class JSONEpisodeUnwatchedView(View):
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            movie_id = kwargs.get('id')
-            try:
-                movie = Movie.objects.get(pk=movie_id)
-                watch_status = MovieWatchStatus.objects.get(user=request.user, movie=movie)
-                watch_status.delete()
-            except MovieWatchStatus.DoesNotExist:
-                pass
-            except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
-            return JsonResponse({'result': 'success'})
-        else:
+        # TODO: Check for movie permissions
+        if not request.user.is_authenticated:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
 
+        episode_id = kwargs.get('id')
+        try:
+            episode = Movie.objects.get(pk=episode_id)
+            watch_status = MovieWatchStatus.objects.get(user=request.user, movie=episode)
+            watch_status.delete()
+        except MovieWatchStatus.DoesNotExist:
+            pass
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
+        return JsonResponse({'result': 'success'})
 
-class JSONMovieStarView(View):
+
+class JSONEpisodeStarView(View):
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            movie_id = kwargs.get('id')
-            try:
-                movie = Movie.objects.get(pk=movie_id)
-                star = StarredMovie.objects.get_or_create(user=request.user, tmdb_id=movie.tmdb_id)[0]
-                star.save()
-            except StarredMovie.DoesNotExist:
-                pass
-            except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
-            return JsonResponse({'result': 'success'})
-        else:
+        # TODO: Check for movie permissions
+        if not request.user.is_authenticated:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
 
+        episode_id = kwargs.get('id')
+        try:
+            episode = Movie.objects.get(pk=episode_id)
+            star = StarredMovie.objects.get_or_create(user=request.user, tmdb_id=episode.tmdb_id)[0]
+            star.save()
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
+        return JsonResponse({'result': 'success'})
 
-class JSONMovieUnstarView(View):
+
+class JSONEpisodeUnstarView(View):
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            movie_id = kwargs.get('id')
-            try:
-                movie = Movie.objects.get(pk=movie_id)
-                star = StarredMovie.objects.get(user=request.user, tmdb_id=movie.tmdb_id)
-                star.delete()
-            except StarredMovie.DoesNotExist:
-                pass
-            except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
-            return JsonResponse({'result': 'success'})
-        else:
+        # TODO: Check for movie permissions
+        if not request.user.is_authenticated:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
 
+        episode_id = kwargs.get('id')
+        try:
+            episode = Movie.objects.get(pk=episode_id)
+            star = StarredMovie.objects.get(user=request.user, tmdb_id=episode.tmdb_id)
+            star.delete()
+        except StarredMovie.DoesNotExist:
+            pass
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
+        return JsonResponse({'result': 'success'})
 
-class JSONMovieProgressView(View):
+
+class JSONEpisodeProgressView(View):
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            movie_id = kwargs.get('id')
-            payload = json.loads(request.body, encoding='UTF-8')
-            try:
-                movie = Movie.objects.get(pk=movie_id)
-                watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=movie)[0]
-                watch_status.stopped_at = int(payload['progress'])
-                watch_status.save()
-            except Movie.DoesNotExist:
-                return JsonResponse({'result': 'failure', 'message': 'Movie does not exist'}, status=404)
-            except KeyError:
-                return JsonResponse(
-                    {'result': 'failure', 'message': '`progress` is missing from request payload'}, status=400)
-            except ValueError:
-                return JsonResponse(
-                    {'result': 'failure', 'message': '`progress` must be an integer'}, status=400)
-            return JsonResponse({'result': 'success'})
-        else:
+        # TODO: Check for movie permissions
+        if not request.user.is_authenticated:
             return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+        episode_id = kwargs.get('id')
+        payload = json.loads(request.body, encoding='UTF-8')
+        try:
+            episode = Movie.objects.get(pk=episode_id)
+            watch_status = MovieWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+            watch_status.stopped_at = int(payload['progress'])
+            watch_status.save()
+        except Movie.DoesNotExist:
+            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
+        except KeyError:
+            return JsonResponse(
+                {'result': 'failure', 'message': '`progress` is missing from request payload'}, status=400)
+        except ValueError:
+            return JsonResponse(
+                {'result': 'failure', 'message': '`progress` must be an integer'}, status=400)
+        return JsonResponse({'result': 'success'})

@@ -1,3 +1,4 @@
+import logging
 import os
 
 # ==================================================
@@ -14,33 +15,35 @@ DEBUG = os.environ.get('BACKEND_DEBUG', False) == '1'
 
 ALLOWED_HOSTS = ['*']
 
-LOGGING = {
+LOGGING_CONFIG = None
+logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        'console': {
+            "()": "coloredlogs.ColoredFormatter",
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(message)s',
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': '/srv/logs/django.log',
-            'formatter': 'verbose'
-        },
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'console',
         },
     },
     'loggers': {
         '': {
-            'handlers': ['file', 'console'],
             'level': 'INFO',
-            'propagate': True,
+            'handlers': ['console'],
         },
+        'gunicorn.access': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': True,
+            'qualname': 'gunicorn.access',
+        }
     },
-}
+})
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -84,7 +87,6 @@ TEMPLATES = [
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
-SESSION_COOKIE_DOMAIN=".nicolasbouliane.com"
 
 ROOT_URLCONF = 'backend.urls'
 WSGI_APPLICATION = 'backend.wsgi.application'
@@ -115,3 +117,7 @@ VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
 MOVIE_LIBRARY_PATH = os.environ.get('MOVIE_LIBRARY_PATH')  # The renamed, triaged movies and their artifacts go here
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')
 TRIAGE_PATH = os.environ.get('TRIAGE_PATH')  # The completed torrents go here until they are triaged
+MOVIE_EXTENSIONS = (
+    '.mkv', '.avi', '.mpg', '.wmv', '.mov', '.m4v', '.3gp', '.mpeg', '.mpe', '.ogm', '.flv', '.divx', '.mp4'
+)
+SUBTITLE_EXTENSIONS = ('.srt', '.vtt')

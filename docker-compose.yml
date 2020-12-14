@@ -8,7 +8,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - db_persistence:/var/lib/postgresql/data
-    userns_mode: "host"
   backend:
     build: backend
     depends_on:
@@ -43,11 +42,8 @@ services:
       - REDIS_DB_URL=redis://redis:6379/1
     volumes:
       - ${MOVIE_LIBRARY_PATH}:/movies
-    ports:
-      - "9181:9181"
     depends_on:
       - redis
-    userns_mode: "host"
   torrents:
     image: haugene/transmission-openvpn:latest
     environment:

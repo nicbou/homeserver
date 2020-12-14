@@ -38,7 +38,7 @@ class Movie(models.Model):
     # Movie
     title = models.CharField(max_length=150)
     description = models.TextField(blank=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)  # TODO: Remove this field
     release_year = models.CharField(max_length=4, blank=True)
     tmdb_id = models.CharField(max_length=12, null=True)
     media_type = models.SmallIntegerField(default=MOVIE, choices=type_choices)
