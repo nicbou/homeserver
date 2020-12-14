@@ -5,7 +5,7 @@ from bottle import route, run, request, abort, response
 import os
 import redis
 from rq import Queue
-from .jobs import convert_to_mp4, extract_mkv_subtitles, convert_subtitles_to_vtt
+from jobs import convert_to_mp4, extract_mkv_subtitles, convert_subtitles_to_vtt
 
 redis_connection = redis.from_url(os.environ['REDIS_DB_URL'])
 conversion_queue = Queue('conversion', connection=redis_connection)
