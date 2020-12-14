@@ -1,13 +1,15 @@
 import os
 import logging.config
+from pathlib import Path
 
 # ==================================================
 # Django stuff
 # ==================================================
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = '/srv/static'
-MEDIA_ROOT = '/srv/media'
+BASE_DIR = Path(__file__).resolve().parent.parent
+STATIC_ROOT = Path('/srv/static')
+MEDIA_ROOT = Path('/srv/media')
+STATIC_URL = '/static/'
 
 SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
@@ -93,10 +95,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'),
         'PORT': 5432,
     }
 }
@@ -105,7 +107,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-STATIC_URL = '/static/'
 USE_X_FORWARDED_HOST = True
 
 # ==================================================
@@ -115,9 +116,9 @@ USE_X_FORWARDED_HOST = True
 LOGIN_REDIRECT_URL = '/'
 SESSION_COOKIE_DOMAIN=".nicolasbouliane.com"
 VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
-MOVIE_LIBRARY_PATH = os.environ.get('MOVIE_LIBRARY_PATH')  # The renamed, triaged movies and their artifacts go here
+MOVIE_LIBRARY_PATH = Path(os.environ.get('MOVIE_LIBRARY_PATH'))
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')
-TRIAGE_PATH = os.environ.get('TRIAGE_PATH')  # The completed torrents go here until they are triaged
+TRIAGE_PATH = Path(os.environ.get('TRIAGE_PATH'))
 MOVIE_EXTENSIONS = (
     '.mkv', '.avi', '.mpg', '.wmv', '.mov', '.m4v', '.3gp', '.mpeg', '.mpe', '.ogm', '.flv', '.divx', '.mp4'
 )

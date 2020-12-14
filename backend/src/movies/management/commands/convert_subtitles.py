@@ -3,7 +3,6 @@
 from django.core.management.base import BaseCommand
 from movies.models import Episode
 from django.conf import settings
-import os
 import requests
 
 
@@ -21,6 +20,8 @@ class Command(BaseCommand):
             (episode.srt_subtitles_path_fr, episode.srt_subtitles_filename_fr),
         )
         for srt_subtitles_path, srt_subtitles_filename in subtitles_paths_and_filenames:
-            if os.path.exists(srt_subtitles_path.encode('utf-8')):
-                api_url = "{host}/subtitlesToVTT".format(host=settings.VIDEO_PROCESSING_API_URL)
-                requests.post(api_url, json={'input': srt_subtitles_filename})
+            if srt_subtitles_path.exists():
+                requests.post(
+                    f"{settings.VIDEO_PROCESSING_API_URL}/subtitlesToVTT",
+                    json={'input': srt_subtitles_filename}
+                )

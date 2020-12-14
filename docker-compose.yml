@@ -16,6 +16,10 @@ services:
     environment:
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
       - MOVIE_LIBRARY_PATH=/movies/library
       - MOVIE_LIBRARY_URL=/movies
       - TRIAGE_PATH=/movies/triage

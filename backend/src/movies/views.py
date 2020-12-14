@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
+from typing import List
+
 from django.http import JsonResponse
 from requests import HTTPError, Timeout
 
@@ -77,7 +80,7 @@ class JSONMovieListView(View):
 
         with transaction.atomic():
             # Create the episodes
-            episodes = []
+            episodes: List[Episode] = []
             for json_episode in payload.get('episodes', []):
                 episode = Episode.objects.get_or_create(
                     tmdb_id=payload.get('tmdbId'),
@@ -121,28 +124,25 @@ class JSONMovieListView(View):
             # TODO: Make this section more readable
             conversion_queue = []
             for episode, triage_options in zip(episodes, triage_options):
-                episode_original_file = triage_options.get('movieFile')
-                episode_original_file_path = os.path.join(settings.TRIAGE_PATH, episode_original_file) if episode_original_file else None
-                if episode_original_file and os.path.exists(episode_original_file_path.encode('utf-8')):
+                episode_original_file = Path(triage_options.get('movieFile'))
+                episode_original_file_path = settings.TRIAGE_PATH / episode_original_file if episode_original_file else None
+
+                # Hard link original video
+                if episode_original_file and episode_original_file_path.exists():
                     episode.triage_path = episode_original_file
-                    episode.original_extension = os.path.splitext(episode_original_file)[1][1:].lower()  # extension without dot
-                    try:
-                        os.unlink(episode.library_path.encode('utf-8'))
-                    except OSError:
-                        pass
-                    os.link(episode_original_file_path.encode('utf-8'), episode.library_path.encode('utf-8'))
+                    episode.original_extension = episode_original_file.suffix.lower()[1:]
+                    episode.library_path.unlink(missing_ok=True)
+                    episode.library_path.link_to(episode_original_file_path)
                     episode.save()
 
+                # Hard link subtitles
                 for subtitles_language in ('En', 'De', 'Fr'):
-                    subtitles_file = triage_options.get('subtitlesFile' + subtitles_language)
-                    subtitles_file_abs = os.path.join(settings.TRIAGE_PATH, subtitles_file) if subtitles_file else None
-                    if subtitles_file and os.path.exists(subtitles_file_abs.encode('utf-8')):
-                        dest_subtitles_path = getattr(episode, 'srt_subtitles_path_' + subtitles_language.lower())
-                        try:
-                            os.unlink(dest_subtitles_path.encode('utf-8'))
-                        except:
-                            pass
-                        os.link(subtitles_file_abs.encode('utf-8'), dest_subtitles_path.encode('utf-8'))
+                    subtitles_file = Path(triage_options.get('subtitlesFile' + subtitles_language))
+                    subtitles_file_abs = settings.TRIAGE_PATH / subtitles_file if subtitles_file else None
+                    if subtitles_file and subtitles_file_abs.exists():
+                        dest_subtitles_path: Path = getattr(episode, f'srt_subtitles_path_{subtitles_language.lower()}')
+                        dest_subtitles_path.unlink(missing_ok=True)
+                        dest_subtitles_path.link_to(subtitles_file_abs)
 
                 if bool(triage_options.get('convertToMp4')):
                     conversion_queue.append(episode)
@@ -161,10 +161,10 @@ class JSONMovieListView(View):
 
         return JsonResponse({'result': 'success'})
 
-    def download_file(self, url: str, filename: str):
+    def download_file(self, url: str, filename: Path):
         req = requests.get(url, stream=True)
         if req.status_code == 200:
-            with open(filename.encode('utf-8'), 'wb') as cover_file:
+            with filename.open('wb') as cover_file:
                 for chunk in req:
                     cover_file.write(chunk)
         else:
@@ -200,7 +200,7 @@ def queue_episode_for_conversion(episode: Episode):
 
     try:
         episode.conversion_status = Episode.CONVERTING
-        requests.post(api_url, json={'input': episode.library_filename, 'callbackUrl': callback_url})
+        requests.post(api_url, json={'input': str(episode.library_filename), 'callbackUrl': callback_url})
     except (HTTPError, Timeout):
         episode.conversion_status = Episode.CONVERSION_FAILED
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
@@ -217,7 +217,7 @@ def queue_subtitles_for_conversion(episode: Episode):
         (episode.srt_subtitles_path_fr, episode.srt_subtitles_filename_fr),
     )
     for srt_subtitles_path, srt_subtitles_filename in subtitles_paths_and_filenames:
-        if os.path.exists(srt_subtitles_path.encode('utf-8')):
+        if srt_subtitles_path.exists():
             try:
                 requests.post(
                     f"{settings.VIDEO_PROCESSING_API_URL}/subtitlesToVTT",
@@ -258,6 +258,8 @@ class JSONTriageListView(View):
 
         video_files = []
         subtitle_files = []
+
+        # TODO: convert to pathlib
         for root, dirs, files in os.walk(settings.TRIAGE_PATH):
             for filename in files:
                 relative_path = os.path.relpath(os.path.join(root, filename), settings.TRIAGE_PATH)
