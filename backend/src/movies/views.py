@@ -132,7 +132,7 @@ class JSONMovieListView(View):
                     episode.triage_path = episode_original_file
                     episode.original_extension = episode_original_file.suffix.lower()[1:]
                     episode.library_path.unlink(missing_ok=True)
-                    episode.library_path.link_to(episode_original_file_path)
+                    episode_original_file_path.link_to(episode.library_path)
                     episode.save()
 
                 # Hard link subtitles
@@ -142,7 +142,7 @@ class JSONMovieListView(View):
                     if subtitles_file and subtitles_file_abs.exists():
                         dest_subtitles_path: Path = getattr(episode, f'srt_subtitles_path_{subtitles_language.lower()}')
                         dest_subtitles_path.unlink(missing_ok=True)
-                        dest_subtitles_path.link_to(subtitles_file_abs)
+                        subtitles_file_abs.link_to(dest_subtitles_path)
 
                 if bool(triage_options.get('convertToMp4')):
                     conversion_queue.append(episode)
