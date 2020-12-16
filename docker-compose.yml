@@ -70,7 +70,7 @@ services:
     cap_add:
       - NET_ADMIN
   nextcloud-php:
-    image: nextcloud:fpm
+    image: nextcloud:20-fpm
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_USER=postgres
