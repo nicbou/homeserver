@@ -97,7 +97,7 @@ class JSONMovieListView(View):
                     episode.date_added = json_episode.get('dateAdded')
 
                 if 'progress' in json_episode or 'lastWatched' in json_episode:
-                    watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+                    watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, episode=episode)[0]
                     if 'progress' in json_episode:
                         watch_status.stopped_at = json_episode.get('progress', 0)
                     if 'lastWatched' in json_episode:
@@ -325,7 +325,7 @@ class JSONEpisodeAccessTokenView(View):
             episode = Episode.objects.get(pk=episode_id)
         except Episode.DoesNotExist:
             return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
-        access_token = EpisodeAccessToken(movie=episode, user=request.user)
+        access_token = EpisodeAccessToken(episode=episode, user=request.user)
         access_token.save()
         return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
 
@@ -339,7 +339,7 @@ class JSONEpisodeWatchedView(View):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
-            watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+            watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, episode=episode)[0]
             watch_status.last_watched = datetime.date.today()
             watch_status.save()
         except Episode.DoesNotExist:
@@ -356,7 +356,7 @@ class JSONEpisodeUnwatchedView(View):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
-            watch_status = EpisodeWatchStatus.objects.get(user=request.user, movie=episode)
+            watch_status = EpisodeWatchStatus.objects.get(user=request.user, episode=episode)
             watch_status.delete()
         except EpisodeWatchStatus.DoesNotExist:
             pass
@@ -409,7 +409,7 @@ class JSONEpisodeProgressView(View):
         payload = json.loads(request.body, encoding='UTF-8')
         try:
             episode = Episode.objects.get(pk=episode_id)
-            watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, movie=episode)[0]
+            watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, episode=episode)[0]
             watch_status.stopped_at = int(payload['progress'])
             watch_status.save()
         except Episode.DoesNotExist:
