@@ -137,8 +137,8 @@ class JSONMovieListView(View):
 
                 # Hard link subtitles
                 for subtitles_language in ('En', 'De', 'Fr'):
-                    subtitles_file = Path(triage_options.get('subtitlesFile' + subtitles_language))
-                    subtitles_file_abs = settings.TRIAGE_PATH / subtitles_file if subtitles_file else None
+                    subtitles_file = triage_options.get('subtitlesFile' + subtitles_language)
+                    subtitles_file_abs = (settings.TRIAGE_PATH / subtitles_file) if subtitles_file else None
                     if subtitles_file and subtitles_file_abs.exists():
                         dest_subtitles_path: Path = getattr(episode, f'srt_subtitles_path_{subtitles_language.lower()}')
                         dest_subtitles_path.unlink(missing_ok=True)
