@@ -10,12 +10,9 @@ RUN apt-get install -y \
     python3-pip \
     netcat \
     git \
-    wget \
-    cron
+    wget
 
-# Set env variables used in this Dockerfile (add a unique prefix, such as DOCKYARD)
 # Local directory with project source
-ENV DOCKER_SRC=src
 ENV DOCKER_SRVHOME=/srv
 ENV DOCKER_SRVPROJ=/srv/src
 
@@ -27,10 +24,6 @@ VOLUME ["$DOCKER_SRVHOME/media/", "$DOCKER_SRVHOME/logs/", "$DOCKER_SRVPROJ"]
 # Install Python dependencies
 COPY requirements.txt $DOCKER_SRVHOME/requirements.txt
 RUN pip3 install -r $DOCKER_SRVHOME/requirements.txt
-
-# Set up cron
-COPY crontab $DOCKER_SRVHOME/crontab
-RUN chmod 600 $DOCKER_SRVHOME/crontab
 
 # Port to expose
 EXPOSE 80

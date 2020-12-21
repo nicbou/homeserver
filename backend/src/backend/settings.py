@@ -43,7 +43,11 @@ logging.config.dictConfig({
             'handlers': ['console'],
             'propagate': True,
             'qualname': 'gunicorn.access',
-        }
+        },
+        'django.request': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+        },
     },
 })
 

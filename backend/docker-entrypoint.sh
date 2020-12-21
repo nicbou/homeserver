@@ -9,16 +9,8 @@ python3 manage.py collectstatic --noinput  # Collect static files
 # Prepare log files and start outputting logs to stdout
 touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
-touch /srv/logs/cron.log
 tail -n 0 -f /srv/logs/*.log &
 service rsyslog start
-
-# Activate cron with all Django environment variables
-> /srv/cronenv
-printf "export BACKEND_SECRET_KEY=%q\n" "${BACKEND_SECRET_KEY}" >> /srv/cronenv
-
-crontab /srv/crontab
-service cron start
 
 # Make sure the data directories exist
 mkdir -p /movies

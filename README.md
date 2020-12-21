@@ -19,7 +19,6 @@ Put these environment variables in a .env file. These environment variables are 
 
 * `COMPOSE_PROJECT_NAME`: A unique value for this project, to avoid docker container and volume conflicts.
 * `DIGITALOCEAN_TOKEN`: API token used to update dynamic DNS
-* `NEXTCLOUD_FILES_PATH`: Where your Nextcloud files are stored
 * `BACKEND_SECRET_KEY`: A random string used by Django. Keep this secret.
 * `BACKEND_DEBUG`: '1'. Any other value sets debugging to false.
 * `TRANSMISSION_DATA_PATH`: Local path that will be mounted as Transmission's data folder (for incomplete torrents, settings etc)
