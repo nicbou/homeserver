@@ -30,9 +30,11 @@ export default Vue.component('movie', {
       const seasonNumber = this.currentSeasonNumber || (this.movie.nextEpisodeToPlay && this.movie.nextEpisodeToPlay.season);
       return this.movie.seasons.find(s => s.seasonNumber === seasonNumber) || this.movie.seasons[0];
     },
+    nextEpisode: function() {
+      return this.movie.nextEpisodeToPlay || this.movie.episodeList[0];
+    },
     nextEpisodeName: function () {
-      const nextEpisode = this.movie.nextEpisodeToPlay;
-      return nextEpisode ? `S${nextEpisode.season}E${nextEpisode.episode}` : null;
+      return this.nextEpisode ? `S${this.nextEpisode.season}E${this.nextEpisode.episode}` : null;
     },
     hasChromecastSupport: function() {
       return !!ChromeCast;
@@ -75,17 +77,17 @@ export default Vue.component('movie', {
             </h2>
             <p>{{ movie.description }}</p>
             <div class="button-group horizontal">
-              <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && movie.nextEpisodeToPlay && !movie.nextEpisodeToPlay.isWatched" @click.prevent="markEpisodeAsWatched(movie.nextEpisodeToPlay)">
+              <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && nextEpisode && !nextEpisode.isWatched" @click.prevent="markEpisodeAsWatched(nextEpisode)">
                 <i class="far fa-check-circle"></i>
               </a>
-              <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && movie.nextEpisodeToPlay && movie.nextEpisodeToPlay.isWatched" @click.prevent="markEpisodeAsUnwatched(movie.nextEpisodeToPlay)">
+              <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && nextEpisode && nextEpisode.isWatched" @click.prevent="markEpisodeAsUnwatched(nextEpisode)">
                 <i class="fas fa-check-circle"></i>
               </a>
-              <a title="Play in browser" href="#" @click.prevent="playEpisode(movie.nextEpisodeToPlay)" v-if="canWatchMovies && movie.nextEpisodeToPlay" class="button large main">
+              <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="canWatchMovies && nextEpisode" class="button large main">
                 <i class="fas fa-play"></i>
                 <span class="label" v-if="episodeList.length > 1">{{ nextEpisodeName }}</span>
               </a>
-              <chromecast-button title="Play on ChromeCast" :episode="movie.nextEpisodeToPlay" v-if="canWatchMovies && movie.nextEpisodeToPlay && movie.nextEpisodeToPlay.isConverted && hasChromecastSupport" class="button large">
+              <chromecast-button title="Play on ChromeCast" :episode="nextEpisode" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted && hasChromecastSupport" class="button large">
                 <i class="fab fa-chromecast"></i>
               </chromecast-button>
               <a title="Download movie and subtitles" href="#" class="button large" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
@@ -95,8 +97,8 @@ export default Vue.component('movie', {
                 <i class="fas fa-ellipsis-h"></i>
               </a>
             </div>
-            <download-menu v-if="downloadMenuVisible && movie.nextEpisodeToPlay" class="button-group vertical" :episode="movie.nextEpisodeToPlay || movie.episodeList[0]" :movie="movie"></download-menu>
-            <admin-menu v-if="adminMenuVisible && movie.nextEpisodeToPlay" class="button-group vertical" :episode="movie.nextEpisodeToPlay || movie.episodeList[0]" :movie="movie"></admin-menu>
+            <download-menu v-if="downloadMenuVisible && nextEpisode" class="button-group vertical" :episode="nextEpisode" :movie="movie"></download-menu>
+            <admin-menu v-if="adminMenuVisible && nextEpisode" class="button-group vertical" :episode="nextEpisode" :movie="movie"></admin-menu>
           </div>
           <div class="section episodes" v-if="episodeList.length > 1">
             <div class="tab-group">

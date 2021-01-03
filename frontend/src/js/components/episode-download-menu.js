@@ -23,7 +23,7 @@ export default Vue.component('download-menu', {
       <a class="button" :href="episode.originalVideoUrl" download>
         <i class="fas fa-film"></i> <span>Download original video</span>
       </a>
-      <a class="button" :href="episode.convertedVideoUrl" download>
+      <a class="button" :href="episode.convertedVideoUrl" download v-if="episode.isConverted">
         <i class="fas fa-film"></i> <span>Download converted video</span>
       </a>
       <a class="button" :href="episode.srtSubtitlesUrlEn" download v-if="subtitlesExistEn">
