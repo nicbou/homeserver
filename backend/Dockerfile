@@ -2,8 +2,7 @@ FROM ubuntu:20.04
 MAINTAINER Nicolas Bouliane
 
 # Update the default application repository sources list
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y \
+RUN apt-get update && apt-get -y upgrade &&  apt-get install -y \
     libpq-dev \
     python3 \
     python3-dev \
