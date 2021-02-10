@@ -20,6 +20,8 @@ def video_to_mp4():
         abort(400, {'result': 'failure', 'message': '`input` parameter is missing from request payload'})
 
     input_file = movie_library_path / request.json.get('input')
+
+    # TODO: Breaks when there is a dot in the file name
     output_file = Path(str(input_file).replace("".join(input_file.suffixes), '.converted.mp4'))
     callback_url = request.json.get('callbackUrl')
 

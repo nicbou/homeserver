@@ -22,7 +22,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     default_video_height = int(os.environ.get('MAX_VIDEO_HEIGHT', 720))
 
     # Get original video metadata
-    ffprobe_cmd = subprocess.run(
+    ffprobe_cmd = subprocess.check_output(
         [
             'ffprobe',
             '-v', 'error',
@@ -30,7 +30,6 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
             '-of', 'json',
             input_file,
         ],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
     )
     video_streams = json.loads(ffprobe_cmd.stdout.decode('utf-8'))['streams']
     video_format = json.loads(ffprobe_cmd.stdout.decode('utf-8'))['format']
@@ -49,8 +48,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                 f"- Bitrate: {total_bitrate}\n"
                 f"- Streamable: {is_streamable}\n"
                 f"- Format: {video_format['format_name']}\n"
-                f"- Streams: \n"
-                f"  {video_streams}")
+                f"- Streams: {video_streams}")
 
     if has_mp4_container and has_h264_video and has_aac_audio and total_bitrate <= max_video_bitrate and is_streamable:
         # Instead of converting this video, hardlink it to its parent
@@ -67,7 +65,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     else:
         try:
             logger.info(f'Converting "{input_file}" to "{output_file}"')
-            subprocess.run(
+            subprocess.check_output(
                 [
                     '/usr/local/bin/ffmpeg',
                     '-i', input_file,
@@ -86,14 +84,13 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                     '-loglevel', 'warning',
                     '-codec:a', 'libfdk_aac',
                     '-f', 'mp4', output_file
-                ],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+                ]
             )
             logger.info(f'Conversion of {input_file} successful')
             requests.post(callback_url, json={'status': 'converted'})
         except subprocess.CalledProcessError as exc:
             logger.exception(f'Failed to convert "{input_file}" to "{output_file}"\n'
-                             f'Command: {" ".join(exc.cmd)}')
+                             f'Output: {exc.output}')
             requests.post(callback_url, json={'status': 'conversion-failed'})
             raise
 
