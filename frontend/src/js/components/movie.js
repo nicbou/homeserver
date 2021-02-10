@@ -83,7 +83,7 @@ export default Vue.component('movie', {
               <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && nextEpisode && nextEpisode.isWatched" @click.prevent="markEpisodeAsUnwatched(nextEpisode)">
                 <i class="fas fa-check-circle"></i>
               </a>
-              <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="canWatchMovies && nextEpisode" class="button large main">
+              <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted" class="button large main">
                 <i class="fas fa-play"></i>
                 <span class="label" v-if="episodeList.length > 1">{{ nextEpisodeName }}</span>
               </a>

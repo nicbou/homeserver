@@ -21,10 +21,10 @@ export default Vue.component('admin-menu', {
       <a class="button" href="#" @click.prevent="deleteEpisode">
         <i class="fas fa-trash-alt"></i> Delete episode
       </a>
-      <a class="button" href="#" @click.prevent="convertEpisode" v-if="!episode.isConverted">
+      <a class="button" href="#" @click.prevent="convertEpisode" v-if="!episode.isConverted && !episode.isConverting">
         <i class="fa fa-file-video"></i> Convert episode
       </a>
-      <a class="button" href="#" @click.prevent="convertEpisode" v-if="episode.isConverted">
+      <a class="button" href="#" @click.prevent="convertEpisode" v-if="episode.isConverted || episode.isConverting">
         <i class="fa fa-file-video"></i> Reconvert episode
       </a>
     </div>
