@@ -22,7 +22,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     default_video_height = int(os.environ.get('MAX_VIDEO_HEIGHT', 720))
 
     # Get original video metadata
-    ffprobe_cmd = subprocess.check_output(
+    ffprobe_output = subprocess.check_output(
         [
             'ffprobe',
             '-v', 'error',
@@ -31,8 +31,8 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
             input_file,
         ],
     )
-    video_streams = json.loads(ffprobe_cmd.stdout.decode('utf-8'))['streams']
-    video_format = json.loads(ffprobe_cmd.stdout.decode('utf-8'))['format']
+    video_streams = json.loads(ffprobe_output.decode('utf-8'))['streams']
+    video_format = json.loads(ffprobe_output.decode('utf-8'))['format']
     total_bitrate = sum(int(s.get('bit_rate', 0)) for s in video_streams)
     has_mp4_container = 'mp4' in video_format['format_name'].split(',')
     has_aac_audio = any(s.get('codec_name') == 'aac' for s in video_streams)
