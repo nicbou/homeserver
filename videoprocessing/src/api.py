@@ -33,7 +33,7 @@ def video_to_mp4():
             'output_file': str(output_file),
             'callback_url': callback_url,
         },
-        timeout=21600  # 6 hours
+        job_timeout=21600  # 6 hours
     )
     if input_file.suffix.lower() == '.mkv':
         subtitles_queue.enqueue(
@@ -42,7 +42,7 @@ def video_to_mp4():
                 'input_file': str(input_file),
                 'callback_url': callback_url,
             },
-            timeout=1800  # 30 min
+            job_timeout=1800  # 30 min
         )
 
     response.status = 202
@@ -63,7 +63,7 @@ def subtitles_to_vtt():
             'input_file': str(input_file),
             'output_file': str(output_file),
         },
-        timeout=1800  # 30 min
+        job_timeout=1800  # 30 min
     )
 
     response.status = 202

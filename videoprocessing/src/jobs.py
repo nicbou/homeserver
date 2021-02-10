@@ -1,9 +1,16 @@
-import subprocess
-import shlex
+import contextlib
 import json
+import logging
+import os
+import shlex
+import subprocess
+
+import chardet
 import requests
 from pycaption import CaptionConverter, WebVTTWriter, SRTReader, CaptionReadNoCaptions
-import chardet
+
+logger = logging.getLogger(__name__)
+
 
 # Prevents escaping of HTML in subtitles
 WebVTTWriter._encode = lambda self, s: s
@@ -11,20 +18,84 @@ WebVTTWriter._encode = lambda self, s: s
 
 def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     """Convert input_file to MP4, saves it to output_file."""
-    command = '/srv/src/convert.sh {input_path} {output_path}'.format(
-        input_path=shlex.quote(input_file),
-        output_path=shlex.quote(output_file),
-    )
-    process = subprocess.Popen(command, shell=True)
-    stdout, stderr = process.communicate()
-    return_code = process.returncode
+    max_video_bitrate = int(os.environ.get('MAX_VIDEO_BITRATE', 3000000))
+    default_video_height = int(os.environ.get('MAX_VIDEO_HEIGHT', 720))
 
-    if callback_url:
-        if return_code == 0:
+    # Get original video metadata
+    ffprobe_cmd = subprocess.run(
+        [
+            'ffprobe',
+            '-v', 'error',
+            '-show_entries', 'format=format_name,duration:stream=bit_rate,width,height,codec_name',
+            '-of', 'json',
+            input_file,
+        ],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+    )
+    video_streams = json.loads(ffprobe_cmd.stdout.decode('utf-8'))['streams']
+    video_format = json.loads(ffprobe_cmd.stdout.decode('utf-8'))['format']
+    total_bitrate = sum(int(s.get('bit_rate', 0)) for s in video_streams)
+    has_mp4_container = 'mp4' in video_format['format_name'].split(',')
+    has_aac_audio = any(s.get('codec_name') == 'aac' for s in video_streams)
+    has_h264_video = any(s.get('codec_name') == 'h264' for s in video_streams)
+
+    # Check if faststart is enabled (https://stackoverflow.com/a/46895695/1067337)
+    is_streamable = subprocess.check_output([
+        'mediainfo', '--Inform=General;%IsStreamable%', input_file
+    ]).decode('utf-8').strip() == 'Yes'
+
+    logger.info(f'Processing {input_file}:\n'
+                f"- Output file: {output_file}\n"
+                f"- Bitrate: {total_bitrate}\n"
+                f"- Streamable: {is_streamable}\n"
+                f"- Format: {video_format['format_name']}\n"
+                f"- Streams: \n"
+                f"  {video_streams}")
+
+    if has_mp4_container and has_h264_video and has_aac_audio and total_bitrate <= max_video_bitrate and is_streamable:
+        # Instead of converting this video, hardlink it to its parent
+        try:
+            logger.info(f'Original video is already streamable. Hard linking "{input_file}" to "{output_file}"')
+            with contextlib.suppress(FileNotFoundError):
+                os.unlink(output_file)
+            os.link(input_file, output_file)
             requests.post(callback_url, json={'status': 'converted'})
-        else:
+        except:
+            logger.exception(f'Failed to hard link original video "{input_file}" to "{output_file}"')
             requests.post(callback_url, json={'status': 'conversion-failed'})
-    return return_code
+            raise
+    else:
+        try:
+            logger.info(f'Converting "{input_file}" to "{output_file}"')
+            subprocess.run(
+                [
+                    '/usr/local/bin/ffmpeg',
+                    '-i', input_file,
+                    '-codec:v', 'libx264',
+                    '-profile:v', 'high',
+                    '-preset', 'fast',
+                    '-movflags', 'faststart',  # Moves metadata to start, to allow streaming
+                    '-b:v', str(max_video_bitrate),  # Target average video bitrate
+                    '-maxrate', str(max_video_bitrate * 1.5),  # Max video bitrade
+                    '-b:a', '128k',  # Target audio bitrate
+                    '-bufsize', str(max_video_bitrate * 1.5),
+                    '-filter:v', f"scale=-2:'min({default_video_height},ih)'",
+                    '-threads', '0',
+                    '-ac', '2',  # Stereo audio
+                    '-af', 'aresample=async=1',  # Keep audio in sync with video
+                    '-loglevel', 'warning',
+                    '-codec:a', 'libfdk_aac',
+                    '-f', 'mp4', output_file
+                ],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+            )
+            logger.info(f'Conversion of {input_file} successful')
+            requests.post(callback_url, json={'status': 'converted'})
+        except subprocess.CalledProcessError as exc:
+            logger.exception(f'Failed to convert "{input_file}" to "{output_file}"\n'
+                             f'Command: {" ".join(exc.cmd)}')
+            requests.post(callback_url, json={'status': 'conversion-failed'})
+            raise
 
 
 def convert_subtitles_to_vtt(input_file: str, output_file: str):
@@ -58,10 +129,20 @@ def extract_mkv_subtitles(input_file: str, callback_url: str):
     :param input_file: .mkv file absolute path
     :returns: True if subtitles were found and extracted, False otherwise
     """
-    command = u'mkvmerge --identify-verbose --identification-format json {input_path}'.format(
-        input_path=shlex.quote(input_file)
-    )
-    mkvmerge_output = subprocess.check_output(command, shell=True)
+    try:
+        logger.info("Extracting subtitles from MKV file")
+        mkvmerge_output = subprocess.check_output(
+            [
+                'mkvmerge',
+                '--identify',
+                '--identification-format', 'json',
+                input_file
+            ]
+        )
+    except subprocess.CalledProcessError:
+        logger.exception("Could not extract subtitles from MKV file")
+        return False
+
     json_tracks = json.loads(mkvmerge_output.decode('utf-8')).get('tracks', [])
 
     tracks_to_extract = {}

@@ -118,12 +118,12 @@ USE_X_FORWARDED_HOST = True
 # ==================================================
 
 LOGIN_REDIRECT_URL = '/'
-SESSION_COOKIE_DOMAIN=".nicolasbouliane.com"
+SESSION_COOKIE_DOMAIN = ".nicolasbouliane.com"
 VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
 MOVIE_LIBRARY_PATH = Path(os.environ.get('MOVIE_LIBRARY_PATH'))
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')
 TRIAGE_PATH = Path(os.environ.get('TRIAGE_PATH'))
-MOVIE_EXTENSIONS = (
+VIDEO_EXTENSIONS = (
     '.mkv', '.avi', '.mpg', '.wmv', '.mov', '.m4v', '.3gp', '.mpeg', '.mpe', '.ogm', '.flv', '.divx', '.mp4'
 )
 SUBTITLE_EXTENSIONS = ('.srt', '.vtt')

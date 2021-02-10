@@ -1,4 +1,7 @@
-FROM jrottenberg/ffmpeg:3.3
+FROM jrottenberg/ffmpeg:4.1-ubuntu2004
+
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install Python 3 for the API, mkvtoolnix for mkv subtitles, lxml for vtt subtitles
 RUN apt-get update && apt-get install -y \
@@ -6,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     python3-pip \
     bash \
+    mediainfo \
     mkvtoolnix \
     python-lxml \
   && pip3 install --no-cache-dir --upgrade pip
@@ -16,7 +20,7 @@ RUN cd /usr/bin \
 
 # Setup API
 COPY requirements.txt /srv/requirements.txt
-RUN pip install -r /srv/requirements.txt
+RUN pip3 install -r /srv/requirements.txt
 
 COPY src /srv/src
 COPY docker-entrypoint.sh /docker-entrypoint.sh

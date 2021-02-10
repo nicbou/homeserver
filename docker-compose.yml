@@ -44,6 +44,8 @@ services:
     environment:
       - MOVIE_LIBRARY_PATH=/movies/library
       - REDIS_DB_URL=redis://redis:6379/1
+      - MAX_VIDEO_BITRATE
+      - DEFAULT_VIDEO_HEIGHT
     volumes:
       - ${MOVIE_LIBRARY_PATH}:/movies
     depends_on:

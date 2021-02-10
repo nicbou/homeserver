@@ -15,7 +15,7 @@ Home server backend and frontend. The backend is built with Django and the front
 
 ### Environment variables
 
-Put these environment variables in a .env file. These environment variables are used by the project.
+Put these environment variables in a `.env` file. These environment variables are used by the project.
 
 * `COMPOSE_PROJECT_NAME`: A unique value for this project, to avoid docker container and volume conflicts.
 * `DIGITALOCEAN_TOKEN`: API token used to update dynamic DNS
@@ -23,6 +23,8 @@ Put these environment variables in a .env file. These environment variables are 
 * `BACKEND_DEBUG`: '1'. Any other value sets debugging to false.
 * `TRANSMISSION_DATA_PATH`: Local path that will be mounted as Transmission's data folder (for incomplete torrents, settings etc)
 * `MOVIE_LIBRARY_PATH`: The directory where the completed torrents awaiting triage and the organized movies, covers and subtitles are stored.
+* `MAX_VIDEO_BITRATE`: The maximum video bitrate allowed, in bits per second. Defaults to 2000000.
+* `DEFAULT_VIDEO_HEIGHT`: The default height for converted videos, in pixels. Defaults to 720.
 * OpenVPN configuration for [the Transmission/OpenVPN image](https://hub.docker.com/r/haugene/transmission-openvpn/):
     * `OPENVPN_PROVIDER`: See documentation for `haugene/transmission-openvpn`
     * `OPENVPN_USERNAME`
