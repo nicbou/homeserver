@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import datetime
 import logging
+import uuid
 from pathlib import Path
 
-from django.db import models
 from django.conf import settings
-import os
+from django.contrib.auth.models import User
+from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
-import datetime
-import uuid
 from django.utils import timezone
-from django.contrib.auth.models import User
-
 
 logger = logging.getLogger(__name__)
 

@@ -50,12 +50,13 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                 f"- Format: {video_format['format_name']}\n"
                 f"- Streams: {video_streams}")
 
+    with contextlib.suppress(FileNotFoundError):
+        os.unlink(output_file)
+
     if has_mp4_container and has_h264_video and has_aac_audio and total_bitrate <= max_video_bitrate and is_streamable:
         # Instead of converting this video, hardlink it to its parent
         try:
             logger.info(f'Original video is already streamable. Hard linking "{input_file}" to "{output_file}"')
-            with contextlib.suppress(FileNotFoundError):
-                os.unlink(output_file)
             os.link(input_file, output_file)
             requests.post(callback_url, json={'status': 'converted'})
         except:
@@ -73,9 +74,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                     '-profile:v', 'high',
                     '-preset', 'fast',
                     '-movflags', 'faststart',  # Moves metadata to start, to allow streaming
-                    '-b:v', str(max_video_bitrate),  # Target average video bitrate
-                    '-maxrate', str(max_video_bitrate * 1.5),  # Max video bitrade
-                    '-b:a', '128k',  # Target audio bitrate
+                    '-maxrate', str(max_video_bitrate),
                     '-bufsize', str(max_video_bitrate * 1.5),
                     '-filter:v', f"scale=-2:'min({default_video_height},ih)'",
                     '-threads', '0',
@@ -90,13 +89,14 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
             requests.post(callback_url, json={'status': 'converted'})
         except subprocess.CalledProcessError as exc:
             logger.exception(f'Failed to convert "{input_file}" to "{output_file}"\n'
-                             f'Output: {exc.output}')
+                             f'Output: {exc.output.decode("utf-8")}')
             requests.post(callback_url, json={'status': 'conversion-failed'})
             raise
 
 
 def convert_subtitles_to_vtt(input_file: str, output_file: str):
     """Convert .srt subtitles to .vtt for web playback."""
+    logger.info(f'Converting {input_file} to {output_file}')
     with open(input_file, mode='rb') as raw_input_content:
         encoding = chardet.detect(raw_input_content.read())['encoding']
 
@@ -107,6 +107,7 @@ def convert_subtitles_to_vtt(input_file: str, output_file: str):
     try:
         converter.read(srt_contents, SRTReader())
     except CaptionReadNoCaptions:
+        logger.exception(f'Failed to convert {input_file} to {output_file}')
         return False  # Likely UTF-16 subtitles
     vtt_captions = converter.write(WebVTTWriter())
 
@@ -116,7 +117,7 @@ def convert_subtitles_to_vtt(input_file: str, output_file: str):
     return True
 
 
-def extract_mkv_subtitles(input_file: str, callback_url: str):
+def extract_mkv_subtitles(input_file: str):
     """
     Extract .srt subtitles from an .mkv file.
 
@@ -126,8 +127,8 @@ def extract_mkv_subtitles(input_file: str, callback_url: str):
     :param input_file: .mkv file absolute path
     :returns: True if subtitles were found and extracted, False otherwise
     """
+    logger.error(f"Extracting subtitles from {input_file}")
     try:
-        logger.info("Extracting subtitles from MKV file")
         mkvmerge_output = subprocess.check_output(
             [
                 'mkvmerge',
@@ -138,7 +139,7 @@ def extract_mkv_subtitles(input_file: str, callback_url: str):
         )
     except subprocess.CalledProcessError:
         logger.exception("Could not extract subtitles from MKV file")
-        return False
+        raise
 
     json_tracks = json.loads(mkvmerge_output.decode('utf-8')).get('tracks', [])
 
@@ -153,23 +154,24 @@ def extract_mkv_subtitles(input_file: str, callback_url: str):
             tracks_to_extract[track_language] = tracks_to_extract.get(track_language, [])
             tracks_to_extract[track_language].append(track)
 
+    logger.info(f"Found {len(tracks_to_extract)} subtitle tracks to extract")
+
     # Extract the first available track for each language
     language_count = len(tracks_to_extract.keys())
     for language, tracks in tracks_to_extract.items():
         # Title.mkv -> Title.fre.srt or Title.srt
-        extension = ".{language}.srt".format(language=language) if language != 'eng' and language_count > 1 else '.srt'
+        extension = f".{language}.srt" if language != 'eng' and language_count > 1 else '.srt'
 
         subtitles_output_file = "{path}{extension}".format(
             path=".".join(input_file.split('.')[0:-1]),
             extension=extension
         )
 
-        if len(tracks_to_extract[language]) > 0:
-            command = u'mkvextract tracks {video_path} {track_id}:{srt_path}'.format(
-                video_path=shlex.quote(input_file),
-                track_id=tracks_to_extract[language][0]['id'],
-                srt_path=shlex.quote(subtitles_output_file),
+        logger.info(f"Extracting {language} subtitles to {subtitles_output_file}")
+
+        if len(tracks) > 0:
+            subprocess.check_output(
+                ['mkvextract', 'tracks', input_file, f"{tracks[0]['id']}:{shlex.quote(subtitles_output_file)}"]
             )
-            subprocess.Popen(command, shell=True).communicate()
 
     return language_count > 1

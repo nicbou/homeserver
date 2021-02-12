@@ -205,7 +205,7 @@ def queue_episode_for_conversion(episode: Episode):
     try:
         logger.info(f'Queueing "{episode.library_filename}" for conversion.')
         episode.conversion_status = Episode.CONVERTING
-        requests.post(api_url, json={'input': str(episode.library_filename), 'callbackUrl': callback_url})
+        requests.post(api_url, json={'input': str(episode.library_filename), 'output': str(episode.converted_filename), 'callbackUrl': callback_url})
     except (HTTPError, Timeout):
         episode.conversion_status = Episode.CONVERSION_FAILED
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
@@ -217,16 +217,16 @@ def queue_subtitles_for_conversion(episode: Episode):
     Queue episode subtitles for conversion
     """
     subtitles_paths_and_filenames = (
-        (episode.srt_subtitles_path_en, episode.srt_subtitles_filename_en),
-        (episode.srt_subtitles_path_de, episode.srt_subtitles_filename_de),
-        (episode.srt_subtitles_path_fr, episode.srt_subtitles_filename_fr),
+        (episode.srt_subtitles_path_en, episode.srt_subtitles_filename_en, episode.vtt_subtitles_filename_en),
+        (episode.srt_subtitles_path_de, episode.srt_subtitles_filename_de, episode.vtt_subtitles_filename_de),
+        (episode.srt_subtitles_path_fr, episode.srt_subtitles_filename_fr, episode.vtt_subtitles_filename_fr),
     )
-    for srt_subtitles_path, srt_subtitles_filename in subtitles_paths_and_filenames:
+    for srt_subtitles_path, srt_subtitles_filename, vtt_subtitles_filename in subtitles_paths_and_filenames:
         if srt_subtitles_path.exists():
             try:
                 requests.post(
                     f"{settings.VIDEO_PROCESSING_API_URL}/subtitlesToVTT",
-                    json={'input': srt_subtitles_filename}
+                    json={'input': srt_subtitles_filename, 'output': vtt_subtitles_filename}
                 )
             except (HTTPError, Timeout):
                 raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")

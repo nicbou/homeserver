@@ -38,6 +38,6 @@ def conversion_exception_handler(job, exc_type, exc_value, traceback):
 
 
 with Connection(redis.from_url(os.environ['REDIS_DB_URL'])):
-    conversion_worker = Worker(['conversion'])
+    conversion_worker = Worker(['conversion', 'subtitles'], log_job_description=False)
     conversion_worker.push_exc_handler(conversion_exception_handler)
     conversion_worker.work()
