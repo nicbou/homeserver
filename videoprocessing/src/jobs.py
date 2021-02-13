@@ -127,7 +127,7 @@ def extract_mkv_subtitles(input_file: str):
     :param input_file: .mkv file absolute path
     :returns: True if subtitles were found and extracted, False otherwise
     """
-    logger.error(f"Extracting subtitles from {input_file}")
+    logger.info(f"Extracting subtitles from {input_file}")
     try:
         mkvmerge_output = subprocess.check_output(
             [
@@ -167,9 +167,8 @@ def extract_mkv_subtitles(input_file: str):
             extension=extension
         )
 
-        logger.info(f"Extracting {language} subtitles to {subtitles_output_file}")
-
         if len(tracks) > 0:
+            logger.info(f"Extracting {language} subtitles to {subtitles_output_file}")
             subprocess.check_output(
                 ['mkvextract', 'tracks', input_file, f"{tracks[0]['id']}:{shlex.quote(subtitles_output_file)}"]
             )
