@@ -20,6 +20,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     """Convert input_file to MP4, saves it to output_file."""
     max_video_bitrate = int(os.environ.get('MAX_VIDEO_BITRATE', 3000000))
     default_video_height = int(os.environ.get('MAX_VIDEO_HEIGHT', 720))
+    ffmpeg_path = '/usr/local/bin/ffmpeg'
 
     # Get original video metadata
     ffprobe_output = subprocess.check_output(
@@ -64,12 +65,19 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                 logger.exception(f'Failed to hard link original video "{input_file}" to "{output_file}"')
                 requests.post(callback_url, json={'status': 'conversion-failed'})
                 raise
-        # Run qt=faststart to make the movie streamable. Just replace the original, since the process is not destructive
+        # Add moov atom at the begining to allow streaming/seeking
         else:
             try:
                 logger.info(f'Original video has right format, but is not streamable. '
-                            f'Running qt-faststart on "{input_file}".')
-                subprocess.check_output(['qt-faststart', input_file, output_file])
+                            f'Adding moov atom to "{input_file}".')
+                subprocess.check_output([
+                    ffmpeg_path,
+                    '-i', input_file,
+                    '-c:v', 'copy'
+                    '-movflags', 'faststart',
+                    '-strict', '-2',
+                    output_file
+                ])
 
                 logger.info(f"Replacing original at {input_file}, with the streamable version")
                 os.unlink(input_file)
@@ -83,25 +91,23 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     else:
         try:
             logger.info(f'Converting "{input_file}" to "{output_file}"')
-            subprocess.check_output(
-                [
-                    '/usr/local/bin/ffmpeg',
-                    '-i', input_file,
-                    '-codec:v', 'libx264',
-                    '-profile:v', 'high',
-                    '-preset', 'fast',
-                    '-movflags', 'faststart',  # Moves metadata to start, to allow streaming
-                    '-maxrate', str(max_video_bitrate),
-                    '-bufsize', str(max_video_bitrate * 1.5),
-                    '-filter:v', f"scale=-2:'min({default_video_height},ih)'",
-                    '-threads', '0',
-                    '-ac', '2',  # Stereo audio
-                    '-af', 'aresample=async=1',  # Keep audio in sync with video
-                    '-loglevel', 'warning',
-                    '-codec:a', 'libfdk_aac',
-                    '-f', 'mp4', output_file
-                ]
-            )
+            subprocess.check_output([
+                ffmpeg_path,
+                '-i', input_file,
+                '-codec:v', 'libx264',
+                '-profile:v', 'high',
+                '-preset', 'fast',
+                '-movflags', 'faststart',  # Moves metadata to start, to allow streaming
+                '-maxrate', str(max_video_bitrate),
+                '-bufsize', str(max_video_bitrate * 1.5),
+                '-filter:v', f"scale=-2:'min({default_video_height},ih)'",
+                '-threads', '0',
+                '-ac', '2',  # Stereo audio
+                '-af', 'aresample=async=1',  # Keep audio in sync with video
+                '-loglevel', 'warning',
+                '-codec:a', 'libfdk_aac',
+                '-f', 'mp4', output_file
+            ])
             logger.info(f'Conversion of {input_file} successful')
             requests.post(callback_url, json={'status': 'converted'})
         except subprocess.CalledProcessError as exc:
@@ -146,14 +152,12 @@ def extract_mkv_subtitles(input_file: str):
     """
     logger.info(f"Extracting subtitles from {input_file}")
     try:
-        mkvmerge_output = subprocess.check_output(
-            [
-                'mkvmerge',
-                '--identify',
-                '--identification-format', 'json',
-                input_file
-            ]
-        )
+        mkvmerge_output = subprocess.check_output([
+            'mkvmerge',
+            '--identify',
+            '--identification-format', 'json',
+            input_file
+        ])
     except subprocess.CalledProcessError:
         logger.exception("Could not extract subtitles from MKV file")
         raise
