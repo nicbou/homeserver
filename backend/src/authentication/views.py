@@ -28,6 +28,11 @@ def check_auth(request):
         for url_matcher, permission in permission_checks:
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
                 return HttpResponse(status=403)
+
+        # TODO: Remove when timeline has its own auth
+        if request.META.get('HTTP_HOST') == 'timeline.nicolasbouliane.com' and not request.user.is_superuser:
+            return HttpResponse(status=403)
+
         return HttpResponse()
     elif parsed_url.path.startswith('/movies') and 'token' in querystring:
         try:
