@@ -75,6 +75,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                     '-i', input_file,
                     '-c:v', 'copy',
                     '-movflags', 'faststart',
+                    '-loglevel', 'warning',
                     '-strict', '-2',
                     output_file
                 ])
