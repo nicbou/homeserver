@@ -53,16 +53,33 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     with contextlib.suppress(FileNotFoundError):
         os.unlink(output_file)
 
-    if has_mp4_container and has_h264_video and has_aac_audio and total_bitrate <= max_video_bitrate and is_streamable:
+    if has_mp4_container and has_h264_video and has_aac_audio and total_bitrate <= max_video_bitrate:
         # Instead of converting this video, hardlink it to its parent
-        try:
-            logger.info(f'Original video is already streamable. Hard linking "{input_file}" to "{output_file}"')
-            os.link(input_file, output_file)
-            requests.post(callback_url, json={'status': 'converted'})
-        except:
-            logger.exception(f'Failed to hard link original video "{input_file}" to "{output_file}"')
-            requests.post(callback_url, json={'status': 'conversion-failed'})
-            raise
+        if not is_streamable:
+            try:
+                logger.info(f'Original video is already streamable. Hard linking "{input_file}" to "{output_file}"')
+                os.link(input_file, output_file)
+                requests.post(callback_url, json={'status': 'converted'})
+            except:
+                logger.exception(f'Failed to hard link original video "{input_file}" to "{output_file}"')
+                requests.post(callback_url, json={'status': 'conversion-failed'})
+                raise
+        # Run qt=faststart to make the movie streamable. Just replace the original, since the process is not destructive
+        else:
+            try:
+                logger.info(f'Original video has right format, but is not streamable. '
+                            f'Running qt-faststart on "{input_file}".')
+                subprocess.check_output(['qt-faststart', input_file, output_file])
+
+                logger.info(f"Replacing original at {input_file}, with the streamable version")
+                os.unlink(input_file)
+                os.link(output_file, input_file)
+
+                requests.post(callback_url, json={'status': 'converted'})
+            except:
+                logger.exception(f'Failed to add qt-faststart to "{input_file}"')
+                requests.post(callback_url, json={'status': 'conversion-failed'})
+                raise
     else:
         try:
             logger.info(f'Converting "{input_file}" to "{output_file}"')
