@@ -73,7 +73,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                 subprocess.check_output([
                     ffmpeg_path,
                     '-i', input_file,
-                    '-c:v', 'copy'
+                    '-c:v', 'copy',
                     '-movflags', 'faststart',
                     '-strict', '-2',
                     output_file
