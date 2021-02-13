@@ -50,6 +50,7 @@ services:
       - ${MOVIE_LIBRARY_PATH}:/movies
     depends_on:
       - redis
+      - backend
   torrents:
     image: haugene/transmission-openvpn:latest
     environment:
