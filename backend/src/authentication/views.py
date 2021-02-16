@@ -77,6 +77,7 @@ class JSONPermissionsView(View):
 
         return JsonResponse({
             'user': request.user.get_username(),
+            'displayName': request.user.first_name or request.user.get_username(),
             'isAdmin': request.user.is_superuser,
             'permissions': [p.codename for p in permissions]
         })

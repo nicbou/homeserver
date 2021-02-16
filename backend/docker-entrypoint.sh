@@ -10,7 +10,6 @@ python3 manage.py collectstatic --noinput  # Collect static files
 touch /srv/logs/gunicorn.log
 touch /srv/logs/access.log
 tail -n 0 -f /srv/logs/*.log &
-service rsyslog start
 
 # Make sure the data directories exist
 mkdir -p /movies
@@ -19,6 +18,9 @@ mkdir -p /movies/library
 
 # Start Gunicorn processes
 echo Starting Gunicorn.
+
+python3 /srv/src/watchparty/server.py &
+
 exec gunicorn backend.wsgi:application \
     --name backend \
     --reload \
@@ -28,4 +30,3 @@ exec gunicorn backend.wsgi:application \
     --log-file=/srv/logs/gunicorn.log \
     --access-logfile=/srv/logs/access.log \
     "$@"
-

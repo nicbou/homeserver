@@ -1,9 +1,9 @@
-import permissionsStore from './permissions.js';
+import userSettingsStore from './users.js';
 import moviesStore from './movies.js';
 
 export default new Vuex.Store({
   modules: {
-    permissions: permissionsStore,
+    users: userSettingsStore,
     movies: moviesStore,
   },
 });

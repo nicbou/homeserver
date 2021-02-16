@@ -28,6 +28,10 @@ logging.config.dictConfig({
             'level': 'INFO',
             'handlers': ['console'],
         },
+        'rq.worker': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+        }
     },
 })
 

@@ -1,3 +1,8 @@
+import ChromeCast from './../services/chromecast.js';
+import ChromeCastButtonComponent from './../components/chromecast-button.js';
+import AdminMenuComponent from './../components/episode-admin-menu.js';
+import DownloadMenuComponent from './../components/episode-download-menu.js';
+
 export default Vue.component('episode-list-item', {
   props: ['episode', 'movie'],
   data: function() {
@@ -9,9 +14,9 @@ export default Vue.component('episode-list-item', {
     };
   },
   mounted: function () {
-    this.$store.dispatch('permissions/getPermissions').then(permissions => {
-      this.canWatchMovies = permissions.includes('movies_watch');
-      this.canManageMovies = permissions.includes('movies_manage');
+    this.$store.dispatch('users/getUserSettings').then(userSettings => {
+      this.canWatchMovies = userSettings.permissions.includes('movies_watch');
+      this.canManageMovies = userSettings.permissions.includes('movies_manage');
     });
   },
   computed: {

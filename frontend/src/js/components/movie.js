@@ -1,4 +1,7 @@
+import AdminMenuComponent from './../components/episode-admin-menu.js';
 import ChromeCast from './../services/chromecast.js';
+import ChromeCastButtonComponent from './../components/chromecast-button.js';
+import DownloadMenuComponent from './../components/episode-download-menu.js';
 import StarComponent from './star.js';
 
 export default Vue.component('movie', {
@@ -14,9 +17,9 @@ export default Vue.component('movie', {
   },
   mounted: function () {
     this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
-    this.$store.dispatch('permissions/getPermissions').then(permissions => {
-      this.canWatchMovies = permissions.includes('movies_watch');
-      this.canManageMovies = permissions.includes('movies_manage');
+    this.$store.dispatch('users/getUserSettings').then(userSettings => {
+      this.canWatchMovies = userSettings.permissions.includes('movies_watch');
+      this.canManageMovies = userSettings.permissions.includes('movies_manage');
     });
   },
   computed: {

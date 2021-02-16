@@ -1,4 +1,5 @@
 import TriageService from './../services/triage-service.js';
+import TriageItemComponent from './../components/triage-item.js';
 import SpinnerComponent from './spinner.js';
 
 export default Vue.component('triage', {

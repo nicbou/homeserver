@@ -4,3 +4,4 @@ psycopg2==2.8.4
 requests==2.23.0
 selenium==3.141.0
 coloredlogs==14.0
+websockets==8.1

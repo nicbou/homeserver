@@ -1,8 +1,10 @@
 # Home server
 
-Home server backend and frontend. The backend is built with Django and the frontend with Vue.js. They are brought together with Docker.
+Home server backend and frontend. It's a sort of personal Netflix. For more info, read the [full introduction](https://nicolasbouliane.com/projects/home-server).
 
-![](http://nicolasbouliane.com/files/homeserver/covers.png)
+The backend is built with Django and the frontend with Vue.js. It runs inside Docker.
+
+![](https://nicolasbouliane.com/images/_ultrawide/Home-page.jpg)
 
 ## Setup
 
@@ -17,14 +19,15 @@ Home server backend and frontend. The backend is built with Django and the front
 
 Put these environment variables in a `.env` file. These environment variables are used by the project.
 
-* `COMPOSE_PROJECT_NAME`: A unique value for this project, to avoid docker container and volume conflicts.
-* `DIGITALOCEAN_TOKEN`: API token used to update dynamic DNS
-* `BACKEND_SECRET_KEY`: A random string used by Django. Keep this secret.
-* `BACKEND_DEBUG`: '1'. Any other value sets debugging to false.
-* `TRANSMISSION_DATA_PATH`: Local path that will be mounted as Transmission's data folder (for incomplete torrents, settings etc)
-* `MOVIE_LIBRARY_PATH`: The directory where the completed torrents awaiting triage and the organized movies, covers and subtitles are stored.
-* `MAX_VIDEO_BITRATE`: The maximum video bitrate allowed, in bits per second. Defaults to 2000000.
+* `BACKEND_SECRET_KEY`: A unique, random, secret string used by Django. [Explanation](https://docs.djangoproject.com/en/3.1/ref/settings/#secret-key)
 * `DEFAULT_VIDEO_HEIGHT`: The default height for converted videos, in pixels. Defaults to 720.
+* `DIGITALOCEAN_TOKEN`: API token used to update dynamic DNS. [Explanation](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/).
+* `MAX_VIDEO_BITRATE`: The maximum video bitrate allowed, in bits per second. Defaults to 2000000.
+* `TRANSMISSION_DATA_PATH`: Path to Transmission's data folder on your local filesystem. Incomplete torrents and Transmission settings are stored there.
+* `MOVIE_LIBRARY_PATH`: Path to the movie library. Movies, subtitles and covers are stored there.
+* `AUTH_COOKIE_DOMAIN` (optional): The domain used for authentication cookies. Defaults to the current domain.
+* `BACKEND_DEBUG` (optional): Set to `1` to enable Django backend debugging. Error pages will have meaningful error messages. Not safe for production.
+* `COMPOSE_PROJECT_NAME` (optional): The prefix for this project's docker networks, images, volumes etc. [Explanation](https://docs.docker.com/compose/reference/envvars/).
 * OpenVPN configuration for [the Transmission/OpenVPN image](https://hub.docker.com/r/haugene/transmission-openvpn/):
     * `OPENVPN_PROVIDER`: See documentation for `haugene/transmission-openvpn`
     * `OPENVPN_USERNAME`
