@@ -76,7 +76,7 @@ export default Vue.component('episode', {
     },
     connectToWatchParty: function(displayName) {
       this.socket = new WebSocket(
-        `ws://${window.location.hostname}/api/watchparty/?room=${this.$route.params.episodeId}&user=${displayName}`
+        `wss://${window.location.hostname}/api/watchparty/?room=${this.$route.params.episodeId}&user=${displayName}`
       );
       this.$refs.videoElement.addEventListener('playing', _ => this.sendPlayerEvent('play'));
       this.$refs.videoElement.addEventListener('pause', _ => this.sendPlayerEvent('pause'));
