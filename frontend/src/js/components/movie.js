@@ -2,6 +2,7 @@ import AdminMenuComponent from './../components/episode-admin-menu.js';
 import ChromeCast from './../services/chromecast.js';
 import ChromeCastButtonComponent from './../components/chromecast-button.js';
 import DownloadMenuComponent from './../components/episode-download-menu.js';
+import EpisodeListItemComponent from './../components/episode-list-item.js';
 import StarComponent from './star.js';
 
 export default Vue.component('movie', {
