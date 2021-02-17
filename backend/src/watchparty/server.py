@@ -73,7 +73,7 @@ async def join_room(room: str, username: str, socket: websockets.WebSocketServer
     """
     Add a user to a room, creating the room if it doesn't exist
     """
-    logger.info(f'{username} joined "{room}"')
+    logger.debug(f'{username} joined "{room}"')
     if room in STATE['rooms']:
         STATE['rooms'][room]['users'][username] = socket
     else:
@@ -90,7 +90,7 @@ async def leave_room(room: str, username: str):
     """
     Remove a user from a room, deleting the room if it's empty
     """
-    logger.info(f'{username} left "{room}"')
+    logger.debug(f'{username} left "{room}"')
     try:
         STATE['rooms'][room]['users'].pop(username)
     except KeyError:
@@ -104,21 +104,21 @@ async def leave_room(room: str, username: str):
 
 
 async def play(room: str, username: str, position: int):
-    logger.info(f'{username} played "{room}" at {position}s')
+    logger.debug(f'{username} played "{room}" at {position}s')
     STATE['rooms'][room]['status'] = 'playing'
     STATE['rooms'][room]['position'] = position
     await state_changed(room, username, 'play')
 
 
 async def pause(room: str, username: str, position: int):
-    logger.info(f'{username} paused "{room}" at {position}s')
+    logger.debug(f'{username} paused "{room}" at {position}s')
     STATE['rooms'][room]['status'] = 'paused'
     STATE['rooms'][room]['position'] = position
     await state_changed(room, username, 'pause')
 
 
 async def seek(room: str, username: str, position: int):
-    logger.info(f'{username} seeked "{room}" to {position}s')
+    logger.debug(f'{username} seeked "{room}" to {position}s')
     STATE['rooms'][room]['position'] = position
     await state_changed(room, username, 'seek')
 
@@ -139,6 +139,8 @@ async def rooms(user_websocket: websockets.WebSocketServerProtocol, uri: str):
                 await seek(room, username, data['position'])
             else:
                 logging.error(f"unsupported event: {data}")
+    except websockets.exceptions.ConnectionClosedError as exc:
+        logger.debug(f'ConnectionClosedError from {username} in room "{room}" - code {exc.code}')
     finally:
         await leave_room(room, username)
 
