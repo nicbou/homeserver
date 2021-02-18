@@ -81,6 +81,8 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                 ])
 
                 logger.info(f"Replacing original at {input_file}, with the streamable version")
+
+                assert Path(output_file).exists(), f"Output file {output_file} does not exist"
                 os.unlink(input_file)
                 os.link(output_file, input_file)
 
