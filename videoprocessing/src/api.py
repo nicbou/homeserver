@@ -20,16 +20,19 @@ logger = logging.getLogger(__name__)
 def video_to_mp4():
     response.content_type = 'application/json'
     if not (request.json.get('input') and request.json.get('output')):
-        abort(400, {'result': 'failure', 'message': '`input` parameter is missing from request payload'})
+        logger.error('`input` or `output` parameter is missing from request payload')
+        abort(400, {'result': 'failure', 'message': '`input` or `output` parameter is missing from request payload'})
 
     input_file = movie_library_path / request.json.get('input')
     output_file = movie_library_path / request.json.get('output')
     callback_url = request.json.get('callbackUrl')
 
     if not input_file.exists():
+        logger.error(f"Input file does not exist: '{Path(input_file)}'")
         abort(404, {'result': 'failure', 'message': 'Input file does not exist'})
 
     logger.info(f"Queueing {str(input_file)} for conversion")
+
     conversion_queue.enqueue(
         convert_to_mp4,
         kwargs={
