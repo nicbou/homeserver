@@ -14,6 +14,7 @@ services:
       - db
       - videoprocessing
     environment:
+      - AUTH_COOKIE_DOMAIN
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
       - POSTGRES_HOST=db
@@ -90,7 +91,7 @@ services:
     environment:
       - DIGITALOCEAN_TOKEN
       - DOMAIN=nicolasbouliane.com
-      - NAME=home
+      - NAME=home;timeline
 volumes:
   django_staticfiles:
   db_persistence:
