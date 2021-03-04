@@ -35,6 +35,8 @@ services:
     depends_on:
       - backend
       - torrents
+    logging:
+      driver: "none"
   redis:
     image: smebberson/alpine-redis
     volumes:
@@ -85,6 +87,10 @@ services:
       - django_staticfiles:/static:ro
       - ${MOVIE_LIBRARY_PATH}:/movies:ro
       - "./proxy/ssl-certs:/etc/ssl/certs"
+    logging:
+      options:
+        max-size: "200k"
+        max-file: "10"
   dynamicdns:
     image: tunix/digitalocean-dyndns
     environment:
