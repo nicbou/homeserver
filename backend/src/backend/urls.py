@@ -4,7 +4,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 from movies.views import JSONEpisodeProgressView, JSONMovieListView, JSONEpisodeView, JSONEpisodeAccessTokenView, \
     JSONEpisodeUnwatchedView, JSONEpisodeWatchedView, JSONEpisodeConversionCallbackView, JSONTriageListView, \
-    JSONEpisodeUnstarView, JSONEpisodeStarView, JSONEpisodeConvertView
+    JSONEpisodeUnstarView, JSONEpisodeStarView, JSONEpisodeConvertView, JSONDeleteOriginalView
 
 urlpatterns = [
     path('auth/', include('authentication.urls')),
@@ -16,6 +16,7 @@ urlpatterns = [
     path('movies/<int:id>/unwatched/', JSONEpisodeUnwatchedView.as_view()),
     path('movies/<int:id>/progress/', JSONEpisodeProgressView.as_view()),
     path('movies/<int:id>/convert/', JSONEpisodeConvertView.as_view()),
+    path('movies/<int:id>/originalFile/', JSONDeleteOriginalView.as_view()),
     path('movies/<int:id>/star/', JSONEpisodeStarView.as_view()),
     path('movies/<int:id>/unstar/', JSONEpisodeUnstarView.as_view()),
     path('movies/triage/', JSONTriageListView.as_view()),

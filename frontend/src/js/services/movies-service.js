@@ -106,6 +106,15 @@ export default class {
     });
   }
 
+  static deleteOriginalFile(id) {
+    return fetch(
+      `/api/movies/${id}/originalFile/`,
+      {method: 'DELETE'}
+    ).then((response) => {
+      return response.json();
+    });
+  }
+
   static convert(id) {
     return fetch(
       `/api/movies/${id}/convert/`,

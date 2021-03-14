@@ -212,6 +212,36 @@ def queue_episode_for_conversion(episode: Episode):
     episode.save()
 
 
+def delete_episode_original(episode: Episode):
+    episode.library_path.unlink(missing_ok=True)
+    episode.original_extension = 'mp4'
+    episode.save()
+    episode.converted_path.link_to(episode.library_path)
+
+
+class JSONDeleteOriginalView(View):
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete an original video, and replace it with the converted version.
+        """
+        # TODO: Permission check
+        if not request.user.is_authenticated:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+
+        episode_id = kwargs.get('id')
+        try:
+            delete_episode_original(Episode.objects.get(pk=episode_id))
+        except Episode.DoesNotExist:
+            message = 'Episode does not exist.'
+            logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
+            return JsonResponse({'result': 'failure', 'message': message}, status=404)
+        except ConnectionError:
+            message = 'Failed to replace original of episode.'
+            logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
+            return JsonResponse({'result': 'failure', 'message': message}, status=500)
+        return JsonResponse({'result': 'success'})
+
+
 def queue_subtitles_for_conversion(episode: Episode):
     """
     Queue episode subtitles for conversion

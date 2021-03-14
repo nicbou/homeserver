@@ -78,6 +78,7 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                     '-movflags', 'faststart',
                     '-loglevel', 'warning',
                     '-strict', '-2',
+                    '-y',
                     output_file
                 ])
 
@@ -110,7 +111,9 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                 '-af', 'aresample=async=1',  # Keep audio in sync with video
                 '-loglevel', 'warning',
                 '-codec:a', 'libfdk_aac',
-                '-f', 'mp4', output_file
+                '-y',
+                '-f', 'mp4',
+                output_file
             ])
             logger.info(f'Conversion of {input_file} successful')
             requests.post(callback_url, json={'status': 'converted'})
