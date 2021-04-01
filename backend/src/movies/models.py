@@ -38,7 +38,7 @@ class Episode(models.Model):
 
     # File
     original_extension = models.CharField(max_length=12, null=True)  # TODO: Might be unnecessary
-    triage_path = models.CharField(max_length=200, null=True)
+    triage_path = models.CharField(max_length=300, null=True)
     conversion_status = models.SmallIntegerField(default=NOT_CONVERTED, choices=status_choices)
 
     # Episode
