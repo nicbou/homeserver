@@ -8,6 +8,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - db_persistence:/var/lib/postgresql/data
+    restart: unless-stopped
   backend:
     build: backend
     depends_on:
@@ -29,6 +30,7 @@ services:
       - django_staticfiles:/srv/static
       - ./backend/src:/srv/src
       - ${MOVIE_LIBRARY_PATH}:/movies
+    restart: unless-stopped
   frontend:
     image: nginx
     volumes:
@@ -38,10 +40,12 @@ services:
       - torrents
     logging:
       driver: "none"
+    restart: unless-stopped
   redis:
     image: smebberson/alpine-redis
     volumes:
       - redis_persistence:/data
+    restart: unless-stopped
   videoprocessing:
     build: videoprocessing
     environment:
@@ -53,6 +57,7 @@ services:
       - ${MOVIE_LIBRARY_PATH}:/movies
     depends_on:
       - redis
+    restart: unless-stopped
   torrents:
     image: haugene/transmission-openvpn:latest
     environment:
@@ -69,11 +74,11 @@ services:
     volumes:
       - ${TRANSMISSION_DATA_PATH}:/data
       - ${MOVIE_LIBRARY_PATH}/triage:/triage
-    restart: on-failure
     devices:
       - /dev/net/tun:/dev/net/tun
     cap_add:
       - NET_ADMIN
+    restart: unless-stopped
   proxy:
     build: proxy
     ports:
@@ -92,6 +97,7 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    restart: unless-stopped
   dynamicdns:
     image: tunix/digitalocean-dyndns
     environment:
