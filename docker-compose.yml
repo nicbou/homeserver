@@ -4,7 +4,7 @@ services:
     image: postgres:9.6
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=homeserver
       - POSTGRES_PASSWORD=postgres
     volumes:
       - db_persistence:/var/lib/postgresql/data
@@ -20,7 +20,7 @@ services:
       - BACKEND_SECRET_KEY
       - POSTGRES_HOST=db
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=homeserver
       - POSTGRES_PASSWORD=postgres
       - MOVIE_LIBRARY_PATH=/movies/library
       - MOVIE_LIBRARY_URL=/movies
