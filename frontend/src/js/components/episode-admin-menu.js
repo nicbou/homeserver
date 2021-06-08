@@ -34,17 +34,17 @@ export default Vue.component('admin-menu', {
   },
   template: `
     <div>
-      <a class="button" href="#" @click.prevent="deleteEpisode" v-if="showDeleteEpisode">
-        <i class="fas fa-trash-alt"></i> Delete episode
-      </a>
       <a class="button" href="#" @click.prevent="convertEpisode" v-if="(!episode.isConverted && !episode.isConverting) && showConvertEpisode">
-        <i class="fa fa-file-video"></i> Convert episode
+        <i class="fa fa-file-video"></i> Convert
       </a>
       <a class="button" href="#" @click.prevent="convertEpisode" v-if="(episode.isConverted || episode.isConverting) && showConvertEpisode">
-        <i class="fa fa-file-video"></i> Reconvert episode
+        <i class="fa fa-file-video"></i> Reconvert
+      </a>
+      <a class="button" href="#" @click.prevent="deleteEpisode" v-if="showDeleteEpisode">
+        <i class="fas fa-trash-alt"></i> Delete and remove from library
       </a>
       <a class="button" href="#" @click.prevent="deleteOriginalFile" v-if="episode.isConverted && showDeleteOriginalFile">
-        <i class="fa fa-file-video"></i> Delete original file
+        <i class="fa fa-file-video"></i> Delete original, keep converted version
       </a>
     </div>
   `
