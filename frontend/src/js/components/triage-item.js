@@ -243,7 +243,7 @@ export default Vue.component('triage-item', {
           <div class="control">
             <label :for="_uid + '-convert'">Conversion</label>
             <label class="input checkbox">
-              <input v-model="convertToMp4" type="checkbox" :id="_uid + '-convert'"> Convert this movie to .mp4
+              <input v-model="convertToMp4" type="checkbox" :id="_uid + '-convert'"> Convert for web playback and extract subtitles
             </label>
           </div>
 
