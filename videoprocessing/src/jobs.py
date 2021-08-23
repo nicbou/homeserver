@@ -122,13 +122,17 @@ def extract_subtitles(input_file: str):
     Extract subs in .srt and .vtt format
     https://nicolasbouliane.com/blog/ffmpeg-extract-subtitles
     """
+    ignored_subtitle_codecs = (
+        'dvd_subtitle',
+        'hdmv_pgs_subtitle',
+    )
 
     # Find subtitle tracks by language. You could use ffmpeg's -map to find subtitle tracks by language, but it fails if
     # there are many tracks with the same language (for example subtitles + closed captions)
     subtitle_streams = json.loads(subprocess.check_output([
         'ffprobe',
         '-v', 'error',
-        '-show_entries', 'stream=index,width:stream_tags=language',  # ISO 639-2/B language codes (eng, ger, fre...)
+        '-show_entries', 'stream=index,width,codec_name:stream_tags=language',  # ISO 639-2/B (eng, ger, fre...)
         '-select_streams', 's',  # subtitle streams only
         '-of', 'json',
         input_file,
@@ -136,23 +140,23 @@ def extract_subtitles(input_file: str):
 
     ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', input_file]
 
-    processed_languages = set()
+    processed_subtitle_languages = set()
     for subtitle_stream in subtitle_streams:
         try:
             stream_index = subtitle_stream['index']
-            language_code = subtitle_stream['tags']['language']
+            language_code = subtitle_stream['tags'].get('language', 'eng')
         except KeyError:
-            logger.exception(f"Could not read metadata from subtitle stream in {input_file}: {subtitle_stream}")
-            raise
-
-        if 'width' in subtitle_stream:
-            # This is an image-based subtitle stream. It can't be converted to text. Skip it.
-            continue
-        if language_code in processed_languages:
-            # There is already a subtitle stream for this language. Skip it.
+            logger.error(f"Could not read metadata from subtitle stream in {input_file}: {subtitle_stream}")
             continue
 
-        processed_languages.add(language_code)
+        if (
+            'width' in subtitle_stream  # Image-based subtitles can't be converted to text
+            or subtitle_stream['codec_name'] in ignored_subtitle_codecs  # Unsupported codec
+            or language_code in processed_subtitle_languages  # There is already a subtitle stream for this language
+        ):
+            continue
+
+        processed_subtitle_languages.add(language_code)
 
         output_file_srt = Path(input_file).with_suffix(f".{language_code}.srt" if language_code != 'eng' else '.srt')
         output_file_vtt = Path(input_file).with_suffix(f".{language_code}.vtt" if language_code != 'eng' else '.vtt')
@@ -162,7 +166,7 @@ def extract_subtitles(input_file: str):
         ])
         logger.info(f'Found {language_code} subtitles track. Will extract to {output_file_srt} and {output_file_vtt}')
 
-    if len(processed_languages) > 0:
+    if len(processed_subtitle_languages) > 0:
         try:
             logger.info(f"Extracting all subtitles from {input_file}")
             subprocess.check_output(ffmpeg_command)
