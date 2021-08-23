@@ -101,6 +101,7 @@ export default Vue.component('triage-item', {
         this.selectedMovie.episodeList[0].episode = this.sanitizedEpisode;
         this.query = this.selectedMovie.title;
         this.description = this.selectedMovie.description;
+        this.$store.dispatch('triage/addMovieSuggestion', this.selectedMovie);
       } else {
         this.query = '';
         this.description = '';
@@ -118,11 +119,16 @@ export default Vue.component('triage-item', {
         TriageService.getSuggestions(query).then((results) => {
           this.suggestions = results.slice(0, 10);
         })
+      } else {
+        this.suggestions = Array.from(this.$store.state.triage.recentMovieSuggestions);
       }
     }, 500),
     focused: function() {
       this.highlightedSuggestion = this.suggestions.length ? 0 : null;
       this.suggestionsVisible = true;
+      if(!this.query && !this.suggestions.length){
+        this.getResults(this.query);
+      }
     },
     blurred: function() {
       this.highlightedSuggestion = null;
