@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import datetime
+import glob
 import logging
 import uuid
 from pathlib import Path
@@ -215,24 +216,15 @@ class Episode(models.Model):
 
 
 @receiver(pre_delete, sender=Episode)
-def episode_delete(sender, instance, **kwargs):
-    files_to_delete = [
-        instance.library_path,
-        instance.converted_path,
-        instance.srt_subtitles_path_en,
-        instance.srt_subtitles_path_de,
-        instance.srt_subtitles_path_fr,
-        instance.vtt_subtitles_path_en,
-        instance.vtt_subtitles_path_de,
-        instance.vtt_subtitles_path_fr,
-        instance.temporary_conversion_path,
-    ]
+def episode_delete(sender, instance: Episode, **kwargs):
+    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.filename('*')))
 
+    # All episodes share the same cover
+    # If deleting the last episode, delete the cover
     episode_count = Episode.objects.filter(tmdb_id=instance.tmdb_id).count()
     if episode_count == 1:
-        files_to_delete.append(instance.cover_path)  # All episodes share the same cover
+        files_to_delete.append(instance.cover_path)
 
-    # Delete the renamed episode
     for path in files_to_delete:
         try:
             path.unlink(missing_ok=True)
