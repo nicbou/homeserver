@@ -2,29 +2,22 @@ import contextlib
 import json
 import logging
 import os
-import shlex
 import subprocess
 from pathlib import Path
 
-import chardet
 import requests
-from pycaption import CaptionConverter, WebVTTWriter, SRTReader, CaptionReadNoCaptions
 
 logger = logging.getLogger(__name__)
-
-
-# Prevents escaping of HTML in subtitles
-WebVTTWriter._encode = lambda self, s: s
+ffmpeg_path = '/usr/local/bin/ffmpeg'
 
 
 def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
     """Convert input_file to MP4, saves it to output_file."""
     max_video_bitrate = int(os.environ.get('MAX_VIDEO_BITRATE', 3000000))
     default_video_height = int(os.environ.get('MAX_VIDEO_HEIGHT', 720))
-    ffmpeg_path = '/usr/local/bin/ffmpeg'
 
     # Get original video metadata
-    ffprobe_output = subprocess.check_output(
+    ffprobe_output = json.loads(subprocess.check_output(
         [
             'ffprobe',
             '-v', 'error',
@@ -32,9 +25,9 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
             '-of', 'json',
             input_file,
         ],
-    )
-    video_streams = json.loads(ffprobe_output.decode('utf-8'))['streams']
-    video_format = json.loads(ffprobe_output.decode('utf-8'))['format']
+    ).decode('utf-8'))
+    video_streams = ffprobe_output['streams']
+    video_format = ffprobe_output['format']
     total_bitrate = sum(int(s.get('bit_rate', 0)) for s in video_streams)
     has_mp4_container = 'mp4' in video_format['format_name'].split(',')
     has_aac_audio = any(s.get('codec_name') == 'aac' for s in video_streams)
@@ -124,81 +117,43 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
             raise
 
 
-def convert_subtitles_to_vtt(input_file: str, output_file: str):
-    """Convert .srt subtitles to .vtt for web playback."""
-    logger.info(f'Converting {input_file} to {output_file}')
-    with open(input_file, mode='rb') as raw_input_content:
-        encoding = chardet.detect(raw_input_content.read())['encoding']
-
-    with open(input_file, mode='r', encoding=encoding) as srt_file:
-        srt_contents = str(srt_file.read())
-
-    converter = CaptionConverter()
-    try:
-        converter.read(srt_contents, SRTReader())
-    except CaptionReadNoCaptions:
-        logger.exception(f'Failed to convert {input_file} to {output_file}')
-        return False  # Likely UTF-16 subtitles
-    vtt_captions = converter.write(WebVTTWriter())
-
-    with open(output_file, mode='w', encoding='utf-8-sig') as vtt_file:
-        vtt_file.write(vtt_captions)
-
-    return True
-
-
-def extract_mkv_subtitles(input_file: str):
+def extract_subtitles(input_file: str):
     """
-    Extract .srt subtitles from an .mkv file.
-
-    The English subtitles are called input_file.srt, and the other subtitles are
-    called input_file.lang.srt, unless there is only one subtitle track.
-
-    :param input_file: .mkv file absolute path
-    :returns: True if subtitles were found and extracted, False otherwise
+    Extract subs in .srt and .vtt format
+    https://nicolasbouliane.com/blog/ffmpeg-extract-subtitles
     """
-    logger.info(f"Extracting subtitles from {input_file}")
-    try:
-        mkvmerge_output = subprocess.check_output([
-            'mkvmerge',
-            '--identify',
-            '--identification-format', 'json',
-            input_file
+
+    # Find subtitle tracks by language. You could use ffmpeg's -map to find subtitle tracks by language, but it fails if
+    # there are many tracks with the same language (for example subtitles + closed captions)
+    subtitle_streams = json.loads(subprocess.check_output([
+        'ffprobe',
+        '-v', 'error',
+        '-show_entries', 'stream=index:stream_tags=language',  # ISO 639-2/B language codes (eng, ger, fre...)
+        '-select_streams', 's',  # subtitle streams only
+        '-of', 'json',
+        input_file,
+    ]).decode('utf-8'))['streams']
+
+    ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', input_file]
+    for subtitle_stream in subtitle_streams:
+        try:
+            stream_index = subtitle_stream['index']
+            language_code = subtitle_stream['tags']['language']
+        except KeyError:
+            logger.exception(f"Could not read metadata from subtitle stream in {input_file}: {subtitle_stream}")
+            raise
+
+        output_file_srt = Path(input_file).with_suffix(f".{language_code}.srt" if language_code != 'eng' else '.srt')
+        output_file_vtt = Path(input_file).with_suffix(f".{language_code}.vtt" if language_code != 'eng' else '.vtt')
+        ffmpeg_command.extend([
+            '-map', f'0:{stream_index}', str(output_file_srt),
+            '-map', f'0:{stream_index}', str(output_file_vtt),
         ])
+        logger.info(f'Found {language_code} subtitles track. Will extract to {output_file_srt} and {output_file_vtt}')
+
+    try:
+        logger.info(f"Extracting all subtitles from {input_file}")
+        ffmpeg_srt_output = subprocess.check_output(ffmpeg_command)
     except subprocess.CalledProcessError:
-        logger.exception("Could not extract subtitles from MKV file")
+        logger.exception(f"Could not extract subtitles from {input_file}. {ffmpeg_srt_output}")
         raise
-
-    json_tracks = json.loads(mkvmerge_output.decode('utf-8')).get('tracks', [])
-
-    tracks_to_extract = {}
-    for track in json_tracks:
-        if (
-            track.get('type') == 'subtitles' and
-            track['properties'].get('enabled_track') and
-            track['properties'].get('text_subtitles')
-        ):
-            track_language = track['properties'].get('language', '').lower()
-            tracks_to_extract[track_language] = tracks_to_extract.get(track_language, [])
-            tracks_to_extract[track_language].append(track)
-
-    logger.info(f"Found {len(tracks_to_extract)} subtitle tracks to extract")
-
-    # Extract the first available track for each language
-    language_count = len(tracks_to_extract.keys())
-    for language, tracks in tracks_to_extract.items():
-        # Title.mkv -> Title.fre.srt or Title.srt
-        extension = f".{language}.srt" if language != 'eng' and language_count > 1 else '.srt'
-
-        subtitles_output_file = "{path}{extension}".format(
-            path=".".join(input_file.split('.')[0:-1]),
-            extension=extension
-        )
-
-        if len(tracks) > 0:
-            logger.info(f"Extracting {language} subtitles to {subtitles_output_file}")
-            subprocess.check_output(
-                ['mkvextract', 'tracks', input_file, f"{tracks[0]['id']}:{shlex.quote(subtitles_output_file)}"]
-            )
-
-    return language_count > 1

@@ -4,6 +4,7 @@ export default Vue.component('admin-menu', {
     return {
       showDeleteOriginalFile: true,
       showConvertEpisode: true,
+      showExtractEpisodeSubtitles: true,
       showDeleteEpisode: true,
     }
   },
@@ -30,6 +31,13 @@ export default Vue.component('admin-menu', {
         episodeId: this.episode.id,
       });
       this.showConvertEpisode = false;
+    },
+    extractEpisodeSubtitles: function() {
+      this.$store.dispatch('movies/extractEpisodeSubtitles', {
+        tmdbId: this.movie.tmdbId,
+        episodeId: this.episode.id,
+      });
+      this.showExtractEpisodeSubtitles = false;
     }
   },
   template: `
@@ -39,6 +47,12 @@ export default Vue.component('admin-menu', {
       </a>
       <a class="button" href="#" @click.prevent="convertEpisode" v-if="(episode.isConverted || episode.isConverting) && showConvertEpisode">
         <i class="fa fa-file-video"></i> Reconvert
+      </a>
+      <a class="button" href="#" @click.prevent="extractEpisodeSubtitles" v-if="(!episode.isConverted && !episode.isConverting) && showExtractEpisodeSubtitles">
+        <i class="far fa-closed-captioning"></i> Extract subtitles
+      </a>
+      <a class="button" href="#" @click.prevent="extractEpisodeSubtitles" v-if="(episode.isConverted || episode.isConverting) && showExtractEpisodeSubtitles">
+        <i class="far fa-closed-captioning"></i> Re-extract subtitles
       </a>
       <a class="button" href="#" @click.prevent="deleteEpisode" v-if="showDeleteEpisode">
         <i class="fas fa-trash-alt"></i> Delete and remove from library

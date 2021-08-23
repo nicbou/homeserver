@@ -6,7 +6,7 @@ from bottle import route, run, request, abort, response
 import os
 import redis
 from rq import Queue
-from jobs import convert_to_mp4, extract_mkv_subtitles, convert_subtitles_to_vtt
+from jobs import convert_to_mp4, extract_subtitles
 
 redis_connection = redis.from_url(os.environ['REDIS_DB_URL'])
 conversion_queue = Queue('conversion', connection=redis_connection)
@@ -16,8 +16,8 @@ movie_library_path = Path(os.environ.get('MOVIE_LIBRARY_PATH'))
 logger = logging.getLogger(__name__)
 
 
-@route('/videoToMp4', method='POST')
-def video_to_mp4():
+@route('/convert', method='POST')
+def convert_video():
     response.content_type = 'application/json'
     if not (request.json.get('input') and request.json.get('output')):
         logger.error('`input` or `output` parameter is missing from request payload')
@@ -42,35 +42,38 @@ def video_to_mp4():
         },
         job_timeout=21600  # 6 hours
     )
-    if input_file.suffix.lower() == '.mkv':
-        logger.info(f"Queueing {str(input_file)} for subtitle extraction")
-        subtitles_queue.enqueue(
-            extract_mkv_subtitles,
-            kwargs={
-                'input_file': str(input_file),
-            },
-            job_timeout=1800  # 30 min
-        )
+
+    logger.info(f"Queueing {str(input_file)} for subtitle extraction")
+    subtitles_queue.enqueue(
+        extract_subtitles,
+        kwargs={
+            'input_file': str(input_file),
+        },
+        job_timeout=60*60
+    )
 
     response.status = 202
     return {'result': 'success', 'message': 'Movie queued for conversion.'}
 
 
-@route('/subtitlesToVTT', method='POST')
-def subtitles_to_vtt():
+@route('/extractSubtitles', method='POST')
+def extract_all_subtitles():
     response.content_type = 'application/json'
     if not request.json.get('input'):
         abort(400, {'result': 'failure', 'message': '`input` parameter is missing from request payload'})
 
     input_file = movie_library_path / request.json.get('input')
-    output_file = movie_library_path / request.json.get('output')
+    if not input_file.exists():
+        logger.error(f"Input file does not exist: '{Path(input_file)}'")
+        abort(404, {'result': 'failure', 'message': 'Input file does not exist'})
+
+    logger.info(f"Queueing {str(input_file)} for subtitle extraction")
     subtitles_queue.enqueue(
-        convert_subtitles_to_vtt,
+        extract_subtitles,
         kwargs={
             'input_file': str(input_file),
-            'output_file': str(output_file),
         },
-        job_timeout=1800  # 30 min
+        job_timeout=60*60
     )
 
     response.status = 202

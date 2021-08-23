@@ -1,7 +1,5 @@
 bottle==0.12.19
-chardet==3.0.4
 coloredlogs==14.0
-pycaption==1.0.1
 redis==3.5.3
 requests==2.25.1
 rq==1.7.0

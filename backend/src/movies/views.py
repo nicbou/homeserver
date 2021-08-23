@@ -198,9 +198,36 @@ class JSONEpisodeConvertView(View):
         return JsonResponse({'result': 'success'})
 
 
+class JSONEpisodeExtractSubtitlesView(View):
+    def post(self, request, *args, **kwargs):
+        """
+        Queue an episode for subtitle extraction
+        """
+        if not request.user.is_authenticated:
+            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+        if not request.user.has_perm('authentication.movies_manage'):
+            return JsonResponse({
+                'result': 'failure',
+                'message': 'You do not have the permission to access this feature'
+            }, status=403)
+
+        episode_id = kwargs.get('id')
+        try:
+            queue_subtitles_for_extraction(Episode.objects.get(pk=episode_id))
+        except Episode.DoesNotExist:
+            message = 'Episode does not exist'
+            logger.error(f"Failed to extract subtitles of episode #{episode_id}. {message}")
+            return JsonResponse({'result': 'failure', 'message': message}, status=404)
+        except ConnectionError:
+            message = 'Could not queue the episode for conversion.'
+            logger.error(f"Failed to extract subtitles of episode #{episode_id}. {message}")
+            return JsonResponse({'result': 'failure', 'message': message}, status=500)
+        return JsonResponse({'result': 'success'})
+
+
 def queue_episode_for_conversion(episode: Episode):
-    api_url = f"{settings.VIDEO_PROCESSING_API_URL}/videoToMp4"
-    callback_url = f"http://{os.environ['HOSTNAME']}/movies/videoToMp4/callback/?id={episode.pk}"
+    api_url = f"{settings.VIDEO_PROCESSING_API_URL}/convert"
+    callback_url = f"http://{os.environ['HOSTNAME']}/movies/convert/callback/?id={episode.pk}"
 
     try:
         logger.info(f'Queueing "{episode.library_filename}" for conversion.')
@@ -242,24 +269,14 @@ class JSONDeleteOriginalView(View):
         return JsonResponse({'result': 'success'})
 
 
-def queue_subtitles_for_conversion(episode: Episode):
-    """
-    Queue episode subtitles for conversion
-    """
-    subtitles_paths_and_filenames = (
-        (episode.srt_subtitles_path_en, episode.srt_subtitles_filename_en, episode.vtt_subtitles_filename_en),
-        (episode.srt_subtitles_path_de, episode.srt_subtitles_filename_de, episode.vtt_subtitles_filename_de),
-        (episode.srt_subtitles_path_fr, episode.srt_subtitles_filename_fr, episode.vtt_subtitles_filename_fr),
-    )
-    for srt_subtitles_path, srt_subtitles_filename, vtt_subtitles_filename in subtitles_paths_and_filenames:
-        if srt_subtitles_path.exists():
-            try:
-                requests.post(
-                    f"{settings.VIDEO_PROCESSING_API_URL}/subtitlesToVTT",
-                    json={'input': srt_subtitles_filename, 'output': vtt_subtitles_filename}
-                )
-            except (HTTPError, Timeout):
-                raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
+def queue_subtitles_for_extraction(episode: Episode):
+    try:
+        requests.post(
+            f"{settings.VIDEO_PROCESSING_API_URL}/extractSubtitles",
+            json={'input': str(episode.library_path)}
+        )
+    except (HTTPError, Timeout):
+        raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
 
 
 class JSONEpisodeView(View):
@@ -346,7 +363,7 @@ class JSONEpisodeConversionCallbackView(View):
             )
 
         try:
-            queue_subtitles_for_conversion(episode)
+            queue_subtitles_for_extraction(episode)
         except ConnectionError:
             pass
 

@@ -3,15 +3,13 @@ FROM jrottenberg/ffmpeg:4.1-ubuntu2004
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install Python 3 for the API, mkvtoolnix for mkv subtitles, lxml for vtt subtitles
+# Install Python 3 for the API, mediainfo to check if videos are streamable
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-dev \
     python3-pip \
     bash \
     mediainfo \
-    mkvtoolnix \
-    python-lxml \
   && pip3 install --no-cache-dir --upgrade pip
 
 RUN cd /usr/bin \

@@ -95,6 +95,9 @@ export default {
       context.commit('CONVERT_EPISODE', {tmdbId, episodeId});
       return await MoviesService.convert(episodeId);
     },
+    async extractEpisodeSubtitles(context, {tmdbId, episodeId}) {
+      return await MoviesService.extractSubtitles(episodeId);
+    },
     async setEpisodeProgress(context, {tmdbId, episodeId, progress}) {
       context.commit('SET_EPISODE_PROGRESS', {tmdbId, episodeId, progress});
       return await MoviesService.setProgress(episodeId, progress);
