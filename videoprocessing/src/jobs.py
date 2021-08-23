@@ -128,7 +128,7 @@ def extract_subtitles(input_file: str):
     subtitle_streams = json.loads(subprocess.check_output([
         'ffprobe',
         '-v', 'error',
-        '-show_entries', 'stream=index:stream_tags=language',  # ISO 639-2/B language codes (eng, ger, fre...)
+        '-show_entries', 'stream=index,width:stream_tags=language',  # ISO 639-2/B language codes (eng, ger, fre...)
         '-select_streams', 's',  # subtitle streams only
         '-of', 'json',
         input_file,
@@ -136,6 +136,10 @@ def extract_subtitles(input_file: str):
 
     ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', input_file]
     for subtitle_stream in subtitle_streams:
+        if 'width' in subtitle_stream:
+            # This is an image-based subtitle stream. It can't be converted to text. Skip it.
+            continue
+
         try:
             stream_index = subtitle_stream['index']
             language_code = subtitle_stream['tags']['language']
@@ -153,7 +157,7 @@ def extract_subtitles(input_file: str):
 
     try:
         logger.info(f"Extracting all subtitles from {input_file}")
-        ffmpeg_srt_output = subprocess.check_output(ffmpeg_command)
-    except subprocess.CalledProcessError:
-        logger.exception(f"Could not extract subtitles from {input_file}. {ffmpeg_srt_output}")
+        subprocess.check_output(ffmpeg_command)
+    except subprocess.CalledProcessError as e:
+        logger.exception(f"Could not extract subtitles from {input_file}. {e.output.decode('utf-8')}")
         raise
