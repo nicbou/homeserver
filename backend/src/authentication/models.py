@@ -8,6 +8,4 @@ class AccessPermissions(models.Model):
             ('torrents', 'Download and manage torrents'),
             ('movies_watch', 'Watch and download movies'),
             ('movies_manage', 'Manage the movie library'),
-            ('finances', 'Use the finances feature'),
-            ('habits', 'Use the habits feature'),
         )
