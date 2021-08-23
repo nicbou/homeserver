@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from functools import wraps
 from pathlib import Path
 from typing import List
 
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import JsonResponse
 from requests import HTTPError, Timeout
 
@@ -19,7 +21,10 @@ import datetime
 logger = logging.getLogger(__name__)
 
 
-class JSONMovieListView(View):
+class JSONMovieListView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_watch'
+    raise_exception = True
+
     def get(self, request, *args, **kwargs):
         movies_by_tmdb_id = {}
 
@@ -175,15 +180,14 @@ class JSONMovieListView(View):
             logger.error(f"Could not download file at {url}.")
 
 
-class JSONEpisodeConvertView(View):
+class JSONEpisodeConvertView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_manage'
+    raise_exception = True
+
     def post(self, request, *args, **kwargs):
         """
         Queue an episode for conversion
         """
-        # TODO: Permission check
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
-
         episode_id = kwargs.get('id')
         try:
             queue_episode_for_conversion(Episode.objects.get(pk=episode_id))
@@ -198,19 +202,14 @@ class JSONEpisodeConvertView(View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeExtractSubtitlesView(View):
+class JSONEpisodeExtractSubtitlesView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_manage'
+    raise_exception = True
+
     def post(self, request, *args, **kwargs):
         """
         Queue an episode for subtitle extraction
         """
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
-        if not request.user.has_perm('authentication.movies_manage'):
-            return JsonResponse({
-                'result': 'failure',
-                'message': 'You do not have the permission to access this feature'
-            }, status=403)
-
         episode_id = kwargs.get('id')
         try:
             queue_subtitles_for_extraction(Episode.objects.get(pk=episode_id))
@@ -246,15 +245,14 @@ def delete_episode_original(episode: Episode):
     episode.converted_path.link_to(episode.library_path)
 
 
-class JSONDeleteOriginalView(View):
+class JSONDeleteOriginalView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_manage'
+    raise_exception = True
+
     def delete(self, request, *args, **kwargs):
         """
         Delete an original video, and replace it with the converted version.
         """
-        # TODO: Permission check
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
-
         episode_id = kwargs.get('id')
         try:
             delete_episode_original(Episode.objects.get(pk=episode_id))
@@ -263,9 +261,8 @@ class JSONDeleteOriginalView(View):
             logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
             return JsonResponse({'result': 'failure', 'message': message}, status=404)
         except ConnectionError:
-            message = 'Failed to replace original of episode.'
-            logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
-            return JsonResponse({'result': 'failure', 'message': message}, status=500)
+            logger.error(f"Failed to replace original of episode #{episode_id}. Could not connect to server.")
+            return JsonResponse({'result': 'failure', 'message': 'Failed to replace original of episode.'}, status=500)
         return JsonResponse({'result': 'success'})
 
 
@@ -279,7 +276,10 @@ def queue_subtitles_for_extraction(episode: Episode):
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
 
 
-class JSONEpisodeView(View):
+class JSONEpisodeView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_manage'
+    raise_exception = True
+
     def delete(self, request, *args, **kwargs):
         if not request.user.has_perm('authentication.movies_manage'):
             return JsonResponse({
@@ -297,17 +297,14 @@ class JSONEpisodeView(View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONTriageListView(View):
+class JSONTriageListView(PermissionRequiredMixin, View):
     """
     List of untriaged video and subtitle files
     """
-    def get(self, request, *args, **kwargs):
-        if not request.user.has_perm('authentication.movies_manage'):
-            return JsonResponse({
-                'result': 'failure',
-                'message': 'You do not have the permission to access this feature'
-            }, status=403)
+    permission_required = 'authentication.movies_manage'
+    raise_exception = True
 
+    def get(self, request, *args, **kwargs):
         video_files = []
         subtitle_files = []
 
@@ -362,19 +359,14 @@ class JSONEpisodeConversionCallbackView(View):
                 status=400
             )
 
-        try:
-            queue_subtitles_for_extraction(episode)
-        except ConnectionError:
-            pass
-
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeAccessTokenView(View):
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+class JSONEpisodeAccessTokenView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_watch'
+    raise_exception = True
 
+    def get(self, request, *args, **kwargs):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
@@ -385,12 +377,11 @@ class JSONEpisodeAccessTokenView(View):
         return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
 
 
-class JSONEpisodeWatchedView(View):
-    def post(self, request, *args, **kwargs):
-        # TODO: Check for movie permissions
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+class JSONEpisodeWatchedView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_watch'
+    raise_exception = True
 
+    def post(self, request, *args, **kwargs):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
@@ -402,12 +393,11 @@ class JSONEpisodeWatchedView(View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeUnwatchedView(View):
-    def post(self, request, *args, **kwargs):
-        # TODO: Check for movie permissions
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+class JSONEpisodeUnwatchedView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_watch'
+    raise_exception = True
 
+    def post(self, request, *args, **kwargs):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
@@ -420,12 +410,11 @@ class JSONEpisodeUnwatchedView(View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeStarView(View):
-    def post(self, request, *args, **kwargs):
-        # TODO: Check for movie permissions
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+class JSONEpisodeStarView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_watch'
+    raise_exception = True
 
+    def post(self, request, *args, **kwargs):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
@@ -436,17 +425,15 @@ class JSONEpisodeStarView(View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeUnstarView(View):
-    def post(self, request, *args, **kwargs):
-        # TODO: Check for movie permissions
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+class JSONEpisodeUnstarView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_watch'
+    raise_exception = True
 
+    def post(self, request, *args, **kwargs):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
-            star = StarredMovie.objects.get(user=request.user, tmdb_id=episode.tmdb_id)
-            star.delete()
+            StarredMovie.objects.get(user=request.user, tmdb_id=episode.tmdb_id).delete()
         except StarredMovie.DoesNotExist:
             pass
         except Episode.DoesNotExist:
@@ -454,12 +441,11 @@ class JSONEpisodeUnstarView(View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeProgressView(View):
-    def post(self, request, *args, **kwargs):
-        # TODO: Check for movie permissions
-        if not request.user.is_authenticated:
-            return JsonResponse({'result': 'failure', 'message': 'Not authenticated'}, status=401)
+class JSONEpisodeProgressView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_watch'
+    raise_exception = True
 
+    def post(self, request, *args, **kwargs):
         episode_id = kwargs.get('id')
         payload = json.loads(request.body, encoding='UTF-8')
         try:
