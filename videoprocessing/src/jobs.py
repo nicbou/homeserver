@@ -162,9 +162,12 @@ def extract_subtitles(input_file: str):
         ])
         logger.info(f'Found {language_code} subtitles track. Will extract to {output_file_srt} and {output_file_vtt}')
 
-    try:
-        logger.info(f"Extracting all subtitles from {input_file}")
-        subprocess.check_output(ffmpeg_command)
-    except subprocess.CalledProcessError as e:
-        logger.exception(f"Could not extract subtitles from {input_file}. {e.output.decode('utf-8')}")
-        raise
+    if len(processed_languages) > 0:
+        try:
+            logger.info(f"Extracting all subtitles from {input_file}")
+            subprocess.check_output(ffmpeg_command)
+        except subprocess.CalledProcessError as e:
+            logger.exception(f"Could not extract subtitles from {input_file}. {e.output.decode('utf-8')}")
+            raise
+    else:
+        logger.info(f"No subtitles found in {input_file}")
