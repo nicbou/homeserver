@@ -135,17 +135,24 @@ def extract_subtitles(input_file: str):
     ]).decode('utf-8'))['streams']
 
     ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', input_file]
-    for subtitle_stream in subtitle_streams:
-        if 'width' in subtitle_stream:
-            # This is an image-based subtitle stream. It can't be converted to text. Skip it.
-            continue
 
+    processed_languages = set()
+    for subtitle_stream in subtitle_streams:
         try:
             stream_index = subtitle_stream['index']
             language_code = subtitle_stream['tags']['language']
         except KeyError:
             logger.exception(f"Could not read metadata from subtitle stream in {input_file}: {subtitle_stream}")
             raise
+
+        if 'width' in subtitle_stream:
+            # This is an image-based subtitle stream. It can't be converted to text. Skip it.
+            continue
+        if language_code in processed_languages:
+            # There is already a subtitle stream for this language. Skip it.
+            continue
+
+        processed_languages.add(language_code)
 
         output_file_srt = Path(input_file).with_suffix(f".{language_code}.srt" if language_code != 'eng' else '.srt')
         output_file_vtt = Path(input_file).with_suffix(f".{language_code}.vtt" if language_code != 'eng' else '.vtt')
