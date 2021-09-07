@@ -30,8 +30,12 @@ def check_auth(request):
                 return HttpResponse(status=403)
 
         # TODO: Remove when timeline has its own auth
-        if request.META.get('HTTP_HOST') == 'timeline.nicolasbouliane.com' and not request.user.is_superuser:
-            return HttpResponse(status=403)
+        if request.META.get('HTTP_HOST') == 'timeline.nicolasbouliane.com':
+            if parsed_url.path.startswith('/map'):
+                if not request.user.is_authenticated:
+                    return HttpResponse(status=403)
+            elif not request.user.is_superuser:
+                return HttpResponse(status=403)
 
         return HttpResponse()
     elif parsed_url.path.startswith('/movies') and 'token' in querystring:
