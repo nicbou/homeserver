@@ -68,7 +68,7 @@ export default Vue.component('triage-item', {
       // Extension
       parts[parts.length - 1] = parts[parts.length - 1].replace(/\.[a-z]{2,4}$/, '<span class="faded">$&</span>');
 
-      parts[parts.length - 1] = `<strong>${parts[parts.length - 1]}<strong>`;
+      parts[parts.length - 1] = `<strong>${parts[parts.length - 1]}</strong>`;
       return parts.join('<br>/');
     },
     fullTitle: function() {
