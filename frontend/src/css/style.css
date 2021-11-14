@@ -9,6 +9,8 @@ a{text-decoration:none}
 input, button{-webkit-appearance:none;font-size:inherit;color:inherit;}
 video{width: 100%;border-radius: 10px;margin: 0;max-height:80vh;display:block;}
 iframe{width:100%;height:calc(100vh - 52px);border:none;}
+.faded{opacity:0.5;font-weight:normal;}
+.error{color:#f00;}
 
 .container{max-width:1280px;width:100%;margin:0 auto;padding:15px 30px;box-sizing:border-box;}
     .container:first-child{margin-top:0;}

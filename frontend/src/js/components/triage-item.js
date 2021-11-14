@@ -43,6 +43,34 @@ export default Vue.component('triage-item', {
     sanitizedEpisode: function() {
       return Math.abs(parseInt(this.episode, 10)) || null;
     },
+    richFile: function() {
+      const parts = this.file.split('/').filter(Boolean);
+
+      // Parent directories
+      if(parts.length > 1) {
+        parts[0] = '<span class="faded">' + parts[0];
+        parts[parts.length - 2] += '</span>';
+      }
+
+      // Non-title words
+      ['dts', 'multisub', 'etrg', '720p', '1080p', 'hdrip', 'x264', 'ac3', '5.1', 'esubs', 'eng', 'webrip', 'brrip'].forEach(
+        (word) => parts[parts.length - 1] = parts[parts.length - 1].replace(new RegExp('\\b'+word+'\\b', 'gi'), '<span class="faded">$&</span>')
+      );
+
+      // Samples
+      ['sample'].forEach(
+        (word) => parts[parts.length - 1] = parts[parts.length - 1].replace(new RegExp('\\b'+word+'\\b', 'gi'), '<span class="error">$&</span>')
+      );
+
+      // Stuff in square brackets
+      parts[parts.length - 1] = parts[parts.length - 1].replace(/\[[^\]]+\]/ig, '<span class="faded">$&</span>');
+
+      // Extension
+      parts[parts.length - 1] = parts[parts.length - 1].replace(/\.[a-z]{2,4}$/, '<span class="faded">$&</span>');
+
+      parts[parts.length - 1] = `<strong>${parts[parts.length - 1]}<strong>`;
+      return parts.join('<br>/');
+    },
     fullTitle: function() {
       if (this.selectedMovie) {
         if (this.sanitizedEpisode) {
@@ -169,9 +197,7 @@ export default Vue.component('triage-item', {
         <div class="form">
           <div class="control">
             <label>File</label>
-            <span class="input filename">
-              /{{ file }}
-            </span>
+            <span class="input filename" v-html="richFile"></span>
           </div>
           <div class="control">
             <label :for="_uid + '-title'">Title</label>
