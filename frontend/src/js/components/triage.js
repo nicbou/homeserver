@@ -13,6 +13,7 @@ export default Vue.component('triage', {
   created: function () {
     TriageService.getFilesToTriage().then(
       (data) => {
+        data.movies.sort();
         data.subtitles.sort();
         this.subtitleFiles = data.subtitles;
         this.movieFiles = data.movies;
