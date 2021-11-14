@@ -66,7 +66,7 @@ export default Vue.component('triage-item', {
       parts[parts.length - 1] = parts[parts.length - 1].replace(/\[[^\]]+\]/ig, '<span class="faded">$&</span>');
 
       // Extension
-      parts[parts.length - 1] = parts[parts.length - 1].replace(/\.[a-z]{2,4}$/, '<span class="faded">$&</span>');
+      parts[parts.length - 1] = parts[parts.length - 1].replace(/\.[a-z0-9]{2,4}$/, '<span class="faded">$&</span>');
 
       parts[parts.length - 1] = `<strong>${parts[parts.length - 1]}</strong>`;
       return parts.join('<br>/');
