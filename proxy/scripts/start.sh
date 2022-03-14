@@ -35,8 +35,8 @@ if [ "$SSL_DOMAIN" != "localhost" ]; then
     issue_selfsigned_cert
 
     nginx
-    /root/.acme.sh/acme.sh --issue -d "home.${SSL_DOMAIN}" -w /var/autossl -d "timeline.${SSL_DOMAIN}"
-    /root/.acme.sh/acme.sh --install-cert -d $SSL_DOMAIN --key-file "$PRIVATE_KEY_PATH" --fullchain-file "$CERT_CHAIN_PATH"
+    /root/.acme.sh/acme.sh --issue --debug --server letsencrypt -d "home.${SSL_DOMAIN}" -w /var/autossl -d "timeline.${SSL_DOMAIN}"
+    /root/.acme.sh/acme.sh --install-cert -d "home.${SSL_DOMAIN}" -d "timeline.${SSL_DOMAIN}" --key-file "$PRIVATE_KEY_PATH" --fullchain-file "$CERT_CHAIN_PATH"
     echo "Certificate installed. Restarting nginx..."
     nginx -s quit;
   else
