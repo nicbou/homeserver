@@ -1,7 +1,6 @@
 Django==3.2.12
-gunicorn==20.0.4
-psycopg2==2.8.4
-requests==2.23.0
-selenium==3.141.0
-coloredlogs==14.0
-websockets==9.1
+gunicorn==20.1.0 
+psycopg2==2.9.3
+requests==2.27.1
+coloredlogs==15.0.1 
+websockets==10.2

@@ -1,5 +1,5 @@
 bottle==0.12.19
-coloredlogs==14.0
-redis==3.5.3
-requests==2.25.1
-rq==1.7.0
+coloredlogs==15.0.1
+redis==4.1.4
+requests==2.27.1
+rq==1.10.1
