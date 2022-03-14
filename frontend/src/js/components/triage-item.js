@@ -53,7 +53,7 @@ export default Vue.component('triage-item', {
       }
 
       // Non-title words
-      ['dts', 'multisub', 'etrg', '720p', '1080p', 'hdrip', 'x264', 'ac3', '5.1', 'esubs', 'eng', 'webrip', 'brrip'].forEach(
+      ['dts', 'multisub', 'etrg', '720p', '1080p', 'hdrip', 'x264', 'ac3', '5.1', 'esubs', 'eng', 'webrip', 'brrip', 'x265', 'hevc', 'bluray'].forEach(
         (word) => parts[parts.length - 1] = parts[parts.length - 1].replace(new RegExp('\\b'+word+'\\b', 'gi'), '<span class="faded">$&</span>')
       );
 
