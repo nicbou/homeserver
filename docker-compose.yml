@@ -80,7 +80,11 @@ services:
       - NET_ADMIN
     restart: unless-stopped
   proxy:
-    build: proxy
+    build:
+      context: ./proxy
+      args:
+        - "SSL_DOMAIN"
+        - "SSL_EMAIL"
     ports:
       - "80:80"
       - "443:443"
@@ -92,7 +96,7 @@ services:
     volumes:
       - django_staticfiles:/static:ro
       - ${MOVIE_LIBRARY_PATH}:/movies:ro
-      - "./proxy/ssl-certs:/etc/ssl/certs"
+      - "ssl_certs:/etc/ssl-certs"
     logging:
       options:
         max-size: "200k"
@@ -108,6 +112,7 @@ volumes:
   django_staticfiles:
   db_persistence:
   redis_persistence:
+  ssl_certs:
 networks:
   default:
     name: homeserver
