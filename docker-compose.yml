@@ -103,11 +103,11 @@ services:
         max-file: "10"
     restart: unless-stopped
   dynamicdns:
-    image: tunix/digitalocean-dyndns
+    build: videoprocessing
     environment:
       - DIGITALOCEAN_TOKEN
       - DOMAIN=nicolasbouliane.com
-      - NAME=home;timeline
+      - SUBDOMAINS="home,timeline"
 volumes:
   django_staticfiles:
   db_persistence:
