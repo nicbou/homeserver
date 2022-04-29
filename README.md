@@ -10,7 +10,7 @@ The backend is built with Django and the frontend with Vue.js. It runs inside Do
 
 1. Set the required environment variables, as described below.
 2. Run `docker-compose up --build -d` to start all the components.
-3. If necessary, run `scripts/create-user.sh` to create your first user.
+3. If necessary, run `scripts/create-user.sh` to create your first admin user.
 
 ### Environment variables
 
@@ -20,7 +20,7 @@ You can use the `.env.example` file as a template.
 
 * `BACKEND_SECRET_KEY`: A unique, random, secret string used by Django. [Explanation](https://docs.djangoproject.com/en/3.1/ref/settings/#secret-key).
 * `DEFAULT_VIDEO_HEIGHT`: The default height for converted videos, in pixels. Defaults to 720.
-* `DIGITALOCEAN_TOKEN` (optional): DigitalOcean API token. Used for dynamic DNS. [Here's how you get that token](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/).
+* `DIGITALOCEAN_TOKEN` (optional): DigitalOcean API token. Used for dynamic DNS. [Here's how you get that token](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/). If you leave it empty, dynamic DNS will stay disabled.
 * `MAX_VIDEO_BITRATE`: The maximum video bitrate allowed, in bits per second. Defaults to 2000000.
 * `TRANSMISSION_DATA_PATH`: Path to Transmission's data folder on your filesystem. Incomplete torrents and Transmission settings are stored there.
 * `MOVIE_LIBRARY_PATH`: Path to the movie library on your filesystem. Movies, subtitles and covers are stored there.
