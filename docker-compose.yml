@@ -107,7 +107,7 @@ services:
     environment:
       - DIGITALOCEAN_TOKEN
       - DOMAIN=nicolasbouliane.com
-      - SUBDOMAINS="home,timeline"
+      - "SUBDOMAINS=home,timeline"
 volumes:
   django_staticfiles:
   db_persistence:
