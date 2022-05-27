@@ -103,7 +103,7 @@ services:
         max-file: "10"
     restart: unless-stopped
   dynamicdns:
-    build: videoprocessing
+    build: dynamicdns
     environment:
       - DIGITALOCEAN_TOKEN
       - DOMAIN=nicolasbouliane.com
