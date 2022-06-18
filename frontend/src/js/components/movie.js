@@ -42,6 +42,11 @@ export default Vue.component('movie', {
     },
     hasChromecastSupport: function() {
       return !!ChromeCast.isSupported();;
+    },
+    coverCss: function(){
+      return {
+        'background-image': `url('${this.movie.coverUrl}')`
+      }
     }
   },
   methods: {
@@ -65,18 +70,18 @@ export default Vue.component('movie', {
         tmdbId: this.movie.tmdbId,
         episodeId: episode.id,
       });
-    },
+    }
   },
   template: `
     <div v-if="movie" class="container">
       <div class="section movie-info">
-        <div class="cover">
+        <div class="cover" :style="coverCss">
           <img :src="movie.coverUrl" :key="movie.tmdbId"/>
         </div>
         <div class="information">
           <div class="section description">
             <h2>
-              {{ movie.title }}
+              <span>{{ movie.title }}</span>
               <star :movie="movie"></star>
             </h2>
             <p>{{ movie.description }}</p>
@@ -88,15 +93,20 @@ export default Vue.component('movie', {
               </a>
               <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && nextEpisode && !nextEpisode.isWatched" @click.prevent="markEpisodeAsWatched(nextEpisode)">
                 <i class="far fa-check-circle"></i>
+                Seen
               </a>
               <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && nextEpisode && nextEpisode.isWatched" @click.prevent="markEpisodeAsUnwatched(nextEpisode)">
                 <i class="fas fa-check-circle"></i>
+                Seen
               </a>
+              <star :movie="movie" class="button large">Star</star>
               <chromecast-button title="Play on ChromeCast" :episode="nextEpisode" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted && hasChromecastSupport" class="button large">
                 <i class="fab fa-chromecast"></i>
+                Cast
               </chromecast-button>
               <a title="Download movie and subtitles" href="#" class="button large" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
                 <i class="fas fa-download"></i>
+                Save
               </a>
               <a title="Administrator options" class="button large" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
                 <i class="fas fa-ellipsis-h"></i>
