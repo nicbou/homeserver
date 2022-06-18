@@ -18,9 +18,6 @@ mkdir -p /movies/library
 
 # Start Gunicorn processes
 echo Starting Gunicorn.
-
-python3 /srv/src/watchparty/server.py &
-
 exec gunicorn backend.wsgi:application \
     --name backend \
     --reload \

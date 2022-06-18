@@ -7,8 +7,6 @@ export default Vue.component('episode', {
     return {
       socket: null,
       ignorePlayerEvents: false,
-      watchPartyUsers: [],
-      watchPartyEnabled: false,
       movie: null,
       episode: null,
       videoElement: null,
@@ -66,41 +64,6 @@ export default Vue.component('episode', {
         episodeId: this.episode.id,
       });
     },
-    sendPlayerEvent: function(eventType) {
-      if(this.watchPartyEnabled && !this.ignorePlayerEvents){
-        this.socket.send(JSON.stringify({
-          'action': eventType,
-          'position': this.$refs.videoElement.currentTime,
-        }));
-      }
-    },
-    connectToWatchParty: function(displayName) {
-      this.socket = new WebSocket(
-        `wss://${window.location.hostname}/api/watchparty/?room=${this.$route.params.episodeId}&user=${displayName}`
-      );
-      this.$refs.videoElement.addEventListener('playing', _ => this.sendPlayerEvent('play'));
-      this.$refs.videoElement.addEventListener('pause', _ => this.sendPlayerEvent('pause'));
-      this.$refs.videoElement.addEventListener('seeked', _ => this.sendPlayerEvent('seek'));
-      this.socket.addEventListener('message', async event => this.receiveWatchPartyEvent(JSON.parse(event.data)));
-    },
-    receiveWatchPartyEvent: async function(message) {
-      console.log(message);
-      this.ignorePlayerEvents = true;
-
-      this.watchPartyUsers = message.users;
-      if(this.watchPartyEnabled){
-        if (this.$refs.videoElement.currentTime !== message.position){
-          this.$refs.videoElement.currentTime = message.position;
-        }
-        if(message.status === 'playing') {
-          await this.$refs.videoElement.play();
-        }
-        else if(message.status === 'paused') {
-          this.$refs.videoElement.pause();
-        }
-      }
-      this.ignorePlayerEvents = false;
-    },
   },
   mounted: function () {
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
@@ -129,8 +92,6 @@ export default Vue.component('episode', {
               this.$refs.videoElement.currentTime = this.episode.progress;
               this.progressInterval = setInterval(this.saveProgress, 3000);
             }
-
-            this.connectToWatchParty(userSettings.displayName);
           });
         }
       );
@@ -155,15 +116,6 @@ export default Vue.component('episode', {
       <div v-if="!episode.isConverted">This episode is not converted for web playback.</div>
       <div class="episode-actions">
         <div class="button-group horizontal">
-          <a class="button" :class="{'main': watchPartyUsers.length > 1}" @click="watchPartyEnabled = !watchPartyEnabled">
-            <i v-if="watchPartyUsers.length <= 1" class="fas fa-user"></i>
-            <i v-if="watchPartyUsers.length == 2" class="fas fa-user-friends"></i>
-            <i v-if="watchPartyUsers.length > 2" class="fas fa-users"></i>
-
-            <span v-if="!watchPartyEnabled && watchPartyUsers.length > 1">Join party</span>
-            <span v-if="!watchPartyEnabled && watchPartyUsers.length <= 1">Start party</span>
-            <span v-if="watchPartyEnabled && watchPartyUsers.length > 0">Leave party</span>
-          </a>
           <a class="button" v-if="!episode.isWatched" v-on:click.prevent="markEpisodeAsWatched">
             <i class="far fa-check-circle"></i> <span class="no-mobile">Mark as seen</span>
           </a>
