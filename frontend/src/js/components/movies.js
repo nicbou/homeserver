@@ -7,6 +7,7 @@ export default Vue.component('movies', {
   data: function() {
     return {
       moviesPerPage: 20,
+      queryDebounceTimeout: null,
     }
   },
   computed: {
@@ -84,7 +85,10 @@ export default Vue.component('movies', {
 
     },
     onSearchChanged: function(event) {
-      this.setQuery(event.target.value.trim());
+      clearTimeout(this.queryDebounceTimeout);
+      this.queryDebounceTimeout = setTimeout(() => {
+        this.setQuery(event.target.value.trim());
+      }, 200);
     },
     shuffleMovies: function() {
       const seed = Math.random().toString(36).substr(2, 5);
