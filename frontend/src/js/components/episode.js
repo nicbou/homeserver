@@ -36,7 +36,7 @@ export default Vue.component('episode', {
       return this.movie.episodeList[this.episodeIndex+1] || null;
     },
     hasChromecastSupport: function() {
-      return !!ChromeCast;
+      return !!ChromeCast.isSupported();
     },
     isMovie: function() {
       return this.movie.mediaType === MediaType.MOVIE;

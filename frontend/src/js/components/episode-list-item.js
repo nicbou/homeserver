@@ -53,7 +53,7 @@ export default Vue.component('episode-list-item', {
       });
     },
     hasChromecastSupport: function() {
-      return !!ChromeCast;
+      return !!ChromeCast.isSupported();
     },
   },
   template: `

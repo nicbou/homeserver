@@ -27,6 +27,15 @@ class ChromeCastService {
       }
     );
   }
+  
+  isSupported() {
+    try{
+      return !!chrome;
+    }
+    catch{
+      return false;
+    }
+  }
 
   // Lets the user select a ChromeCast and opens the player on the big screen
   selectDevice() {
