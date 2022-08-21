@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from functools import wraps
 from pathlib import Path
 from typing import List
 
@@ -153,6 +152,8 @@ class JSONMovieListView(PermissionRequiredMixin, View):
                         logger.info(f'Copying subtitles from {str(subtitles_file_abs)} to {str(dest_subtitles_path)}')
                         subtitles_file_abs.link_to(dest_subtitles_path)
 
+                        queue_subtitles_for_conversion(dest_subtitles_path)
+
                 if bool(triage_options.get('convertToMp4')):
                     conversion_queue.append(episode)
 
@@ -236,6 +237,15 @@ def queue_episode_for_conversion(episode: Episode):
         episode.conversion_status = Episode.CONVERSION_FAILED
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
     episode.save()
+
+
+def queue_subtitles_for_conversion(srt_subtitles_path: Path):
+    api_url = f"{settings.VIDEO_PROCESSING_API_URL}/convertSubtitles"
+    try:
+        logger.info(f'Queueing "{str(srt_subtitles_path)}" for conversion to .vtt.')
+        requests.post(api_url, json={'input': str(srt_subtitles_path)})
+    except (HTTPError, Timeout):
+        raise ConnectionError(f"Failed to queue {str(srt_subtitles_path)} for conversion to .vtt. Could not connect to server.")
 
 
 def delete_episode_original(episode: Episode):

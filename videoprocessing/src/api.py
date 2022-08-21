@@ -6,7 +6,7 @@ from bottle import route, run, request, abort, response
 import os
 import redis
 from rq import Queue
-from jobs import convert_to_mp4, extract_subtitles
+from jobs import convert_to_mp4, extract_subtitles, convert_subtitles
 
 redis_connection = redis.from_url(os.environ['REDIS_DB_URL'])
 conversion_queue = Queue('conversion', connection=redis_connection)
@@ -74,6 +74,30 @@ def extract_all_subtitles():
             'input_file': str(input_file),
         },
         job_timeout=60*60
+    )
+
+    response.status = 202
+    return {'result': 'success', 'message': 'Subtitles queued for extraction.'}
+
+
+@route('/convertSubtitles', method='POST')
+def convert_subtitles_to_vtt():
+    response.content_type = 'application/json'
+    if not request.json.get('input'):
+        abort(400, {'result': 'failure', 'message': '`input` parameter is missing from request payload'})
+
+    input_file = movie_library_path / request.json.get('input')
+    if not input_file.exists():
+        logger.error(f"Input file does not exist: '{Path(input_file)}'")
+        abort(404, {'result': 'failure', 'message': 'Input file does not exist'})
+
+    logger.info(f"Queueing {str(input_file)} for subtitle extraction")
+    subtitles_queue.enqueue(
+        convert_subtitles,
+        kwargs={
+            'input_file': str(input_file),
+        },
+        job_timeout=60
     )
 
     response.status = 202

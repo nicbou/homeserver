@@ -12,7 +12,9 @@ ffmpeg_path = '/usr/local/bin/ffmpeg'
 
 
 def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
-    """Convert input_file to MP4, saves it to output_file."""
+    """
+    Convert `input_file` to MP4, save to `output_file`, send success/failure message to `callback_url`.
+    """
     max_video_bitrate = int(os.environ.get('MAX_VIDEO_BITRATE', 3000000))
     default_video_height = int(os.environ.get('MAX_VIDEO_HEIGHT', 720))
 
@@ -115,6 +117,20 @@ def convert_to_mp4(input_file: str, output_file: str, callback_url: str):
                              f'Output: {exc.output.decode("utf-8")}')
             requests.post(callback_url, json={'status': 'conversion-failed'})
             raise
+
+
+def convert_subtitles(input_file: str):
+    """
+    Convert subs from .srt to .vtt format
+    """
+    output_file = str(Path(input_file).with_suffix('.vtt'))
+    ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', input_file, output_file]
+    try:
+        logger.info(f"Converting {input_file} subtitles to .vtt")
+        subprocess.check_output(ffmpeg_command)
+    except subprocess.CalledProcessError as e:
+        logger.exception(f"Could not convert subtitles in {input_file}. {e.output.decode('utf-8')}")
+        raise
 
 
 def extract_subtitles(input_file: str):
