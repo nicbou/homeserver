@@ -42,7 +42,7 @@ services:
       driver: "none"
     restart: unless-stopped
   redis:
-    image: smebberson/alpine-redis
+    image: redis:7-alpine
     volumes:
       - redis_persistence:/data
     restart: unless-stopped
