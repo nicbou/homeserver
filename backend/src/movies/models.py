@@ -38,7 +38,6 @@ class Episode(models.Model):
     status_map = {status[1]: status[0] for status in status_choices}
 
     # File
-    original_extension = models.CharField(max_length=12, null=True)  # TODO: Might be unnecessary
     triage_path = models.CharField(max_length=300, null=True)
     conversion_status = models.SmallIntegerField(default=NOT_CONVERTED, choices=status_choices)
 
@@ -55,15 +54,18 @@ class Episode(models.Model):
     date_added = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.filename(extension=self.original_extension, show_season=True)
+        return self.filename(show_season=True)
 
-    def filename(self, extension: str = 'mp4', show_season: bool = True):
+    def filename(self, extension: str = None, show_season: bool = True):
         filename = u'{title} ({year}).{extension}'
         if show_season and (self.season or self.episode):
             filename = u'{title} ({year}) {season}{episode}.{extension}'
 
+        # triage_path is None if the original was deleted and replaced by the converted version
+        default_extension = Path(self.triage_path).suffix[1:] if self.triage_path else 'mp4'
+
         return filename.format(
-            extension=extension,
+            extension=extension or default_extension,
             season='S{}'.format(self.season) if self.season else '',
             episode='E{}'.format(self.episode) if self.episode else '',
             year=self.release_year,
@@ -72,7 +74,7 @@ class Episode(models.Model):
 
     @property
     def library_filename(self) -> str:
-        return self.filename(self.original_extension)
+        return self.filename()
 
     @property
     def library_path(self) -> Path:
@@ -154,7 +156,7 @@ class Episode(models.Model):
     def library_url(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename(self.original_extension)
+            file=self.filename()
         )
 
     @property

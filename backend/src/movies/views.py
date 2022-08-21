@@ -139,7 +139,6 @@ class MovieListView(PermissionRequiredMixin, View):
                 # Create hard link to the original video in the movie library
                 if episode_original_vid_path.exists():
                     episode.triage_path = episode_original_vid_path
-                    episode.original_extension = episode_original_vid_path.suffix.lower()[1:]
 
                     logger.info(f'Copying video "{str(episode_original_vid_path)}" to "{str(episode.library_path)}"')
                     episode.library_path.unlink(missing_ok=True)
@@ -276,9 +275,9 @@ class DeleteOriginalView(PermissionRequiredMixin, View):
         try:
             episode = Episode.objects.get(pk=episode_id)
             episode.library_path.unlink(missing_ok=True)
-            episode.original_extension = 'mp4'
             episode.save()
             episode.converted_path.link_to(episode.library_path)
+            episode.triage_path = None
         except Episode.DoesNotExist:
             message = 'Episode does not exist.'
             logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
