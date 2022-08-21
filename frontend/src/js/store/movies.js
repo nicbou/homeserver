@@ -26,6 +26,7 @@ export default {
       }
     },
     DELETE_ORIGINAL_FILE(state, {tmdbId, episodeId}) {
+      state.movies[tmdbId].episodeMap[episodeId].originalVideoPreserved = false;
       state.movies[tmdbId].episodeMap[episodeId].originalVideoUrl = state.movies[tmdbId].episodeMap[episodeId].convertedVideoUrl;
     },
     CONVERT_EPISODE(state, {tmdbId, episodeId}) {

@@ -4,17 +4,18 @@ import StarComponent from './star.js';
 
 // List of movie covers
 export default Vue.component('movies', {
-  data: function() {
+  data() {
     return {
       moviesPerPage: 20,
       queryDebounceTimeout: null,
+      cleaningMode: false,
     }
   },
   computed: {
-    movies: function() {
+    movies() {
       return Object.values(this.$store.state.movies.movies).sort(this.movieSorter);
     },
-    movieSorter: function() {
+    movieSorter() {
       if (this.$route.query.shuffle) {
         Math.seedrandom(this.$route.query.shuffle);
         return () => .5 - Math.random();
@@ -23,13 +24,13 @@ export default Vue.component('movies', {
         return movieSorter;
       }
     },
-    query: function() {
+    query() {
       return this.$route.query.q || null;
     },
-    page: function() {
+    page() {
       return parseInt(this.$route.query.p) || 0;
     },
-    filteredMovies: function() {
+    filteredMovies() {
       if (this.query) {
         const lowerCaseQuery = this.query.toLocaleLowerCase();
         return this.movies
@@ -43,26 +44,26 @@ export default Vue.component('movies', {
       };
       return this.movies;
     },
-    paginatedMovies: function() {
+    paginatedMovies() {
       const start = this.page * this.moviesPerPage;
       const end = start + this.moviesPerPage;
       return this.filteredMovies.slice(start, end);
     },
-    maxPage: function() {
+    maxPage() {
       return Math.ceil(this.filteredMovies.length / this.moviesPerPage) - 1;
     },
-    starredMovies: function() {
+    starredMovies() {
       return this.filteredMovies.filter(m => m.isStarred);
     }
   },
-  created: function () {
+  created() {
     this.$store.dispatch('movies/getMovies');
   },
   methods: {
-    openMovie: function(movie) {
+    openMovie(movie) {
       this.$router.push({ name: 'movie', params: { tmdbId: movie.tmdbId } });
     },
-    setPage: function(page) {
+    setPage(page) {
       const navParams = {
         name: 'movies',
         query: {}
@@ -72,7 +73,7 @@ export default Vue.component('movies', {
 
       this.$router.push(navParams);
     },
-    setQuery: function(query) {
+    setQuery(query) {
       // Note: the page number is reset when the query changes
       const navParams = {
         name: 'movies',
@@ -84,13 +85,13 @@ export default Vue.component('movies', {
       this.query ? this.$router.replace(navParams) : this.$router.push(navParams);
 
     },
-    onSearchChanged: function(event) {
+    onSearchChanged(event) {
       clearTimeout(this.queryDebounceTimeout);
       this.queryDebounceTimeout = setTimeout(() => {
         this.setQuery(event.target.value.trim());
       }, 200);
     },
-    shuffleMovies: function() {
+    shuffleMovies() {
       const seed = Math.random().toString(36).substr(2, 5);
 
       // Add the seed to history, to make the shuffling persist navigation
@@ -100,7 +101,15 @@ export default Vue.component('movies', {
           shuffle: seed,
         }
       });
-    }
+    },
+    deleteOriginalFiles: function(movie) {
+      movie.episodeList.filter(e => e.needsCleaning).forEach(episode => {
+        this.$store.dispatch('movies/deleteOriginalFile', {
+          tmdbId: movie.tmdbId,
+          episodeId: episode.id,
+        });
+      });
+    },
   },
   template: `
     <div id="movies" class="container">
@@ -116,14 +125,16 @@ export default Vue.component('movies', {
         <h2 v-if="!query && page === 0">All movies</h2>
         <h2 v-if="!query && page > 0">More movies...</h2>
         <button id="shuffle-button" class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
+        <button id="clean-button" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
         <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
       </div>
       <spinner v-if="movies.length === 0"></spinner>
       <p v-if="movies.length > 0 && filteredMovies.length === 0">No movies found</p>
-      <div class="covers">
-        <div class="cover" v-for="movie in paginatedMovies" :key="movie.tmdbId">
+      <div class="covers" :class="{'cleaning-mode': cleaningMode}">
+        <div class="cover" :class="{'needs-cleaning': movie.needsCleaning}" v-for="movie in paginatedMovies" :key="movie.tmdbId">
           <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <star :movie="movie"></star>
+          <button v-if="cleaningMode && movie.needsCleaning" class="button clean" @click="deleteOriginalFiles(movie)"><i class="fas fa-broom"></i></button>
         </div>
       </div>
       <div class="button-group horizontal">

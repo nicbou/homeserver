@@ -57,8 +57,8 @@ export default Vue.component('admin-menu', {
       <a class="button" href="#" @click.prevent="deleteEpisode" v-if="showDeleteEpisode">
         <i class="fas fa-trash-alt"></i> Delete and remove from library
       </a>
-      <a class="button" href="#" @click.prevent="deleteOriginalFile" v-if="episode.isConverted && showDeleteOriginalFile">
-        <i class="fa fa-file-video"></i> Delete original, keep converted version
+      <a class="button" href="#" @click.prevent="deleteOriginalFile" v-if="episode.isConverted && episode.originalVideoPreserved && showDeleteOriginalFile">
+        <i class="fas fa-broom"></i> Delete original, keep converted version
       </a>
     </div>
   `

@@ -91,6 +91,8 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
 .covers{display:grid;grid-template-columns:repeat(4, 1fr);grid-gap:15px;width: 100%;margin: 0 0 25px;overflow:hidden;border-radius:var(--border-radius);}
     .covers .cover{border-radius:var(--border-radius);overflow:hidden;background:#191919;}
         .covers .cover img{cursor:pointer;}
+    .covers.cleaning-mode .cover:not(.needs-cleaning){opacity:0.2}
+        .covers.cleaning-mode .cover .button.clean{position:absolute;bottom:15px;right:15px}
     .cover{width: 100%;position:relative;}
         .cover img{max-width:100%;display:block;}
 

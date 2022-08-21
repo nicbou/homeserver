@@ -69,6 +69,7 @@ class MovieListView(PermissionRequiredMixin, View):
                     'vttSubtitlesUrlEn': movie.vtt_subtitles_url_en,
                     'vttSubtitlesUrlDe': movie.vtt_subtitles_url_de,
                     'vttSubtitlesUrlFr': movie.vtt_subtitles_url_fr,
+                    'originalVideoPreserved': not movie.original_is_same_as_converted,
                 })
 
             json_movies.append(json_movie)
@@ -85,7 +86,7 @@ class MovieListView(PermissionRequiredMixin, View):
                 'message': 'You do not have the permission to access this feature'
             }, status=403)
 
-        payload = json.loads(request.body, encoding='UTF-8')
+        payload = json.loads(request.body)
 
         with transaction.atomic():
             # Create the episodes
@@ -134,15 +135,15 @@ class MovieListView(PermissionRequiredMixin, View):
             # If the movie is already in the library, overwrite the file.
             conversion_queue = []
             for episode, triage_options in zip(episodes, triage_options):
-                episode_original_vid_path = settings.TRIAGE_PATH / Path(triage_options.get('movieFile'))
+                episode_triage_path = settings.TRIAGE_PATH / Path(triage_options.get('movieFile'))
 
                 # Create hard link to the original video in the movie library
-                if episode_original_vid_path.exists():
-                    episode.triage_path = episode_original_vid_path
+                if episode_triage_path.exists():
+                    episode.triage_path = episode_triage_path
 
-                    logger.info(f'Copying video "{str(episode_original_vid_path)}" to "{str(episode.original_path)}"')
+                    logger.info(f'Copying video "{str(episode_triage_path)}" to "{str(episode.original_path)}"')
                     episode.original_path.unlink(missing_ok=True)
-                    episode_original_vid_path.link_to(episode.original_path)
+                    episode.original_path.hardlink_to(episode_triage_path)
                     episode.save()
 
                 # Create hard link to subtitle files in the movie library
@@ -153,11 +154,11 @@ class MovieListView(PermissionRequiredMixin, View):
                     subtitles_triage_path = settings.TRIAGE_PATH / triage_options[f'subtitlesFile{language}']
                     assert subtitles_triage_path.exists()
 
-                    subtitles_library_path: Path = getattr(episode, f'srt_subtitles_path_{language.lower()}')
-                    logger.info(f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_library_path)}"')
-                    subtitles_library_path.unlink(missing_ok=True)
-                    subtitles_triage_path.link_to(subtitles_library_path)
-                    queue_subtitles_for_conversion(subtitles_library_path)
+                    subtitles_original_path: Path = getattr(episode, f'srt_subtitles_path_{language.lower()}')
+                    logger.info(f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_original_path)}"')
+                    subtitles_original_path.unlink(missing_ok=True)
+                    subtitles_original_path.hardlink_to(subtitles_triage_path)
+                    queue_subtitles_for_conversion(subtitles_original_path)
 
                 conversion_queue.append(episode)
 
@@ -275,7 +276,9 @@ class DeleteOriginalView(PermissionRequiredMixin, View):
         try:
             episode = Episode.objects.get(pk=episode_id)
             episode.original_path.unlink(missing_ok=True)
-            episode.converted_path.link_to(episode.original_path)
+            episode.original_path.with_suffix('.mp4').unlink(missing_ok=True)
+            logger.warning([episode.original_path, episode.original_path.exists(), episode.converted_path, episode.converted_path.exists()])
+            episode.original_path.hardlink_to(episode.converted_path)
         except Episode.DoesNotExist:
             message = 'Episode does not exist.'
             logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
@@ -342,7 +345,7 @@ class EpisodeConversionCallbackView(View):
     Called when an episode conversion task is finished.
     """
     def post(self, request, *args, **kwargs):
-        payload = json.loads(request.body, encoding='UTF-8')
+        payload = json.loads(request.body)
 
         if 'id' not in request.GET:
             return JsonResponse({'result': 'failure', 'message': '`id` is missing from query string'}, status=400)
@@ -457,7 +460,7 @@ class EpisodeProgressView(PermissionRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         episode_id = kwargs.get('id')
-        payload = json.loads(request.body, encoding='UTF-8')
+        payload = json.loads(request.body)
         try:
             episode = Episode.objects.get(pk=episode_id)
             watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, episode=episode)[0]

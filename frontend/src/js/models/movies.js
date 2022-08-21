@@ -76,6 +76,10 @@ export class Episode {
   get playbackUrl() {
     return `/player/play/${ this.id }/`;
   }
+
+  get needsCleaning() {
+    return this.isWatched && this.originalVideoPreserved;
+  }
 }
 
 export class Movie {
@@ -89,7 +93,7 @@ export class Movie {
     return WatchStatus.NOT_WATCHED;
   }
 
-  get watched() {
+  get isWatched() {
     return this.watchStatus === WatchStatus.WATCHED;
   }
 
@@ -153,6 +157,10 @@ export class Movie {
     return Object.values(this.episodeMap).sort(episodeSorter);
   }
 
+  get needsCleaning() {
+    return this.episodeList.some(e => e.needsCleaning);
+  }
+
   static fromMovieApiResponse(jsonResponse) {
     const movie = new Movie();
     movie.isStarred = !!jsonResponse.isStarred;
@@ -181,6 +189,7 @@ export class Movie {
           episode.releaseYear = jsonEpisode.releaseYear;
           episode.progress = jsonEpisode.progress;
           episode.dateAdded = moment(jsonEpisode.dateAdded);
+          episode.originalVideoPreserved = jsonEpisode.originalVideoPreserved;
           episodes[episode.id] = episode;
           return episodes
         },
