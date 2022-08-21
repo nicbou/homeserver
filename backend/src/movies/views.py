@@ -20,11 +20,14 @@ import datetime
 logger = logging.getLogger(__name__)
 
 
-class JSONMovieListView(PermissionRequiredMixin, View):
+class MovieListView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_watch'
     raise_exception = True
 
     def get(self, request, *args, **kwargs):
+        """
+        Return all movies/shows and their episodes as a nested list
+        """
         movies_by_tmdb_id = {}
 
         watch_statuses = {wp.episode_id: wp for wp in EpisodeWatchStatus.objects.filter(user=request.user)}
@@ -73,7 +76,9 @@ class JSONMovieListView(PermissionRequiredMixin, View):
         return JsonResponse({'movies': json_movies})
 
     def post(self, request, *args, **kwargs):
-        """Create or update a movie with a list of episodes."""
+        """
+        Create or update a movie/show with a list of episodes.
+        """
         if not request.user.has_perm('authentication.movies_manage'):
             return JsonResponse({
                 'result': 'failure',
@@ -123,38 +128,38 @@ class JSONMovieListView(PermissionRequiredMixin, View):
                 for json_episode in payload.get('episodes', [])
             ]
 
-            # Link the movies and subtitles from the triage dir to the the library dir
-            # If the movie is already in the library, overwrite the file
-            # TODO: Make this section more readable
+            # Create hard links to the files in the triage directory so that they can be
+            # in the triage directory and in the movie library at the same time.
+            # If the movie is already in the library, overwrite the file.
             conversion_queue = []
             for episode, triage_options in zip(episodes, triage_options):
-                episode_original_file = Path(triage_options.get('movieFile'))
-                episode_original_file_path = settings.TRIAGE_PATH / episode_original_file if episode_original_file else None
+                episode_original_vid_path = settings.TRIAGE_PATH / Path(triage_options.get('movieFile'))
 
-                # Hard link original video
-                if episode_original_file_path and episode_original_file_path.exists():
-                    episode.triage_path = episode_original_file_path
-                    episode.original_extension = episode_original_file_path.suffix.lower()[1:]
+                # Create hard link to the original video in the movie library
+                if episode_original_vid_path.exists():
+                    episode.triage_path = episode_original_vid_path
+                    episode.original_extension = episode_original_vid_path.suffix.lower()[1:]
+
+                    logger.info(f'Copying video "{str(episode_original_vid_path)}" to "{str(episode.library_path)}"')
                     episode.library_path.unlink(missing_ok=True)
-                    logger.info(f'Copying video from {str(episode_original_file_path)} to {str(episode.library_path)}')
-                    episode_original_file_path.link_to(episode.library_path)
-                    assert episode_original_file_path.exists(), f"{episode_original_file_path} does not exist"
-                    assert episode.library_path.exists(), episode.library_path
+                    episode_original_vid_path.link_to(episode.library_path)
                     episode.save()
 
-                # Hard link subtitles
-                for subtitles_language in ('En', 'De', 'Fr'):
-                    subtitles_file = triage_options.get('subtitlesFile' + subtitles_language)
-                    subtitles_file_abs = (settings.TRIAGE_PATH / subtitles_file) if subtitles_file else None
-                    if subtitles_file and subtitles_file_abs.exists():
-                        dest_subtitles_path: Path = getattr(episode, f'srt_subtitles_path_{subtitles_language.lower()}')
-                        dest_subtitles_path.unlink(missing_ok=True)
-                        logger.info(f'Copying subtitles from {str(subtitles_file_abs)} to {str(dest_subtitles_path)}')
-                        subtitles_file_abs.link_to(dest_subtitles_path)
+                # Create hard link to subtitle files in the movie library
+                for language in ('En', 'De', 'Fr'):
+                    if not triage_options.get(f'subtitlesFile{language}'):
+                        continue
 
-                        queue_subtitles_for_conversion(dest_subtitles_path)
+                    subtitles_triage_path = settings.TRIAGE_PATH / triage_options[f'subtitlesFile{language}']
+                    assert subtitles_triage_path.exists()
 
-                if bool(triage_options.get('convertToMp4')):
+                    subtitles_library_path: Path = getattr(episode, f'srt_subtitles_path_{language.lower()}')
+                    logger.info(f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_library_path)}"')
+                    subtitles_library_path.unlink(missing_ok=True)
+                    subtitles_triage_path.link_to(subtitles_library_path)
+                    queue_subtitles_for_conversion(subtitles_library_path)
+
+                if triage_options.get('convertToMp4'):
                     conversion_queue.append(episode)
 
             # Download the cover URL if necessary
@@ -181,7 +186,7 @@ class JSONMovieListView(PermissionRequiredMixin, View):
             logger.error(f"Could not download file at {url}.")
 
 
-class JSONEpisodeConvertView(PermissionRequiredMixin, View):
+class EpisodeConvertView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_manage'
     raise_exception = True
 
@@ -203,7 +208,7 @@ class JSONEpisodeConvertView(PermissionRequiredMixin, View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeExtractSubtitlesView(PermissionRequiredMixin, View):
+class EpisodeExtractSubtitlesView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_manage'
     raise_exception = True
 
@@ -248,34 +253,6 @@ def queue_subtitles_for_conversion(srt_subtitles_path: Path):
         raise ConnectionError(f"Failed to queue {str(srt_subtitles_path)} for conversion to .vtt. Could not connect to server.")
 
 
-def delete_episode_original(episode: Episode):
-    episode.library_path.unlink(missing_ok=True)
-    episode.original_extension = 'mp4'
-    episode.save()
-    episode.converted_path.link_to(episode.library_path)
-
-
-class JSONDeleteOriginalView(PermissionRequiredMixin, View):
-    permission_required = 'authentication.movies_manage'
-    raise_exception = True
-
-    def delete(self, request, *args, **kwargs):
-        """
-        Delete an original video, and replace it with the converted version.
-        """
-        episode_id = kwargs.get('id')
-        try:
-            delete_episode_original(Episode.objects.get(pk=episode_id))
-        except Episode.DoesNotExist:
-            message = 'Episode does not exist.'
-            logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
-            return JsonResponse({'result': 'failure', 'message': message}, status=404)
-        except ConnectionError:
-            logger.error(f"Failed to replace original of episode #{episode_id}. Could not connect to server.")
-            return JsonResponse({'result': 'failure', 'message': 'Failed to replace original of episode.'}, status=500)
-        return JsonResponse({'result': 'success'})
-
-
 def queue_subtitles_for_extraction(episode: Episode):
     try:
         requests.post(
@@ -286,7 +263,33 @@ def queue_subtitles_for_extraction(episode: Episode):
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
 
 
-class JSONEpisodeView(PermissionRequiredMixin, View):
+class DeleteOriginalView(PermissionRequiredMixin, View):
+    permission_required = 'authentication.movies_manage'
+    raise_exception = True
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete an original video, and replace it with the converted version. For example, delete the 4K version and keep
+        only the smaller web version.
+        """
+        episode_id = kwargs.get('id')
+        try:
+            episode = Episode.objects.get(pk=episode_id)
+            episode.library_path.unlink(missing_ok=True)
+            episode.original_extension = 'mp4'
+            episode.save()
+            episode.converted_path.link_to(episode.library_path)
+        except Episode.DoesNotExist:
+            message = 'Episode does not exist.'
+            logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
+            return JsonResponse({'result': 'failure', 'message': message}, status=404)
+        except ConnectionError:
+            logger.error(f"Failed to replace original of episode #{episode_id}. Could not connect to server.")
+            return JsonResponse({'result': 'failure', 'message': 'Failed to replace original of episode.'}, status=500)
+        return JsonResponse({'result': 'success'})
+
+
+class EpisodeView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_manage'
     raise_exception = True
 
@@ -307,7 +310,7 @@ class JSONEpisodeView(PermissionRequiredMixin, View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONTriageListView(PermissionRequiredMixin, View):
+class TriageListView(PermissionRequiredMixin, View):
     """
     List of untriaged video and subtitle files
     """
@@ -337,7 +340,7 @@ class JSONTriageListView(PermissionRequiredMixin, View):
         return JsonResponse({'movies': list(relative_video_files), 'subtitles': relative_subtitle_files})
 
 
-class JSONEpisodeConversionCallbackView(View):
+class EpisodeConversionCallbackView(View):
     """
     Called when an episode conversion task is finished.
     """
@@ -372,7 +375,7 @@ class JSONEpisodeConversionCallbackView(View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeAccessTokenView(PermissionRequiredMixin, View):
+class EpisodeAccessTokenView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_watch'
     raise_exception = True
 
@@ -387,7 +390,7 @@ class JSONEpisodeAccessTokenView(PermissionRequiredMixin, View):
         return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
 
 
-class JSONEpisodeWatchedView(PermissionRequiredMixin, View):
+class EpisodeWatchedView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_watch'
     raise_exception = True
 
@@ -403,7 +406,7 @@ class JSONEpisodeWatchedView(PermissionRequiredMixin, View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeUnwatchedView(PermissionRequiredMixin, View):
+class EpisodeUnwatchedView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_watch'
     raise_exception = True
 
@@ -420,7 +423,7 @@ class JSONEpisodeUnwatchedView(PermissionRequiredMixin, View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeStarView(PermissionRequiredMixin, View):
+class EpisodeStarView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_watch'
     raise_exception = True
 
@@ -435,7 +438,7 @@ class JSONEpisodeStarView(PermissionRequiredMixin, View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeUnstarView(PermissionRequiredMixin, View):
+class EpisodeUnstarView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_watch'
     raise_exception = True
 
@@ -451,7 +454,7 @@ class JSONEpisodeUnstarView(PermissionRequiredMixin, View):
         return JsonResponse({'result': 'success'})
 
 
-class JSONEpisodeProgressView(PermissionRequiredMixin, View):
+class EpisodeProgressView(PermissionRequiredMixin, View):
     permission_required = 'authentication.movies_watch'
     raise_exception = True
 
