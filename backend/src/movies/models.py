@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import datetime
-import glob
 import logging
 import uuid
 from pathlib import Path
@@ -61,11 +60,8 @@ class Episode(models.Model):
         if show_season and (self.season or self.episode):
             filename = u'{title} ({year}) {season}{episode}.{extension}'
 
-        # triage_path is None if the original was deleted and replaced by the converted version
-        default_extension = Path(self.triage_path).suffix[1:] if self.triage_path else 'mp4'
-
         return filename.format(
-            extension=extension or default_extension,
+            extension=extension or Path(self.triage_path).suffix[1:],
             season='S{}'.format(self.season) if self.season else '',
             episode='E{}'.format(self.episode) if self.episode else '',
             year=self.release_year,
@@ -73,12 +69,29 @@ class Episode(models.Model):
         )
 
     @property
-    def library_filename(self) -> str:
-        return self.filename()
+    def original_is_same_as_converted(self):
+        return (
+            self.conversion_status == self.CONVERTED
+            and self.original_path.suffix == '.mp4'
+            and self.original_path.exists()  # Actual files might be missing in the dev environment
+            and self.converted_path.exists()
+            and self.original_path.stat().st_ino == self.converted_path.stat().st_ino
+        )
 
     @property
-    def library_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.library_filename
+    def original_filename(self) -> str:
+        original_extension = Path(self.triage_path).suffix[1:]
+        original_filename = self.filename(original_extension)
+
+        # The original file might have been deleted, and replaced with the converted version to save space
+        if self.conversion_status == self.CONVERTED and not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
+            return str(Path(original_filename).with_suffix('.mp4'))
+
+        return original_filename
+
+    @property
+    def original_path(self) -> Path:
+        return settings.MOVIE_LIBRARY_PATH / self.original_filename
 
     @property
     def converted_filename(self) -> str:
@@ -153,59 +166,59 @@ class Episode(models.Model):
         return settings.MOVIE_LIBRARY_PATH / self.cover_filename
 
     @property
-    def library_url(self) -> str:
+    def original_url(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename()
+            file=self.original_filename
         )
 
     @property
     def converted_url(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('converted.mp4')
+            file=self.converted_filename
         )
 
     @property
     def srt_subtitles_url_en(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('srt')
+            file=self.srt_subtitles_filename_en
         )
 
     @property
     def srt_subtitles_url_de(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('ger.srt')
+            file=self.srt_subtitles_filename_de
         )
 
     @property
     def srt_subtitles_url_fr(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('fre.srt')
+            file=self.srt_subtitles_filename_fr
         )
 
     @property
     def vtt_subtitles_url_en(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('vtt')
+            file=self.vtt_subtitles_filename_en
         )
 
     @property
     def vtt_subtitles_url_de(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('ger.vtt')
+            file=self.vtt_subtitles_filename_de
         )
 
     @property
     def vtt_subtitles_url_fr(self) -> str:
         return u"{url}/{file}".format(
             url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('fre.vtt')
+            file=self.vtt_subtitles_filename_fr
         )
 
     @property

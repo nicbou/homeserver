@@ -58,7 +58,7 @@ class MovieListView(PermissionRequiredMixin, View):
                     'dateAdded': movie.date_added,
                     'id': movie.id,
                     'lastWatched': watch_status.last_watched if watch_status else None,
-                    'originalVideoUrl': movie.library_url,
+                    'originalVideoUrl': movie.original_url,
                     'season': movie.season,
                     'episode': movie.episode,
                     'progress': watch_status.stopped_at if watch_status else 0,
@@ -140,9 +140,9 @@ class MovieListView(PermissionRequiredMixin, View):
                 if episode_original_vid_path.exists():
                     episode.triage_path = episode_original_vid_path
 
-                    logger.info(f'Copying video "{str(episode_original_vid_path)}" to "{str(episode.library_path)}"')
-                    episode.library_path.unlink(missing_ok=True)
-                    episode_original_vid_path.link_to(episode.library_path)
+                    logger.info(f'Copying video "{str(episode_original_vid_path)}" to "{str(episode.original_path)}"')
+                    episode.original_path.unlink(missing_ok=True)
+                    episode_original_vid_path.link_to(episode.original_path)
                     episode.save()
 
                 # Create hard link to subtitle files in the movie library
@@ -234,9 +234,9 @@ def queue_episode_for_conversion(episode: Episode):
     callback_url = f"http://{os.environ['HOSTNAME']}/movies/convert/callback/?id={episode.pk}"
 
     try:
-        logger.info(f'Queueing "{episode.library_filename}" for conversion.')
+        logger.info(f'Queueing "{episode.original_filename}" for conversion.')
         episode.conversion_status = Episode.CONVERTING
-        requests.post(api_url, json={'input': str(episode.library_filename), 'output': str(episode.converted_filename), 'callbackUrl': callback_url})
+        requests.post(api_url, json={'input': str(episode.original_filename), 'output': str(episode.converted_filename), 'callbackUrl': callback_url})
     except (HTTPError, Timeout):
         episode.conversion_status = Episode.CONVERSION_FAILED
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
@@ -256,7 +256,7 @@ def queue_subtitles_for_extraction(episode: Episode):
     try:
         requests.post(
             f"{settings.VIDEO_PROCESSING_API_URL}/extractSubtitles",
-            json={'input': str(episode.library_path)}
+            json={'input': str(episode.original_path)}
         )
     except (HTTPError, Timeout):
         raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
@@ -274,10 +274,8 @@ class DeleteOriginalView(PermissionRequiredMixin, View):
         episode_id = kwargs.get('id')
         try:
             episode = Episode.objects.get(pk=episode_id)
-            episode.library_path.unlink(missing_ok=True)
-            episode.save()
-            episode.converted_path.link_to(episode.library_path)
-            episode.triage_path = None
+            episode.original_path.unlink(missing_ok=True)
+            episode.converted_path.link_to(episode.original_path)
         except Episode.DoesNotExist:
             message = 'Episode does not exist.'
             logger.error(f"Failed to replace original of episode #{episode_id}. {message}")

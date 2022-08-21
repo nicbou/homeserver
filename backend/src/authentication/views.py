@@ -42,7 +42,7 @@ def check_auth(request):
         if (
             access_token.expiration_date < timezone.now() or
             unquote(parsed_url.path) not in (
-                access_token.episode.library_url,
+                access_token.episode.original_url,
                 access_token.episode.converted_url,
                 access_token.episode.srt_subtitles_url_en,
                 access_token.episode.vtt_subtitles_url_en,
