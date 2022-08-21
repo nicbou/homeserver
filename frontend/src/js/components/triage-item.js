@@ -20,7 +20,6 @@ export default Vue.component('triage-item', {
   props: ['file', 'subtitles'],
   data: function() {
     return {
-      convertToMp4: true,
       description: '',
       episode: null,
       highlightedSuggestion: null,
@@ -178,7 +177,6 @@ export default Vue.component('triage-item', {
           subtitlesFileEn: this.selectedSubtitlesEn || null, 
           subtitlesFileDe: this.selectedSubtitlesDe || null, 
           subtitlesFileFr: this.selectedSubtitlesFr || null, 
-          convertToMp4: this.convertToMp4
         }
       ).then(() => {
         this.savingInProgress = false;
@@ -264,13 +262,6 @@ export default Vue.component('triage-item', {
               <option disabled>-----</option>
               <option v-for="subtitle in subtitles">{{ subtitle }}</option>
             </select>
-          </div>
-
-          <div class="control">
-            <label :for="_uid + '-convert'">Conversion</label>
-            <label class="input checkbox">
-              <input v-model="convertToMp4" type="checkbox" :id="_uid + '-convert'"> Convert for web playback and extract subtitles
-            </label>
           </div>
 
           <div class="button-group horizontal">

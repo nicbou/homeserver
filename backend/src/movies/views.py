@@ -122,8 +122,9 @@ class MovieListView(PermissionRequiredMixin, View):
             triage_options = [
                 json_episode.get('triage', {
                     'movieFile': None,
-                    'subtitlesFile': None,
-                    'convertToMp4': False
+                    'subtitlesFileEn': None,
+                    'subtitlesFileFr': None,
+                    'subtitlesFileDe': None,
                 })
                 for json_episode in payload.get('episodes', [])
             ]
@@ -159,8 +160,7 @@ class MovieListView(PermissionRequiredMixin, View):
                     subtitles_triage_path.link_to(subtitles_library_path)
                     queue_subtitles_for_conversion(subtitles_library_path)
 
-                if triage_options.get('convertToMp4'):
-                    conversion_queue.append(episode)
+                conversion_queue.append(episode)
 
             # Download the cover URL if necessary
             new_cover_url = payload.get('coverUrl')

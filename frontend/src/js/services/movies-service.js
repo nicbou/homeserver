@@ -71,7 +71,6 @@ export default class {
           subtitlesFileEn: params.subtitlesFileEn || null,
           subtitlesFileDe: params.subtitlesFileDe || null,
           subtitlesFileFr: params.subtitlesFileFr || null,
-          convertToMp4: params.convertToMp4 || false,
         },
       }
     })
