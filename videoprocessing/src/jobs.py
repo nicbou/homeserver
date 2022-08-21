@@ -141,6 +141,7 @@ def extract_subtitles(input_file: str):
     ignored_subtitle_codecs = (
         'dvd_subtitle',
         'hdmv_pgs_subtitle',
+        'ass',
     )
 
     # Find subtitle tracks by language. You could use ffmpeg's -map to find subtitle tracks by language, but it fails if
