@@ -1,4 +1,4 @@
-FROM jrottenberg/ffmpeg:4.1-ubuntu2004
+FROM jrottenberg/ffmpeg:4.4-ubuntu
 
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
