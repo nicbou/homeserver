@@ -277,7 +277,6 @@ class DeleteOriginalView(PermissionRequiredMixin, View):
             episode = Episode.objects.get(pk=episode_id)
             episode.original_path.unlink(missing_ok=True)
             episode.original_path.with_suffix('.mp4').unlink(missing_ok=True)
-            logger.warning([episode.original_path, episode.original_path.exists(), episode.converted_path, episode.converted_path.exists()])
             episode.original_path.hardlink_to(episode.converted_path)
         except Episode.DoesNotExist:
             message = 'Episode does not exist.'

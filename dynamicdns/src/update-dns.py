@@ -26,23 +26,24 @@ def update_dns():
         record_url = f"https://api.digitalocean.com/v2/domains/{domain}/records/{record['id']}"
 
         if record['name'] in existing_subdomains:
-            logger.warning(f"{subdomain}.{domain}: Found duplicate A record")
+            logger.warning(f"{record['name']}.{domain}: Found duplicate A record")
             requests.delete(url=record_url, headers=headers)
-            logger.info(f"{subdomain}.{domain}: Deleted duplicate A record.")
+            logger.info(f"{record['name']}.{domain}: Deleted duplicate A record.")
 
         elif record['data'] != current_ip:
-            logger.warning(f"{subdomain}.{domain}: DNS A record ({record['data']}) does not match current IP ({current_ip})")
+            logger.warning(f"{record['name']}.{domain}: DNS A record ({record['data']}) does not match current IP ({current_ip})")
             requests.post(url=record_url, headers=headers, data={
                 'type': 'A',
                 'name': record['name'],
                 'data': current_ip,
             })
-            logger.info(f"{subdomain}.{domain}: Updated A record to current IP ({current_ip})")
+            logger.info(f"{record['name']}.{domain}: Updated A record to current IP ({current_ip})")
 
         else:
-            logger.info(f"{subdomain}.{domain}: DNS A record matches current IP ({current_ip})")
+            logger.info(f"{record['name']}.{domain}: DNS A record matches current IP ({current_ip})")
 
         existing_subdomains.add(record['name'])
+
 
 while True:
     if os.environ.get('DIGITALOCEAN_TOKEN'):
