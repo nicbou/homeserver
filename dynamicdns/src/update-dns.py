@@ -3,6 +3,7 @@ import requests
 import logging
 import os
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 domain = os.environ.get('DOMAIN')
@@ -21,7 +22,6 @@ def update_dns():
     a_records = [r for r in all_records['domain_records'] if r['type'] == 'A' and r['name'] in subdomains]
 
     existing_subdomains = set()
-
     for record in a_records:
         record_url = f"https://api.digitalocean.com/v2/domains/{domain}/records/{record['id']}"
 
@@ -48,4 +48,8 @@ def update_dns():
 while True:
     if os.environ.get('DIGITALOCEAN_TOKEN'):
         update_dns()
-    sleep(30 * 60)
+        sleep(30 * 60)
+    else:
+        logger.error("DIGITALOCEAN_TOKEN environment variable is not set. Exiting.")
+        exit()
+
