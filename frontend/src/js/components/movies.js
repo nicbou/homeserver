@@ -125,7 +125,7 @@ export default Vue.component('movies', {
         <h2 v-if="!query && page === 0">All movies</h2>
         <h2 v-if="!query && page > 0">More movies...</h2>
         <button id="shuffle-button" class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
-        <button id="clean-button" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
+        <button id="clean-button" v-if="canManageMovies" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
         <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
       </div>
       <spinner v-if="movies.length === 0"></spinner>
