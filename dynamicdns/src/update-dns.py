@@ -5,6 +5,7 @@ import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 domain = os.environ.get('DOMAIN')
 subdomains = [sd.strip() for sd in os.environ.get('SUBDOMAINS', '').split(',')]
@@ -52,4 +53,3 @@ while True:
     else:
         logger.error("DIGITALOCEAN_TOKEN environment variable is not set. Exiting.")
         exit()
-
