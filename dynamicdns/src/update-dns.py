@@ -1,3 +1,4 @@
+from requests.exceptions import HTTPError
 from time import sleep
 import requests
 import logging
@@ -28,18 +29,27 @@ def update_dns():
 
         if record['name'] in existing_subdomains:
             logger.warning(f"{record['name']}.{domain}: Found duplicate A record")
-            requests.delete(url=record_url, headers=headers)
-            logger.info(f"{record['name']}.{domain}: Deleted duplicate A record.")
+            try:
+                r = requests.delete(url=record_url, headers=headers)
+                r.raise_for_status()
+            except HTTPError:
+                logger.exception(f"{record['name']}.{domain}: Could not delete duplicate A record.")
+            else:
+                logger.info(f"{record['name']}.{domain}: Deleted duplicate A record.")
 
         elif record['data'] != current_ip:
             logger.warning(f"{record['name']}.{domain}: DNS A record ({record['data']}) does not match current IP ({current_ip})")
-            requests.post(url=record_url, headers=headers, data={
-                'type': 'A',
-                'name': record['name'],
-                'data': current_ip,
-            })
-            logger.info(f"{record['name']}.{domain}: Updated A record to current IP ({current_ip})")
-
+            try:
+                r = requests.post(url=record_url, headers=headers, data={
+                    'type': 'A',
+                    'name': record['name'],
+                    'data': current_ip,
+                })
+                r.raise_for_status()
+            except HTTPError:
+                logger.exception(f"{record['name']}.{domain}: Could not update A record to current IP ({current_ip})")
+            else:
+                logger.info(f"{record['name']}.{domain}: Updated A record to current IP ({current_ip})")
         else:
             logger.info(f"{record['name']}.{domain}: DNS A record matches current IP ({current_ip})")
 
