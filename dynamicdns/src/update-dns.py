@@ -4,7 +4,11 @@ import requests
 import logging
 import os
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(**{
+    'datefmt': '%Y-%m-%d %H:%M:%S',
+    'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
+    'level': logging.INFO,
+})
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
