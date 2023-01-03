@@ -36,11 +36,10 @@ def update_dns():
                 logger.exception(f"{record['name']}.{domain}: Could not delete duplicate A record.")
             else:
                 logger.info(f"{record['name']}.{domain}: Deleted duplicate A record.")
-
         elif record['data'] != current_ip:
             logger.warning(f"{record['name']}.{domain}: DNS A record ({record['data']}) does not match current IP ({current_ip})")
             try:
-                r = requests.post(url=record_url, headers=headers, data={
+                r = requests.patch(url=record_url, headers=headers, data={
                     'type': 'A',
                     'name': record['name'],
                     'data': current_ip,
