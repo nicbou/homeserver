@@ -9,6 +9,7 @@ export default Vue.component('movies', {
       moviesPerPage: 20,
       queryDebounceTimeout: null,
       cleaningMode: false,
+      canManageMovies: false,
     }
   },
   computed: {
@@ -58,6 +59,9 @@ export default Vue.component('movies', {
   },
   created() {
     this.$store.dispatch('movies/getMovies');
+    this.$store.dispatch('users/getUserSettings').then(userSettings => {
+      this.canManageMovies = userSettings.permissions.includes('movies_manage');
+    });
   },
   methods: {
     openMovie(movie) {
