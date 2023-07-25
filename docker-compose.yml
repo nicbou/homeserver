@@ -98,6 +98,7 @@ services:
       - django_staticfiles:/static:ro
       - ${MOVIE_LIBRARY_PATH}:/movies:ro
       - "ssl_certs:/etc/ssl-certs"
+      - "acme_sh:/root/.acme.sh"
     logging:
       options:
         max-size: "200k"
