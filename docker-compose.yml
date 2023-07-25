@@ -93,6 +93,7 @@ services:
       - backend
       - videoprocessing
       - torrents
+      - "acme_sh:/root/.acme.sh"
     volumes:
       - django_staticfiles:/static:ro
       - ${MOVIE_LIBRARY_PATH}:/movies:ro
@@ -109,6 +110,7 @@ services:
       - DOMAIN=nicolasbouliane.com
       - "SUBDOMAINS=home,timeline"
 volumes:
+  acme_sh:
   django_staticfiles:
   db_persistence:
   redis_persistence:
