@@ -93,7 +93,6 @@ services:
       - backend
       - videoprocessing
       - torrents
-      - "acme_sh:/root/.acme.sh"
     volumes:
       - django_staticfiles:/static:ro
       - ${MOVIE_LIBRARY_PATH}:/movies:ro
