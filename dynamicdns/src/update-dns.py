@@ -61,7 +61,10 @@ def update_dns():
 
 while True:
     if os.environ.get('DIGITALOCEAN_TOKEN'):
-        update_dns()
+        try:
+            update_dns()
+        except:
+            logger.exception("Could not update DNS. Trying again later.")
         sleep(30 * 60)
     else:
         logger.error("DIGITALOCEAN_TOKEN environment variable is not set. Exiting.")
