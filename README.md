@@ -18,11 +18,13 @@ Put these environment variables in a `.env` file at the root of the project (nex
 
 You can use the `.env.example` file as a template.
 
+* `GOOGLE_MAPS_API_KEY`: A Google Maps API key used to show a map on the timeline
 * `BACKEND_SECRET_KEY`: A unique, random, secret string used by Django. [Explanation](https://docs.djangoproject.com/en/3.1/ref/settings/#secret-key).
 * `DEFAULT_VIDEO_HEIGHT`: The default height for converted videos, in pixels. Defaults to 720.
 * `DIGITALOCEAN_TOKEN` (optional): DigitalOcean API token. Used for dynamic DNS. [Here's how you get that token](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/). If you leave it empty, dynamic DNS will stay disabled.
 * `MAX_VIDEO_BITRATE`: The maximum video bitrate allowed, in bits per second. Defaults to 2000000.
 * `TRANSMISSION_DATA_PATH`: Path to Transmission's data folder on your filesystem. Incomplete torrents and Transmission settings are stored there.
+* `TIMELINE_DATA_PATH`: Path to the files that appear on the timeline
 * `MOVIE_LIBRARY_PATH`: Path to the movie library on your filesystem. Movies, subtitles and covers are stored there.
 * `AUTH_COOKIE_DOMAIN` (optional): The domain used for authentication cookies. Defaults to the current hostname.
 * `BACKEND_DEBUG` (optional): Set to `1` to enable Django backend debugging. Error pages will have meaningful error messages. Not safe for production.

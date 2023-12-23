@@ -79,6 +79,12 @@ services:
     cap_add:
       - NET_ADMIN
     restart: unless-stopped
+  timeline:
+    environment:
+      - "GOOGLE_MAPS_API_KEY"
+    volumes:
+      - ${TIMELINE_DATA_PATH}:/media/timeline
+      - timeline_persistence:/var/timeline/output
   proxy:
     build:
       context: ./proxy
@@ -114,6 +120,7 @@ volumes:
   django_staticfiles:
   db_persistence:
   redis_persistence:
+  timeline_persistence:
   ssl_certs:
 networks:
   default:
