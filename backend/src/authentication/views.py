@@ -34,7 +34,7 @@ def check_auth(request):
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
                 return HttpResponseRedirect(redirect_url, status=302)
 
-        if request.path.startswith('/timeline') and not request.user.is_superuser:
+        if parsed_url.path.startswith('/timeline') and not request.user.is_superuser:
             return HttpResponseRedirect(redirect_url, status=302)
 
         return HttpResponse()
