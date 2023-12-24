@@ -1,0 +1,44 @@
+{$SSL_DOMAIN:localhost} {
+    tls {$SSL_EMAIL:internal}
+    encode gzip
+
+    handle /transmission* {
+        reverse_proxy torrents:9091
+    }
+
+    forward_auth /* backend:80 {
+        uri /auth/verify/
+    }
+    handle /auth* {
+        reverse_proxy backend:80
+    }
+
+    handle /timeline* {
+        root * /var/www
+        file_server
+    }
+
+    handle /api* {
+        reverse_proxy backend:80
+    }
+
+    handle /admin* {
+        reverse_proxy backend:80
+    }
+
+    handle /movies/* {
+        uri strip_prefix /movies
+        file_server /var/www/movies/library
+    }
+
+    handle /static/* {
+        uri strip_prefix /static
+        root * /var/www/movies/django-static
+        file_server
+    }
+
+    handle /* {
+        root * /var/www/movies/frontend
+        file_server
+    }
+}

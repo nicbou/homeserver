@@ -22,7 +22,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=homeserver
       - POSTGRES_PASSWORD=postgres
-      - MOVIE_LIBRARY_PATH=/movies/library
+      - MOVIE_LIBRARY_PATH=/var/www/movies/library
       - MOVIE_LIBRARY_URL=/movies
       - TRIAGE_PATH=/movies/triage
       - VIDEO_PROCESSING_API_URL=http://videoprocessing
@@ -30,17 +30,6 @@ services:
       - django_staticfiles:/srv/static
       - ./backend/src:/srv/src
       - ${MOVIE_LIBRARY_PATH}:/movies
-    restart: unless-stopped
-  frontend:
-    image: nginx
-    volumes:
-      - ./frontend/src:/usr/share/nginx/html:ro
-      - timeline_persistence:/usr/share/nginx/timeline:ro
-    depends_on:
-      - backend
-      - torrents
-    logging:
-      driver: "none"
     restart: unless-stopped
   redis:
     image: redis:7-alpine
@@ -50,7 +39,7 @@ services:
   videoprocessing:
     build: videoprocessing
     environment:
-      - MOVIE_LIBRARY_PATH=/movies/library
+      - MOVIE_LIBRARY_PATH=/var/www/movies/library
       - REDIS_DB_URL=redis://redis:6379/1
       - MAX_VIDEO_BITRATE
       - DEFAULT_VIDEO_HEIGHT
@@ -90,28 +79,24 @@ services:
   proxy:
     build:
       context: ./proxy
-      args:
-        - "SSL_DOMAIN"
-        - "SSL_EMAIL"
+    environment:
+      - SSL_DOMAIN
+      - SSL_EMAIL
+    volumes:
+      - "./frontend/src:/var/www/movies/frontend:ro"
+      - "timeline_persistence:/var/www/timeline:ro"
+      - "django_staticfiles:/var/www/movies/django-static:ro"
+      - "${MOVIE_LIBRARY_PATH}/library:/var/www/movies/library:ro"
+      - "caddy_data:/data"
+      - "caddy_config:/config"
     ports:
       - "80:80"
       - "443:443"
+    restart: unless-stopped
     depends_on:
-      - frontend
       - backend
       - videoprocessing
       - torrents
-    volumes:
-      - timeline_persistence:/usr/share/nginx/timeline:ro
-      - django_staticfiles:/static:ro
-      - ${MOVIE_LIBRARY_PATH}:/movies:ro
-      - "ssl_certs:/etc/ssl-certs"
-      - "acme_sh:/root/.acme.sh"
-    logging:
-      options:
-        max-size: "200k"
-        max-file: "10"
-    restart: unless-stopped
   dynamicdns:
     build: dynamicdns
     environment:
@@ -119,12 +104,12 @@ services:
       - DOMAIN=nicolasbouliane.com
       - "SUBDOMAINS=home,timeline"
 volumes:
-  acme_sh:
+  caddy_data:
+  caddy_config:
   django_staticfiles:
   db_persistence:
   redis_persistence:
   timeline_persistence:
-  ssl_certs:
 networks:
   default:
     name: homeserver

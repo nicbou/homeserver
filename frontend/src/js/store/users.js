@@ -11,7 +11,7 @@ export default {
   actions: {
     async getUserSettings(context) {
       if (context.state.userSettingsPromise === null) {
-        const userSettingsPromise = fetch('/api/auth/info/')
+        const userSettingsPromise = fetch('/auth/info/')
           .then((response) => {
             return response.json();
           })

@@ -1,11 +1,12 @@
-from django.http import HttpResponse, JsonResponse
-import re
-from movies.models import EpisodeAccessToken
-from django.views import View
 from django.contrib.auth.models import Permission
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.utils import timezone
+from django.views import View
+from movies.models import EpisodeAccessToken
 from urllib.parse import urlparse, parse_qs, unquote
 import logging
-from django.utils import timezone
+import re
+import urllib.parse
 
 
 permission_checks = (
@@ -17,9 +18,13 @@ logger = logging.getLogger(__name__)
 
 
 def check_auth(request):
-    original_url = request.META.get('HTTP_X_ORIGINAL_URI')
+    original_url = request.META.get('HTTP_X_FORWARDED_URI')
+    redirect_url = '/auth/?next=' + urllib.parse.quote_plus(original_url)
+
     if not original_url:
-        return HttpResponse(status=401)
+        return HttpResponseRedirect(redirect_url)
+    elif original_url.startswith('/auth/'):
+        return HttpResponse()
 
     parsed_url = urlparse(original_url)
     querystring = parse_qs(parsed_url.query)
@@ -27,18 +32,17 @@ def check_auth(request):
     if request.user.is_authenticated:
         for url_matcher, permission in permission_checks:
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
-                return HttpResponse(status=403)
+                return HttpResponseRedirect(redirect_url)
 
-        # TODO: Remove when timeline has its own auth
-        if request.META.get('HTTP_HOST') == 'timeline.nicolasbouliane.com' and not request.user.is_superuser:
-            return HttpResponse(status=403)
+        if request.path.startswith('/timeline') and not request.user.is_superuser:
+            return HttpResponseRedirect(redirect_url)
 
         return HttpResponse()
     elif parsed_url.path.startswith('/movies') and 'token' in querystring:
         try:
             access_token = EpisodeAccessToken.objects.get(token=querystring['token'][0])
         except EpisodeAccessToken.DoesNotExist:
-            return HttpResponse(status=403)
+            return HttpResponseRedirect(redirect_url)
         if (
             access_token.expiration_date < timezone.now() or
             unquote(parsed_url.path) not in (
@@ -54,11 +58,11 @@ def check_auth(request):
             )
         ):
             access_token.delete()
-            return HttpResponse(status=403)
+            return HttpResponseRedirect('/auth/')
         else:
             return HttpResponse()
     else:
-        return HttpResponse(status=401)
+        return HttpResponseRedirect('/auth/')
 
 
 class JSONPermissionsView(View):
