@@ -29,7 +29,8 @@
 
     handle /movies/* {
         uri strip_prefix /movies
-        file_server /var/www/movies/library
+        root * /var/www/movies/library
+        file_server
     }
 
     handle /static/* {
