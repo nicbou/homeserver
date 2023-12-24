@@ -14,7 +14,7 @@
     }
 
     handle /timeline* {
-        uri strip_prefix /movies
+        uri strip_prefix /timeline
         root * /var/www/timeline
         file_server
     }
