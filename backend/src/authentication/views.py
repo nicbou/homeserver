@@ -22,7 +22,7 @@ def check_auth(request):
     redirect_url = '/auth/?next=' + urllib.parse.quote_plus(original_url)
 
     if not original_url:
-        return HttpResponseRedirect(redirect_url)
+        return HttpResponseRedirect(redirect_url, status=302)
     elif original_url.startswith('/auth/'):
         return HttpResponse()
 
@@ -32,17 +32,17 @@ def check_auth(request):
     if request.user.is_authenticated:
         for url_matcher, permission in permission_checks:
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
-                return HttpResponseRedirect(redirect_url)
+                return HttpResponseRedirect(redirect_url, status=302)
 
         if request.path.startswith('/timeline') and not request.user.is_superuser:
-            return HttpResponseRedirect(redirect_url)
+            return HttpResponseRedirect(redirect_url, status=302)
 
         return HttpResponse()
     elif parsed_url.path.startswith('/movies') and 'token' in querystring:
         try:
             access_token = EpisodeAccessToken.objects.get(token=querystring['token'][0])
         except EpisodeAccessToken.DoesNotExist:
-            return HttpResponseRedirect(redirect_url)
+            return HttpResponseRedirect(redirect_url, status=302)
         if (
             access_token.expiration_date < timezone.now() or
             unquote(parsed_url.path) not in (
@@ -58,11 +58,11 @@ def check_auth(request):
             )
         ):
             access_token.delete()
-            return HttpResponseRedirect('/auth/')
+            return HttpResponseRedirect(redirect_url, status=302)
         else:
             return HttpResponse()
     else:
-        return HttpResponseRedirect('/auth/')
+        return HttpResponseRedirect(redirect_url, status=302)
 
 
 class JSONPermissionsView(View):
