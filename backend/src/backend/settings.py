@@ -118,7 +118,6 @@ USE_X_FORWARDED_HOST = True
 # ==================================================
 
 LOGIN_REDIRECT_URL = '/'
-SESSION_COOKIE_DOMAIN = os.environ.get('AUTH_COOKIE_DOMAIN', None)
 VIDEO_PROCESSING_API_URL = os.environ.get('VIDEO_PROCESSING_API_URL')
 MOVIE_LIBRARY_PATH = Path(os.environ.get('MOVIE_LIBRARY_PATH'))
 MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')

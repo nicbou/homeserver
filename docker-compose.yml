@@ -15,7 +15,6 @@ services:
       - db
       - videoprocessing
     environment:
-      - AUTH_COOKIE_DOMAIN
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
       - POSTGRES_HOST=db

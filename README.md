@@ -26,7 +26,6 @@ You can use the `.env.example` file as a template.
 * `TRANSMISSION_DATA_PATH`: Path to Transmission's data folder on your filesystem. Incomplete torrents and Transmission settings are stored there.
 * `TIMELINE_DATA_PATH`: Path to the files that appear on the timeline
 * `MOVIE_LIBRARY_PATH`: Path to the movie library on your filesystem. Movies, subtitles and covers are stored there.
-* `AUTH_COOKIE_DOMAIN` (optional): The domain used for authentication cookies. Defaults to the current hostname.
 * `BACKEND_DEBUG` (optional): Set to `1` to enable Django backend debugging. Error pages will have meaningful error messages. Not safe for production.
 * `COMPOSE_PROJECT_NAME` (optional): The prefix for this project's docker networks, images, volumes etc. [Explanation](https://docs.docker.com/compose/reference/envvars/).
 * `SSL_DOMAIN`: Domain for which to generate an SSL certificate. If set to `localhost`, a self-signed certificate will be generated.
