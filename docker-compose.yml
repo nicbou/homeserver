@@ -38,12 +38,12 @@ services:
   videoprocessing:
     build: videoprocessing
     environment:
-      - MOVIE_LIBRARY_PATH=/var/www/movies/library
+      - MOVIE_LIBRARY_PATH=/media/movies
       - REDIS_DB_URL=redis://redis:6379/1
       - MAX_VIDEO_BITRATE
       - DEFAULT_VIDEO_HEIGHT
     volumes:
-      - ${MOVIE_LIBRARY_PATH}:/movies
+      - ${MOVIE_LIBRARY_PATH}:/media/movies
     depends_on:
       - redis
     restart: unless-stopped
@@ -71,7 +71,7 @@ services:
   timeline:
     build: timeline
     environment:
-      - "GOOGLE_MAPS_API_KEY"
+      - GOOGLE_MAPS_API_KEY
     volumes:
       - ${TIMELINE_DATA_PATH}:/media/timeline
       - timeline_persistence:/var/timeline/output
