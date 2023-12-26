@@ -2,7 +2,7 @@ from django.conf.urls import include
 from django.urls import path
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
-from movies.views import EpisodeProgressView, MovieListView, EpisodeView, EpisodeAccessTokenView, \
+from movies.views import EpisodeProgressView, MovieListView, EpisodeView, \
     EpisodeUnwatchedView, EpisodeWatchedView, TriageListView, EpisodeUnstarView, EpisodeStarView, \
     DeleteOriginalView
 
@@ -11,7 +11,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/movies/', MovieListView.as_view()),
     path('api/movies/<int:id>/', EpisodeView.as_view()),
-    path('api/movies/<int:id>/token/', EpisodeAccessTokenView.as_view()),
     path('api/movies/<int:id>/watched/', EpisodeWatchedView.as_view()),
     path('api/movies/<int:id>/unwatched/', EpisodeUnwatchedView.as_view()),
     path('api/movies/<int:id>/progress/', EpisodeProgressView.as_view()),

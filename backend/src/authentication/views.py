@@ -1,9 +1,7 @@
 from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.utils import timezone
 from django.views import View
-from movies.models import EpisodeAccessToken
-from urllib.parse import urlparse, parse_qs, unquote
+from urllib.parse import urlparse
 import logging
 import re
 import urllib.parse
@@ -27,7 +25,6 @@ def check_auth(request):
         return HttpResponse()
 
     parsed_url = urlparse(original_url)
-    querystring = parse_qs(parsed_url.query)
 
     if request.user.is_authenticated:
         for url_matcher, permission in permission_checks:
@@ -38,29 +35,6 @@ def check_auth(request):
             return HttpResponseRedirect(redirect_url, status=302)
 
         return HttpResponse()
-    elif parsed_url.path.startswith('/movies') and 'token' in querystring:
-        try:
-            access_token = EpisodeAccessToken.objects.get(token=querystring['token'][0])
-        except EpisodeAccessToken.DoesNotExist:
-            return HttpResponseRedirect(redirect_url, status=302)
-        if (
-            access_token.expiration_date < timezone.now() or
-            unquote(parsed_url.path) not in (
-                access_token.episode.original_url,
-                access_token.episode.converted_url,
-                access_token.episode.srt_subtitles_url_en,
-                access_token.episode.vtt_subtitles_url_en,
-                access_token.episode.srt_subtitles_url_de,
-                access_token.episode.vtt_subtitles_url_de,
-                access_token.episode.srt_subtitles_url_fr,
-                access_token.episode.vtt_subtitles_url_fr,
-                access_token.episode.cover_url,
-            )
-        ):
-            access_token.delete()
-            return HttpResponseRedirect(redirect_url, status=302)
-        else:
-            return HttpResponse()
     else:
         return HttpResponseRedirect(redirect_url, status=302)
 

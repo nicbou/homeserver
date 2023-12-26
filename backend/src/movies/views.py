@@ -5,7 +5,7 @@ from typing import List
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import JsonResponse
 
-from .models import Episode, EpisodeWatchStatus, EpisodeAccessToken, StarredMovie
+from .models import Episode, EpisodeWatchStatus, StarredMovie
 from django.views import View
 from django.conf import settings
 from django.db import transaction
@@ -252,21 +252,6 @@ class TriageListView(PermissionRequiredMixin, View):
         relative_subtitle_files = [os.path.relpath(abs_path, settings.TRIAGE_PATH) for abs_path in subtitle_files]
 
         return JsonResponse({'movies': list(relative_video_files), 'subtitles': relative_subtitle_files})
-
-
-class EpisodeAccessTokenView(PermissionRequiredMixin, View):
-    permission_required = 'authentication.movies_watch'
-    raise_exception = True
-
-    def get(self, request, *args, **kwargs):
-        episode_id = kwargs.get('id')
-        try:
-            episode = Episode.objects.get(pk=episode_id)
-        except Episode.DoesNotExist:
-            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=404)
-        access_token = EpisodeAccessToken(episode=episode, user=request.user)
-        access_token.save()
-        return JsonResponse({'token': access_token.token, 'expirationDate': access_token.expiration_date})
 
 
 class EpisodeWatchedView(PermissionRequiredMixin, View):

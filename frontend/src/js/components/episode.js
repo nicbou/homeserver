@@ -1,6 +1,5 @@
 import MoviesService from './../services/movies-service.js';
 import { MediaType } from './../models/movies.js';
-import ChromeCast from './../services/chromecast.js';
 
 export default Vue.component('episode', {
   data: function() {
@@ -32,9 +31,6 @@ export default Vue.component('episode', {
     },
     nextEpisode: function() {
       return this.movie.episodeList[this.episodeIndex+1] || null;
-    },
-    hasChromecastSupport: function() {
-      return !!ChromeCast.isSupported();
     },
     isMovie: function() {
       return this.movie.mediaType === MediaType.MOVIE;
@@ -123,9 +119,6 @@ export default Vue.component('episode', {
             <i class="fas fa-check-circle"></i> <span class="no-mobile">Mark as not seen</span>
           </a>
           <star class="button" :movie="movie"></star>
-          <chromecast-button v-if="episode.isConverted && hasChromecastSupport" :episode="episode" class="button">
-            <i class="fab fa-chromecast"></i>
-          </chromecast-button>
           <router-link class="button" v-if="previousEpisode" :to="{ name: 'episode', params: { tmdbId: movie.tmdbId, episodeId: previousEpisode.id }}">
             <i class="fas fa-step-backward"></i>
           </router-link>

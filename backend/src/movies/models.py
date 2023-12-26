@@ -283,10 +283,3 @@ class StarredMovie(models.Model):
 
     class Meta:
         unique_together = (('tmdb_id', 'user'),)
-
-
-class EpisodeAccessToken(models.Model):
-    episode = models.ForeignKey(Episode, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    expiration_date = models.DateTimeField(default=tomorrow)
-    token = models.CharField(max_length=32, default=random_uuid)

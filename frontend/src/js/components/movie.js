@@ -1,6 +1,4 @@
 import AdminMenuComponent from './../components/episode-admin-menu.js';
-import ChromeCast from './../services/chromecast.js';
-import ChromeCastButtonComponent from './../components/chromecast-button.js';
 import DownloadMenuComponent from './../components/episode-download-menu.js';
 import EpisodeListItemComponent from './../components/episode-list-item.js';
 import StarComponent from './star.js';
@@ -39,9 +37,6 @@ export default Vue.component('movie', {
     },
     nextEpisodeName: function () {
       return this.nextEpisode ? `S${this.nextEpisode.season}E${this.nextEpisode.episode}` : null;
-    },
-    hasChromecastSupport: function() {
-      return !!ChromeCast.isSupported();;
     },
     coverCss: function(){
       return {
@@ -100,10 +95,6 @@ export default Vue.component('movie', {
                 Seen
               </a>
               <star :movie="movie" class="button large">Star</star>
-              <chromecast-button title="Play on ChromeCast" :episode="nextEpisode" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted && hasChromecastSupport" class="button large">
-                <i class="fab fa-chromecast"></i>
-                Cast
-              </chromecast-button>
               <a title="Download movie and subtitles" href="#" class="button large" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
                 <i class="fas fa-download"></i>
                 Save

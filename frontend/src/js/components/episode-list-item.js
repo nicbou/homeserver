@@ -1,5 +1,3 @@
-import ChromeCast from './../services/chromecast.js';
-import ChromeCastButtonComponent from './../components/chromecast-button.js';
 import AdminMenuComponent from './../components/episode-admin-menu.js';
 import DownloadMenuComponent from './../components/episode-download-menu.js';
 
@@ -52,9 +50,6 @@ export default Vue.component('episode-list-item', {
         episodeId: this.episode.id,
       });
     },
-    hasChromecastSupport: function() {
-      return !!ChromeCast.isSupported();
-    },
   },
   template: `
     <div class="episode collapsible" :class="{expanded: expanded}">
@@ -73,9 +68,6 @@ export default Vue.component('episode-list-item', {
           <a title="Play in browser" class="button icon-only" href="#" v-if="canWatchMovies && episode.isConverted" :href="episode.playbackUrl" @click.prevent="playEpisode">
             <i class="fas fa-play"></i>
           </a>
-          <chromecast-button title="Play on ChromeCast" class="button icon-only" v-if="canWatchMovies && episode.isConverted && hasChromecastSupport" :episode="episode">
-            <i class="fab fa-chromecast"></i>
-          </chromecast-button>
           <a title="Download movie and subtitles" class="button icon-only" :class="{selected: downloadMenuVisible}" href="#" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
             <i class="fas fa-download"></i>
           </a>
