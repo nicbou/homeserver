@@ -22,7 +22,7 @@ def get_movies_to_convert(input_dir: Path) -> Iterable[Path]:
             path.is_file()
 
             # File is a video
-            and path.suffix.lower().endswith(settings.VIDEO_EXTENSIONS)
+            and path.suffix.lower() in settings.VIDEO_EXTENSIONS
 
             # File is not a converting/converted video
             and not path.stem.lower().endswith(('.converting', '.converted'))
@@ -116,7 +116,7 @@ def convert_movie(input_file: Path):
     is_streamable = is_video_streamable(input_file)
 
     logger.info(f'Processing {str(input_file)}:\n'
-                f"- Output file: {str(tmp_file.name)} then {str(output_file.name)}\n"
+                f"- Output file: {tmp_file.name} then {output_file.name}\n"
                 f"- Bitrate: {total_bitrate}\n"
                 f"- Streamable: {is_streamable}\n"
                 f"- Format: {video_format['format_name']}\n"
@@ -127,38 +127,63 @@ def convert_movie(input_file: Path):
     if has_correct_codecs and has_correct_bitrate:
         if is_streamable:
             try:
-                logger.info(f'Original video is already streamable. Hard linking "{str(input_file.name)}" to "{str(output_file.name)}"')
+                logger.info(f'Original video is already streamable. Hard linking "{input_file.name}" to "{output_file.name}"')
                 os.link(input_file, output_file)
             except:
-                logger.exception(f'Failed to hard link original video "{str(input_file.name)}" to "{str(output_file.name)}"')
+                logger.exception(f'Failed to hard link original video "{input_file.name}" to "{output_file.name}"')
                 raise
         else:
             try:
                 logger.info(f'Original video has right format, but is not streamable. '
-                            f'Adding moov atom to "{str(input_file.name)}".')
+                            f'Adding moov atom to "{input_file.name}".')
                 add_moov_atom(input_file, output_file)
 
-                logger.info(f"Replacing original at {str(input_file.name)}, with the streamable version")
+                logger.info(f"Replacing original at {input_file.name}, with the streamable version")
                 os.unlink(input_file)
                 os.link(output_file, input_file)
             except:
-                logger.exception(f'Failed to add moov atom to "{str(input_file.name)}"')
+                logger.exception(f'Failed to add moov atom to "{input_file.name}"')
                 raise
     else:
         try:
-            logger.info(f'Converting "{str(input_file.name)}" to "{str(tmp_file.name)}"')
+            logger.info(f'Converting "{input_file.name}" to "{tmp_file.name}"')
             convert_to_h264(input_file, tmp_file)
-            logger.info(f'Conversion of {str(tmp_file.name)} successful. Renaming to {str(output_file.name)}')
+            logger.info(f'Conversion of {tmp_file.name} successful. Renaming to {output_file.name}')
             tmp_file.rename(output_file)
         except subprocess.CalledProcessError as exc:
-            logger.exception(f'Failed to convert "{str(input_file.name)}" to "{str(output_file.name)}"\n'
+            logger.exception(f'Failed to convert "{input_file.name}" to "{output_file.name}"\n'
                              f'Output: {exc.output.decode("utf-8")}')
             raise
 
     extract_subtitles(input_file)
 
 
-def extract_subtitles(input_file: str):
+def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
+    for path in input_dir.iterdir():
+        if (
+            path.is_file()
+
+            # File is a subtitles file
+            and path.suffix.lower() == '.srt'
+
+            # No .vtt subtitles exist
+            and not path.with_suffix('.vtt').exists()
+        ):
+            yield path
+
+
+def convert_subtitles_to_vtt(input_file: Path):
+    output_file = Path(input_file).with_suffix('.vtt')
+    ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', str(input_file), str(output_file)]
+    try:
+        logger.info(f"Converting {input_file} subtitles to .vtt")
+        subprocess.check_output(ffmpeg_command)
+    except subprocess.CalledProcessError as e:
+        logger.exception(f"Could not convert subtitles in {input_file}. {e.output.decode('utf-8')}")
+        raise
+
+
+def extract_subtitles(input_file: Path):
     """
     Extract subs in .srt and .vtt format
     https://nicolasbouliane.com/blog/ffmpeg-extract-subtitles
@@ -177,10 +202,10 @@ def extract_subtitles(input_file: str):
         '-show_entries', 'stream=index,width,codec_name:stream_tags=language',  # ISO 639-2/B (eng, ger, fre...)
         '-select_streams', 's',  # subtitle streams only
         '-of', 'json',
-        input_file,
+        str(input_file),
     ]).decode('utf-8'))['streams']
 
-    ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', input_file]
+    ffmpeg_command = [ffmpeg_path, '-y', '-loglevel', 'warning', '-i', str(input_file)]
 
     processed_subtitle_languages = set()
     for subtitle_stream in subtitle_streams:
@@ -188,7 +213,7 @@ def extract_subtitles(input_file: str):
             stream_index = subtitle_stream['index']
             language_code = subtitle_stream['tags'].get('language', subtitle_languages[0])
         except KeyError:
-            logger.error(f"Could not read metadata from subtitle stream in {str(input_file.name)}: {subtitle_stream}")
+            logger.error(f"Could not read metadata from subtitle stream in {input_file.name}: {subtitle_stream}")
             continue
 
         if (
@@ -202,24 +227,24 @@ def extract_subtitles(input_file: str):
         processed_subtitle_languages.add(language_code)
 
         if language_code == subtitle_languages[0]:
-            output_file_srt = Path(input_file).with_suffix('.srt')
-            output_file_vtt = Path(input_file).with_suffix('.vtt')
+            output_file_srt = input_file.with_suffix('.srt')
+            output_file_vtt = input_file.with_suffix('.vtt')
         else:
-            output_file_srt = Path(input_file).with_suffix(f".{language_code}.srt")
-            output_file_vtt = Path(input_file).with_suffix(f".{language_code}.vtt")
+            output_file_srt = input_file.with_suffix(f".{language_code}.srt")
+            output_file_vtt = input_file.with_suffix(f".{language_code}.vtt")
 
         ffmpeg_command.extend([
-            '-map', f'0:{stream_index}', str(output_file_srt),
             '-map', f'0:{stream_index}', str(output_file_vtt),
+            '-map', f'0:{stream_index}', str(output_file_srt),
         ])
         logger.info(f'Extracting {language_code} subs to {str(output_file_srt.name)} and {str(output_file_vtt.name)}')
 
     if len(processed_subtitle_languages) > 0:
         try:
-            logger.info(f"Extracting all subtitles from {str(input_file.name)}")
+            logger.info(f"Extracting all subtitles from {input_file.name}")
             subprocess.check_output(ffmpeg_command)
         except subprocess.CalledProcessError as e:
-            logger.exception(f"Could not extract subtitles from {str(input_file.name)}. {e.output.decode('utf-8')}")
+            logger.exception(f"Could not extract subtitles from {input_file.name}. {e.output.decode('utf-8')}")
             raise
     else:
-        logger.info(f"No subtitles found in {str(input_file.name)}")
+        logger.info(f"No subtitles found in {input_file.name}")

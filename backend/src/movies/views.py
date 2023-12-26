@@ -157,7 +157,6 @@ class MovieListView(PermissionRequiredMixin, View):
                     logger.info(f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_original_path)}"')
                     subtitles_original_path.unlink(missing_ok=True)
                     subtitles_original_path.hardlink_to(subtitles_triage_path)
-                    queue_subtitles_for_conversion(subtitles_original_path)
 
                 conversion_queue.append(episode)
 
