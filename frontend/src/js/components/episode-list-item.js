@@ -70,9 +70,6 @@ export default Vue.component('episode-list-item', {
           <a class="button icon-only" v-if="episode.isConverting" title="Video is converting for web playback">
             <i class="fa fa-spinner fa-spin"></i>
           </a>
-          <a class="button icon-only" v-if="episode.isConversionFailed" title="Video conversion failed">
-            <i class="fas fa-exclamation-triangle"></i>
-          </a>
           <a title="Play in browser" class="button icon-only" href="#" v-if="canWatchMovies && episode.isConverted" :href="episode.playbackUrl" @click.prevent="playEpisode">
             <i class="fas fa-play"></i>
           </a>

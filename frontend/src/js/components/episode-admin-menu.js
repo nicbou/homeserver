@@ -3,7 +3,6 @@ export default Vue.component('admin-menu', {
   data: function() {
     return {
       showDeleteOriginalFile: true,
-      showConvertEpisode: true,
       showExtractEpisodeSubtitles: true,
       showDeleteEpisode: true,
     }
@@ -25,13 +24,6 @@ export default Vue.component('admin-menu', {
       });
       this.showDeleteOriginalFile = false;
     },
-    convertEpisode: function() {
-      this.$store.dispatch('movies/convertEpisode', {
-        tmdbId: this.movie.tmdbId,
-        episodeId: this.episode.id,
-      });
-      this.showConvertEpisode = false;
-    },
     extractEpisodeSubtitles: function() {
       this.$store.dispatch('movies/extractEpisodeSubtitles', {
         tmdbId: this.movie.tmdbId,
@@ -42,12 +34,6 @@ export default Vue.component('admin-menu', {
   },
   template: `
     <div>
-      <a class="button" href="#" @click.prevent="convertEpisode" v-if="(!episode.isConverted && !episode.isConverting) && showConvertEpisode">
-        <i class="fa fa-file-video"></i> Convert
-      </a>
-      <a class="button" href="#" @click.prevent="convertEpisode" v-if="(episode.isConverted || episode.isConverting) && showConvertEpisode">
-        <i class="fa fa-file-video"></i> Reconvert
-      </a>
       <a class="button" href="#" @click.prevent="extractEpisodeSubtitles" v-if="(!episode.isConverted && !episode.isConverting) && showExtractEpisodeSubtitles">
         <i class="far fa-closed-captioning"></i> Extract subtitles
       </a>

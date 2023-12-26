@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 class Episode(models.Model):
     NOT_CONVERTED = 0
     CONVERTING = 1
-    CONVERSION_FAILED = 2
     CONVERTED = 3
 
     TV_SHOW = 1
@@ -27,7 +26,6 @@ class Episode(models.Model):
     status_choices = (
         (NOT_CONVERTED, 'not-converted'),
         (CONVERTING, 'converting'),
-        (CONVERSION_FAILED, 'conversion-failed'),
         (CONVERTED, 'converted'),
     )
     type_choices = (
@@ -38,7 +36,6 @@ class Episode(models.Model):
 
     # File
     triage_path = models.CharField(max_length=300, null=True)
-    conversion_status = models.SmallIntegerField(default=NOT_CONVERTED, choices=status_choices)
 
     # Episode
     title = models.CharField(max_length=150)
@@ -69,6 +66,15 @@ class Episode(models.Model):
         )
 
     @property
+    def conversion_status(self):
+        if self.converted_path.exists():
+            return self.CONVERTED
+        elif self.original_path.with_suffix('.converting.mp4').exists:
+            return self.CONVERTING
+        else:
+            return self.NOT_CONVERTED
+
+    @property
     def original_is_same_as_converted(self):
         return (
             self.conversion_status == self.CONVERTED
@@ -84,7 +90,7 @@ class Episode(models.Model):
         original_filename = self.filename(original_extension)
 
         # The original file might have been deleted, and replaced with the converted version to save space
-        if self.conversion_status == self.CONVERTED and not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
+        if not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
             return str(Path(original_filename).with_suffix('.mp4'))
 
         return original_filename

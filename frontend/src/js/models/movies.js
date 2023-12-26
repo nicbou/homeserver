@@ -1,7 +1,6 @@
 export const ConversionStatus = {
   NOT_CONVERTED: 0,
   CONVERTING: 1,
-  CONVERSION_FAILED: 2,
   CONVERTED: 3
 };
 
@@ -69,10 +68,6 @@ export class Episode {
     return this.conversionStatus === ConversionStatus.CONVERTED;
   }
 
-  get isConversionFailed() {
-    return this.conversionStatus === ConversionStatus.CONVERSION_FAILED;
-  }
-
   get playbackUrl() {
     return `/player/play/${ this.id }/`;
   }
@@ -113,8 +108,6 @@ export class Movie {
       return ConversionStatus.CONVERTED;
     } else if (episodeList.some(p => p.conversionStatus === ConversionStatus.CONVERTING)) {
       return ConversionStatus.CONVERTING;
-    } else if (episodeList.some(p => p.conversionStatus === ConversionStatus.CONVERSION_FAILED)) {
-      return ConversionStatus.CONVERSION_FAILED;
     }
     return ConversionStatus.NOT_CONVERTED;
   }
