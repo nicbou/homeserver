@@ -4,7 +4,6 @@ from typing import List
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import JsonResponse
-from requests import HTTPError, Timeout
 
 from .models import Episode, EpisodeWatchStatus, EpisodeAccessToken, StarredMovie
 from django.views import View
@@ -167,13 +166,6 @@ class MovieListView(PermissionRequiredMixin, View):
             if new_cover_url and new_cover_url != episodes[0].cover_url:
                 self.download_file(new_cover_url, episodes[0].cover_path)
 
-            # Queue episodes for conversion
-            for episode in conversion_queue:
-                try:
-                    queue_episode_for_conversion(episode)
-                except ConnectionError:
-                    logger.error(f"Failed to convert {episode}. Could not queue the episode for conversion.")
-
         return JsonResponse({'result': 'success'})
 
     def download_file(self, url: str, filename: Path):
@@ -184,83 +176,6 @@ class MovieListView(PermissionRequiredMixin, View):
                     cover_file.write(chunk)
         else:
             logger.error(f"Could not download file at {url}.")
-
-
-class EpisodeConvertView(PermissionRequiredMixin, View):
-    permission_required = 'authentication.movies_manage'
-    raise_exception = True
-
-    def post(self, request, *args, **kwargs):
-        """
-        Queue an episode for conversion
-        """
-        episode_id = kwargs.get('id')
-        try:
-            queue_episode_for_conversion(Episode.objects.get(pk=episode_id))
-        except Episode.DoesNotExist:
-            message = 'Episode does not exist'
-            logger.error(f"Failed to convert episode #{episode_id}. {message}")
-            return JsonResponse({'result': 'failure', 'message': message}, status=404)
-        except ConnectionError:
-            message = 'Could not queue the episode for conversion.'
-            logger.error(f"Failed to convert episode #{episode_id}. {message}")
-            return JsonResponse({'result': 'failure', 'message': message}, status=500)
-        return JsonResponse({'result': 'success'})
-
-
-class EpisodeExtractSubtitlesView(PermissionRequiredMixin, View):
-    permission_required = 'authentication.movies_manage'
-    raise_exception = True
-
-    def post(self, request, *args, **kwargs):
-        """
-        Queue an episode for subtitle extraction
-        """
-        episode_id = kwargs.get('id')
-        try:
-            queue_subtitles_for_extraction(Episode.objects.get(pk=episode_id))
-        except Episode.DoesNotExist:
-            message = 'Episode does not exist'
-            logger.error(f"Failed to extract subtitles of episode #{episode_id}. {message}")
-            return JsonResponse({'result': 'failure', 'message': message}, status=404)
-        except ConnectionError:
-            message = 'Could not queue the episode for conversion.'
-            logger.error(f"Failed to extract subtitles of episode #{episode_id}. {message}")
-            return JsonResponse({'result': 'failure', 'message': message}, status=500)
-        return JsonResponse({'result': 'success'})
-
-
-def queue_episode_for_conversion(episode: Episode):
-    api_url = f"{settings.VIDEO_PROCESSING_API_URL}/convert"
-    callback_url = f"http://{os.environ['HOSTNAME']}/movies/convert/callback/?id={episode.pk}"
-
-    try:
-        logger.info(f'Queueing "{episode.original_filename}" for conversion.')
-        episode.conversion_status = Episode.CONVERTING
-        requests.post(api_url, json={'input': str(episode.original_filename), 'output': str(episode.converted_filename), 'callbackUrl': callback_url})
-    except (HTTPError, Timeout):
-        episode.conversion_status = Episode.CONVERSION_FAILED
-        raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
-    episode.save()
-
-
-def queue_subtitles_for_conversion(srt_subtitles_path: Path):
-    api_url = f"{settings.VIDEO_PROCESSING_API_URL}/convertSubtitles"
-    try:
-        logger.info(f'Queueing "{str(srt_subtitles_path)}" for conversion to .vtt.')
-        requests.post(api_url, json={'input': str(srt_subtitles_path)})
-    except (HTTPError, Timeout):
-        raise ConnectionError(f"Failed to queue {str(srt_subtitles_path)} for conversion to .vtt. Could not connect to server.")
-
-
-def queue_subtitles_for_extraction(episode: Episode):
-    try:
-        requests.post(
-            f"{settings.VIDEO_PROCESSING_API_URL}/extractSubtitles",
-            json={'input': str(episode.original_path)}
-        )
-    except (HTTPError, Timeout):
-        raise ConnectionError(f"Failed to queue {episode} for conversion. Could not connect to server.")
 
 
 class DeleteOriginalView(PermissionRequiredMixin, View):
@@ -337,41 +252,6 @@ class TriageListView(PermissionRequiredMixin, View):
         relative_subtitle_files = [os.path.relpath(abs_path, settings.TRIAGE_PATH) for abs_path in subtitle_files]
 
         return JsonResponse({'movies': list(relative_video_files), 'subtitles': relative_subtitle_files})
-
-
-class EpisodeConversionCallbackView(View):
-    """
-    Called when an episode conversion task is finished.
-    """
-    def post(self, request, *args, **kwargs):
-        payload = json.loads(request.body)
-
-        if 'id' not in request.GET:
-            return JsonResponse({'result': 'failure', 'message': '`id` is missing from query string'}, status=400)
-        if 'status' not in payload:
-            return JsonResponse(
-                {'result': 'failure', 'message': '`status` is missing from request payload'}, status=400)
-
-        try:
-            episode = Episode.objects.get(pk=request.GET['id'])
-        except Episode.DoesNotExist:
-            logger.warning(f"Conversion callback was called for an episode that does not exist (#{request.GET['id']})")
-            return JsonResponse({'result': 'failure', 'message': 'Episode does not exist'}, status=204)
-
-        conversion_status = payload['status']
-
-        try:
-            episode.conversion_status = Episode.status_map[conversion_status]
-            episode.save()
-            logger.info(f"{episode} has finished converting. Conversion status: {conversion_status}")
-        except KeyError:
-            logger.warning(f"Conversion callback was called with an invalid conversion status: {conversion_status}")
-            return JsonResponse(
-                {'result': 'failure', 'message': f'`{conversion_status}` is not a valid `status` value'},
-                status=400
-            )
-
-        return JsonResponse({'result': 'success'})
 
 
 class EpisodeAccessTokenView(PermissionRequiredMixin, View):

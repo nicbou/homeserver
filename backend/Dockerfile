@@ -1,13 +1,18 @@
-FROM ubuntu:22.04
+FROM ubuntu:23.10
 MAINTAINER Nicolas Bouliane
 
 # Update the default application repository sources list
+
+# mediainfo: To check if videos are streamable
+# netcat: To wait for database to be available when starting the backend
 RUN apt-get update && apt-get -y upgrade &&  apt-get install -y \
+    ffmpeg \
     libpq-dev \
     python3 \
     python3-dev \
     python3-pip \
-    netcat \
+    mediainfo \
+    netcat-traditional \
     git \
     wget
 
@@ -22,7 +27,7 @@ VOLUME ["$DOCKER_SRVHOME/media/", "$DOCKER_SRVHOME/logs/", "$DOCKER_SRVPROJ"]
 
 # Install Python dependencies
 COPY requirements.txt $DOCKER_SRVHOME/requirements.txt
-RUN pip3 install -r $DOCKER_SRVHOME/requirements.txt
+RUN pip3 install --break-system-packages -r $DOCKER_SRVHOME/requirements.txt
 
 # Port to expose
 EXPOSE 80

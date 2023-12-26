@@ -16,6 +16,9 @@ mkdir -p /movies
 mkdir -p /movies/triage
 mkdir -p /movies/library
 
+# Convert movies in the background
+python3 /srv/src/manage.py convert_new_movies &
+
 # Start Gunicorn processes
 echo Starting Gunicorn.
 exec gunicorn backend.wsgi:application \

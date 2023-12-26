@@ -13,7 +13,6 @@ services:
     build: backend
     depends_on:
       - db
-      - videoprocessing
     environment:
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
@@ -21,31 +20,13 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=homeserver
       - POSTGRES_PASSWORD=postgres
-      - MOVIE_LIBRARY_PATH=/var/www/movies/library
+      - MOVIE_LIBRARY_PATH=/movies/library
       - MOVIE_LIBRARY_URL=/movies
       - TRIAGE_PATH=/movies/triage
-      - VIDEO_PROCESSING_API_URL=http://videoprocessing
     volumes:
       - django_staticfiles:/srv/static
       - ./backend/src:/srv/src
       - ${MOVIE_LIBRARY_PATH}:/movies
-    restart: unless-stopped
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_persistence:/data
-    restart: unless-stopped
-  videoprocessing:
-    build: videoprocessing
-    environment:
-      - MOVIE_LIBRARY_PATH=/media/movies
-      - REDIS_DB_URL=redis://redis:6379/1
-      - MAX_VIDEO_BITRATE
-      - DEFAULT_VIDEO_HEIGHT
-    volumes:
-      - ${MOVIE_LIBRARY_PATH}:/media/movies
-    depends_on:
-      - redis
     restart: unless-stopped
   torrents:
     image: haugene/transmission-openvpn:latest
@@ -94,7 +75,6 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-      - videoprocessing
       - torrents
   dynamicdns:
     build: dynamicdns
