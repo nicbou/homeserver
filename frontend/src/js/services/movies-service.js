@@ -114,24 +114,6 @@ export default class {
     });
   }
 
-  static convert(id) {
-    return fetch(
-      `/api/movies/${id}/convert/`,
-      {method: 'POST'}
-    ).then((response) => {
-      return response.json();
-    });
-  }
-
-  static extractSubtitles(id) {
-    return fetch(
-      `/api/movies/${id}/extractSubtitles/`,
-      {method: 'POST'}
-    ).then((response) => {
-      return response.json();
-    });
-  }
-
   static subtitlesExist(episode){
     function fileExists(url) {
       return fetch(url, {

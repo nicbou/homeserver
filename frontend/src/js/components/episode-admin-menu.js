@@ -3,7 +3,6 @@ export default Vue.component('admin-menu', {
   data: function() {
     return {
       showDeleteOriginalFile: true,
-      showExtractEpisodeSubtitles: true,
       showDeleteEpisode: true,
     }
   },
@@ -24,22 +23,9 @@ export default Vue.component('admin-menu', {
       });
       this.showDeleteOriginalFile = false;
     },
-    extractEpisodeSubtitles: function() {
-      this.$store.dispatch('movies/extractEpisodeSubtitles', {
-        tmdbId: this.movie.tmdbId,
-        episodeId: this.episode.id,
-      });
-      this.showExtractEpisodeSubtitles = false;
-    }
   },
   template: `
     <div>
-      <a class="button" href="#" @click.prevent="extractEpisodeSubtitles" v-if="(!episode.isConverted && !episode.isConverting) && showExtractEpisodeSubtitles">
-        <i class="far fa-closed-captioning"></i> Extract subtitles
-      </a>
-      <a class="button" href="#" @click.prevent="extractEpisodeSubtitles" v-if="(episode.isConverted || episode.isConverting) && showExtractEpisodeSubtitles">
-        <i class="far fa-closed-captioning"></i> Re-extract subtitles
-      </a>
       <a class="button" href="#" @click.prevent="deleteEpisode" v-if="showDeleteEpisode">
         <i class="fas fa-trash-alt"></i> Delete and remove from library
       </a>

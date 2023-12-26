@@ -29,9 +29,6 @@ export default {
       state.movies[tmdbId].episodeMap[episodeId].originalVideoPreserved = false;
       state.movies[tmdbId].episodeMap[episodeId].originalVideoUrl = state.movies[tmdbId].episodeMap[episodeId].convertedVideoUrl;
     },
-    CONVERT_EPISODE(state, {tmdbId, episodeId}) {
-      state.movies[tmdbId].episodeMap[episodeId].conversionStatus = ConversionStatus.CONVERTING;
-    },
     MARK_EPISODE_WATCHED(state, {tmdbId, episodeId}) {
       state.movies[tmdbId].episodeMap[episodeId].lastWatched = new Date();
     },
@@ -91,13 +88,6 @@ export default {
     async deleteOriginalFile(context, {tmdbId, episodeId}) {
       context.commit('DELETE_ORIGINAL_FILE', {tmdbId, episodeId});
       return await MoviesService.deleteOriginalFile(episodeId);
-    },
-    async convertEpisode(context, {tmdbId, episodeId}) {
-      context.commit('CONVERT_EPISODE', {tmdbId, episodeId});
-      return await MoviesService.convert(episodeId);
-    },
-    async extractEpisodeSubtitles(context, {tmdbId, episodeId}) {
-      return await MoviesService.extractSubtitles(episodeId);
     },
     async setEpisodeProgress(context, {tmdbId, episodeId, progress}) {
       context.commit('SET_EPISODE_PROGRESS', {tmdbId, episodeId, progress});
