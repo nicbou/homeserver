@@ -67,7 +67,7 @@ class Episode(models.Model):
     @property
     def original_filename(self) -> Path:
         original_extension = Path(self.triage_path).suffix
-        original_filename = self.base_filename().with_suffix(original_extension)
+        original_filename = self.base_filename(original_extension)
 
         # When the original was replaced with the converted version
         if not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
