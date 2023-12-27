@@ -47,10 +47,13 @@ class Episode(models.Model):
     def __str__(self):
         return self.base_filename()
 
-    def base_filename(self, episode_number=True) -> Path:
+    def base_filename(self, extension=None, episode_number=True) -> Path:
         filename = u'{title} ({year})'
         if episode_number and (self.season or self.episode):
             filename = u'{title} ({year}) {season}{episode}'
+
+        if extension:
+            filename = filename + extension
 
         return Path(filename.format(
             season='S{}'.format(self.season) if self.season else '',
@@ -84,7 +87,7 @@ class Episode(models.Model):
 
     @property
     def converted_filename(self) -> Path:
-        return self.base_filename().with_suffix('.converted.mp4')
+        return self.base_filename('.converted.mp4')
 
     @property
     def converted_path(self) -> Path:
@@ -97,7 +100,7 @@ class Episode(models.Model):
     # Subtitles
 
     def subtitles_filename(self, extension='.srt', language_code='eng') -> Path:
-        return self.base_filename().with_suffix(f'.{language_code}{extension}')
+        return self.base_filename(f'.{language_code}{extension}')
 
     def subtitles_path(self, extension='.srt', language_code='eng') -> Path:
         return settings.MOVIE_LIBRARY_PATH / self.subtitles_filename(extension, language_code)
@@ -109,7 +112,7 @@ class Episode(models.Model):
 
     @property
     def cover_filename(self) -> Path:
-        return self.base_filename(episode_number=False).with_suffix('.jpg')
+        return self.base_filename('.jpg', episode_number=False)
 
     @property
     def cover_path(self) -> Path:
@@ -139,7 +142,7 @@ class Episode(models.Model):
 
 @receiver(pre_delete, sender=Episode)
 def episode_delete(sender, instance: Episode, **kwargs):
-    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.base_filename.with_suffix('*')))
+    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.base_filename('*')))
 
     # All episodes share the same cover
     # If deleting the last episode, delete the cover
