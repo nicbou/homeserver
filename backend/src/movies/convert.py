@@ -226,18 +226,13 @@ def extract_subtitles(input_file: Path):
 
         processed_subtitle_languages.add(language_code)
 
-        if language_code == subtitle_languages[0]:
-            output_file_srt = input_file.with_suffix('.srt')
-            output_file_vtt = input_file.with_suffix('.vtt')
-        else:
-            output_file_srt = input_file.with_suffix(f".{language_code}.srt")
-            output_file_vtt = input_file.with_suffix(f".{language_code}.vtt")
-
-        ffmpeg_command.extend([
-            '-map', f'0:{stream_index}', str(output_file_vtt),
-            '-map', f'0:{stream_index}', str(output_file_srt),
-        ])
-        logger.info(f'Extracting {language_code} subs to {str(output_file_srt.name)} and {str(output_file_vtt.name)}')
+        for suffix in ('.srt', '.vtt'):
+            if language_code == subtitle_languages[0]:
+                subs_output_file = input_file.with_suffix(suffix)
+            else:
+                subs_output_file = input_file.with_suffix(f".{language_code}{suffix}")
+            logger.info(f'Extracting {language_code} subtitles to {str(subs_output_file)}')
+            ffmpeg_command.extend(['-map', f'0:{stream_index}', str(subs_output_file)])
 
     if len(processed_subtitle_languages) > 0:
         try:
