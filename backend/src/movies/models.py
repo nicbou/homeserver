@@ -23,18 +23,13 @@ class Episode(models.Model):
     TV_SHOW = 1
     MOVIE = 2
 
-    status_choices = (
-        (NOT_CONVERTED, 'not-converted'),
-        (CONVERTING, 'converting'),
-        (CONVERTED, 'converted'),
-    )
     type_choices = (
         (TV_SHOW, 'tv'),
         (MOVIE, 'movie'),
     )
-    status_map = {status[1]: status[0] for status in status_choices}
 
-    # File
+    # Path to the original file in the finished torrents directory
+    # Use to remove triaged files from the triage list
     triage_path = models.CharField(max_length=300, null=True)
 
     # Episode
@@ -50,20 +45,82 @@ class Episode(models.Model):
     date_added = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.filename(show_season=True)
+        return self.base_filename()
 
-    def filename(self, extension: str = None, show_season: bool = True):
-        filename = u'{title} ({year}).{extension}'
-        if show_season and (self.season or self.episode):
-            filename = u'{title} ({year}) {season}{episode}.{extension}'
+    def base_filename(self, episode_number=True) -> Path:
+        filename = u'{title} ({year})'
+        if episode_number and (self.season or self.episode):
+            filename = u'{title} ({year}) {season}{episode}'
 
-        return filename.format(
-            extension=extension or Path(self.triage_path).suffix[1:],
+        return Path(filename.format(
             season='S{}'.format(self.season) if self.season else '',
             episode='E{}'.format(self.episode) if self.episode else '',
             year=self.release_year,
             title=self.title.replace('/', '-').replace(':', ','),
-        )
+        ))
+
+    # Original file
+
+    @property
+    def original_filename(self) -> Path:
+        original_extension = Path(self.triage_path).suffix
+        original_filename = self.base_filename().with_suffix(original_extension)
+
+        # When the original was replaced with the converted version
+        if not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
+            return original_filename.with_suffix('.mp4')
+
+        return original_filename
+
+    @property
+    def original_path(self) -> Path:
+        return settings.MOVIE_LIBRARY_PATH / self.original_filename
+
+    @property
+    def original_url(self) -> str:
+        return f"{settings.MOVIE_LIBRARY_URL}/{self.original_filename}"
+
+    # Converted file
+
+    @property
+    def converted_filename(self) -> Path:
+        return self.base_filename().with_suffix('.converted.mp4')
+
+    @property
+    def converted_path(self) -> Path:
+        return settings.MOVIE_LIBRARY_PATH / self.converted_filename
+
+    @property
+    def converted_url(self) -> str:
+        return f"{settings.MOVIE_LIBRARY_URL}/{self.converted_filename}"
+
+    # Subtitles
+
+    def subtitles_filename(self, extension='.srt', language_code='eng') -> Path:
+        if language_code == 'eng':
+            return self.base_filename.with_suffix(extension)
+        else:
+            return self.base_filename.with_suffix(f'.{language_code}{extension}')
+
+    def subtitles_path(self, extension='.srt', language_code='eng') -> Path:
+        return settings.MOVIE_LIBRARY_PATH / self.subtitles_filename(extension, language_code)
+
+    def subtitles_url(self, extension='.srt', language_code='eng') -> str:
+        return f"{settings.MOVIE_LIBRARY_URL}/{self.subtitles_filename(extension, language_code)}"
+
+    # Cover image
+
+    @property
+    def cover_filename(self) -> Path:
+        return self.base_filename(show_season=False).with_suffix('.jpg')
+
+    @property
+    def cover_path(self) -> Path:
+        return settings.MOVIE_LIBRARY_PATH / self.cover_filename
+
+    @property
+    def cover_url(self) -> str:
+        return f"{settings.MOVIE_LIBRARY_URL}/{self.cover_filename}"
 
     @property
     def conversion_status(self):
@@ -77,168 +134,15 @@ class Episode(models.Model):
     @property
     def original_is_same_as_converted(self):
         return (
-            self.conversion_status == self.CONVERTED
-            and self.original_path.suffix == '.mp4'
-            and self.original_path.exists()  # Actual files might be missing in the dev environment
+            self.original_path.exists()
             and self.converted_path.exists()
             and self.original_path.stat().st_ino == self.converted_path.stat().st_ino
-        )
-
-    @property
-    def original_filename(self) -> str:
-        original_extension = Path(self.triage_path).suffix[1:]
-        original_filename = self.filename(original_extension)
-
-        # The original file might have been deleted, and replaced with the converted version to save space
-        if not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
-            return str(Path(original_filename).with_suffix('.mp4'))
-
-        return original_filename
-
-    @property
-    def original_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.original_filename
-
-    @property
-    def converted_filename(self) -> str:
-        return self.filename('converted.mp4')
-
-    @property
-    def converted_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.converted_filename
-
-    @property
-    def temporary_conversion_filename(self) -> str:
-        return self.filename('converted.mp4.tmp')
-
-    @property
-    def temporary_conversion_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.temporary_conversion_filename
-
-    @property
-    def srt_subtitles_filename_en(self) -> str:
-        return self.filename('srt')
-
-    @property
-    def srt_subtitles_filename_de(self) -> str:
-        return self.filename('ger.srt')
-
-    @property
-    def srt_subtitles_filename_fr(self) -> str:
-        return self.filename('fre.srt')
-
-    @property
-    def srt_subtitles_path_en(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.srt_subtitles_filename_en
-
-    @property
-    def srt_subtitles_path_de(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.srt_subtitles_filename_de
-
-    @property
-    def srt_subtitles_path_fr(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.srt_subtitles_filename_fr
-
-    @property
-    def vtt_subtitles_filename_en(self) -> str:
-        return self.filename('vtt')
-
-    @property
-    def vtt_subtitles_filename_de(self) -> str:
-        return self.filename('ger.vtt')
-
-    @property
-    def vtt_subtitles_filename_fr(self) -> str:
-        return self.filename('fre.vtt')
-
-    @property
-    def vtt_subtitles_path_en(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.vtt_subtitles_filename_en
-
-    @property
-    def vtt_subtitles_path_de(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.vtt_subtitles_filename_de
-
-    @property
-    def vtt_subtitles_path_fr(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.vtt_subtitles_filename_fr
-
-    @property
-    def cover_filename(self) -> str:
-        return self.filename('jpg', show_season=False)
-
-    @property
-    def cover_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.cover_filename
-
-    @property
-    def original_url(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.original_filename
-        )
-
-    @property
-    def converted_url(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.converted_filename
-        )
-
-    @property
-    def srt_subtitles_url_en(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.srt_subtitles_filename_en
-        )
-
-    @property
-    def srt_subtitles_url_de(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.srt_subtitles_filename_de
-        )
-
-    @property
-    def srt_subtitles_url_fr(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.srt_subtitles_filename_fr
-        )
-
-    @property
-    def vtt_subtitles_url_en(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.vtt_subtitles_filename_en
-        )
-
-    @property
-    def vtt_subtitles_url_de(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.vtt_subtitles_filename_de
-        )
-
-    @property
-    def vtt_subtitles_url_fr(self) -> str:
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.vtt_subtitles_filename_fr
-        )
-
-    @property
-    def cover_url(self) -> str:
-        """All episodes of a movie/show share the same cover."""
-        return u"{url}/{file}".format(
-            url=settings.MOVIE_LIBRARY_URL,
-            file=self.filename('jpg', show_season=False)
         )
 
 
 @receiver(pre_delete, sender=Episode)
 def episode_delete(sender, instance: Episode, **kwargs):
-    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.filename('*')))
+    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.base_filename.with_suffix('*')))
 
     # All episodes share the same cover
     # If deleting the last episode, delete the cover

@@ -62,12 +62,12 @@ class MovieListView(PermissionRequiredMixin, View):
                     'episode': movie.episode,
                     'progress': watch_status.stopped_at if watch_status else 0,
                     'releaseYear': movie.release_year,
-                    'srtSubtitlesUrlEn': movie.srt_subtitles_url_en,
-                    'srtSubtitlesUrlDe': movie.srt_subtitles_url_de,
-                    'srtSubtitlesUrlFr': movie.srt_subtitles_url_fr,
-                    'vttSubtitlesUrlEn': movie.vtt_subtitles_url_en,
-                    'vttSubtitlesUrlDe': movie.vtt_subtitles_url_de,
-                    'vttSubtitlesUrlFr': movie.vtt_subtitles_url_fr,
+                    'srtSubtitlesUrlEn': movie.subtitles_url('.srt', 'eng'),
+                    'srtSubtitlesUrlDe': movie.subtitles_url('.srt', 'ger'),
+                    'srtSubtitlesUrlFr': movie.subtitles_url('.srt', 'fre'),
+                    'vttSubtitlesUrlEn': movie.subtitles_url('.vtt', 'eng'),
+                    'vttSubtitlesUrlDe': movie.subtitles_url('.vtt', 'ger'),
+                    'vttSubtitlesUrlFr': movie.subtitles_url('.vtt', 'fre'),
                     'originalVideoPreserved': not movie.original_is_same_as_converted,
                 })
 
@@ -146,14 +146,14 @@ class MovieListView(PermissionRequiredMixin, View):
                     episode.save()
 
                 # Create hard link to subtitle files in the movie library
-                for language in ('En', 'De', 'Fr'):
-                    if not triage_options.get(f'subtitlesFile{language}'):
+                for json_language, sub_language in (('En', 'eng'), ('De', 'ger'), ('Fr', 'fre')):
+                    if not triage_options.get(f'subtitlesFile{json_language}'):
                         continue
 
-                    subtitles_triage_path = settings.TRIAGE_PATH / triage_options[f'subtitlesFile{language}']
+                    subtitles_triage_path = settings.TRIAGE_PATH / triage_options[f'subtitlesFile{json_language}']
                     assert subtitles_triage_path.exists()
 
-                    subtitles_original_path: Path = getattr(episode, f'srt_subtitles_path_{language.lower()}')
+                    subtitles_original_path: Path = episode.subtitles_path('.srt', sub_language)
                     logger.info(f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_original_path)}"')
                     subtitles_original_path.unlink(missing_ok=True)
                     subtitles_original_path.hardlink_to(subtitles_triage_path)
