@@ -61,7 +61,8 @@ class Episode(models.Model):
     def original_filename(self) -> Path:
         return [
             f.name for f in settings.MOVIE_LIBRARY_PATH.iterdir()
-            if f.name.stem == str(self.base_filename(episode_number=True))
+            if f.is_file()
+            and f.stem == str(self.base_filename(episode_number=True))
             and not f.name.endswith(('.srt', '.vtt', '.jpg'))
         ][0]
 
