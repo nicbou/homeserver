@@ -227,10 +227,7 @@ def extract_subtitles(input_file: Path):
         processed_subtitle_languages.add(language_code)
 
         for suffix in ('.srt', '.vtt'):
-            if language_code == subtitle_languages[0]:
-                subs_output_file = input_file.with_suffix(suffix)
-            else:
-                subs_output_file = input_file.with_suffix(f".{language_code}{suffix}")
+            subs_output_file = input_file.with_suffix(f".{language_code}{suffix}")
             logger.info(f'Extracting {language_code} subtitles to {str(subs_output_file)}')
             ffmpeg_command.extend(['-map', f'0:{stream_index}', str(subs_output_file)])
 
