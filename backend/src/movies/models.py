@@ -109,7 +109,7 @@ class Episode(models.Model):
 
     @property
     def cover_filename(self) -> Path:
-        return self.base_filename(show_season=False).with_suffix('.jpg')
+        return self.base_filename(episode_number=False).with_suffix('.jpg')
 
     @property
     def cover_path(self) -> Path:
