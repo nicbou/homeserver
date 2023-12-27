@@ -97,7 +97,7 @@ class Episode(models.Model):
     # Subtitles
 
     def subtitles_filename(self, extension='.srt', language_code='eng') -> Path:
-        return self.base_filename.with_suffix(f'.{language_code}{extension}')
+        return self.base_filename().with_suffix(f'.{language_code}{extension}')
 
     def subtitles_path(self, extension='.srt', language_code='eng') -> Path:
         return settings.MOVIE_LIBRARY_PATH / self.subtitles_filename(extension, language_code)
