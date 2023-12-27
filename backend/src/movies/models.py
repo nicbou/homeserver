@@ -28,10 +28,6 @@ class Episode(models.Model):
         (MOVIE, 'movie'),
     )
 
-    # Path to the original file in the finished torrents directory
-    # Use to remove triaged files from the triage list
-    triage_path = models.CharField(max_length=300, null=True)
-
     # Episode
     title = models.CharField(max_length=150)
     description = models.TextField(blank=True)
@@ -63,14 +59,10 @@ class Episode(models.Model):
 
     @property
     def original_filename(self) -> Path:
-        original_extension = Path(self.triage_path).suffix
-        original_filename = self.base_filename().with_suffix(original_extension)
-
-        # When the original was replaced with the converted version
-        if not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
-            return original_filename.with_suffix('.mp4')
-
-        return original_filename
+        return [
+            f.name for f in settings.MOVIE_LIBRARY_PATH.glob(str(self.base_filename(episode_number=True).with_suffix('.*')))
+            if not f.name.endswith(('.converting.mp4', '.converted.mp4', '.srt', '.vtt', '.jpg'))
+        ][0]
 
     @property
     def original_path(self) -> Path:
@@ -97,7 +89,7 @@ class Episode(models.Model):
     # Subtitles
 
     def subtitles_filename(self, extension='.srt', language_code='eng') -> Path:
-        return self.base_filename.with_suffix(f'.{language_code}{extension}')
+        return self.base_filename().with_suffix(f'.{language_code}{extension}')
 
     def subtitles_path(self, extension='.srt', language_code='eng') -> Path:
         return settings.MOVIE_LIBRARY_PATH / self.subtitles_filename(extension, language_code)
@@ -109,7 +101,7 @@ class Episode(models.Model):
 
     @property
     def cover_filename(self) -> Path:
-        return self.base_filename(show_season=False).with_suffix('.jpg')
+        return self.base_filename(episode_number=False).with_suffix('.jpg')
 
     @property
     def cover_path(self) -> Path:
@@ -139,7 +131,7 @@ class Episode(models.Model):
 
 @receiver(pre_delete, sender=Episode)
 def episode_delete(sender, instance: Episode, **kwargs):
-    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.base_filename.with_suffix('*')))
+    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.base_filename().with_suffix('*')))
 
     # All episodes share the same cover
     # If deleting the last episode, delete the cover
