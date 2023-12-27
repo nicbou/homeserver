@@ -231,30 +231,26 @@ class TriageListView(PermissionRequiredMixin, View):
     raise_exception = True
 
     def get(self, request, *args, **kwargs):
-        # The movies in triage and the movies in the library are hard links pointing to the same file.
-        # So if a file in triage has no hard link in the library, it still needs to be triaged.
-        library_file_inodes = set([
-            f.stat().st_ino
-            for f in settings.MOVIE_LIBRARY_PATH.iterdir()
-            if f.is_file()
-        ])
+        video_files = []
+        subtitle_files = []
 
-        files_in_triage = [
-            f.relative_to(settings.TRIAGE_PATH) for f in settings.TRIAGE_PATH.iterdir()
-            if f.is_file()
-            and f.stat().st_ino not in library_file_inodes
-        ]
+        # TODO: convert to pathlib
+        for root, dirs, files in os.walk(settings.TRIAGE_PATH):
+            for filename in files:
+                absolute_path = os.path.join(root, filename)
+                if filename.lower().endswith(settings.VIDEO_EXTENSIONS):
+                    video_files.append(absolute_path)
+                if filename.lower().endswith(settings.SUBTITLE_EXTENSIONS):
+                    subtitle_files.append(absolute_path)
 
-        return JsonResponse({
-            'movies': [
-                str(f) for f in files_in_triage
-                if f.suffix in settings.VIDEO_EXTENSIONS
-            ],
-            'subtitles': [
-                str(f) for f in files_in_triage
-                if f.suffix in settings.SUBTITLE_EXTENSIONS
-            ]
-        })
+        # These movies are still in the completed downloads, but they are already triaged. They're seeding.
+        triaged_movie_files = Episode.objects.filter(triage_path__in=video_files).values_list('triage_path', flat=True)
+        untriaged_video_files = set(video_files).difference(set(triaged_movie_files))
+
+        relative_video_files = [os.path.relpath(abs_path, settings.TRIAGE_PATH) for abs_path in untriaged_video_files]
+        relative_subtitle_files = [os.path.relpath(abs_path, settings.TRIAGE_PATH) for abs_path in subtitle_files]
+
+        return JsonResponse({'movies': list(relative_video_files), 'subtitles': relative_subtitle_files})
 
 
 class EpisodeWatchedView(PermissionRequiredMixin, View):
