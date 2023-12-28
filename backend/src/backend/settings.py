@@ -1,5 +1,4 @@
 import os
-import logging.config
 from pathlib import Path
 
 # ==================================================
@@ -7,9 +6,31 @@ from pathlib import Path
 # ==================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-STATIC_ROOT = Path('/srv/static')
-MEDIA_ROOT = Path('/srv/media')
+STATIC_ROOT = Path('/var/backend/staticfiles')
 STATIC_URL = '/static/'
+
+TRIAGE_PATH = Path('/movies/triage')
+MOVIE_LIBRARY_PATH = Path('/movies/library')
+MOVIE_LIBRARY_URL = '/movies'
+
+VIDEO_EXTENSIONS = (
+    '.3gp',
+    '.avi',
+    '.divx',
+    '.flv',
+    '.m4v',
+    '.mkv',
+    '.mov',
+    '.mp4'
+    '.mpe',
+    '.mpeg',
+    '.mpg',
+    '.ogm',
+    '.wmv',
+)
+SUBTITLE_EXTENSIONS = ('.srt', '.vtt')
+
+LOGIN_REDIRECT_URL = '/'
 
 SECRET_KEY = os.environ.get('BACKEND_SECRET_KEY', False)
 
@@ -17,39 +38,31 @@ DEBUG = os.environ.get('BACKEND_DEBUG', False) == '1'
 
 ALLOWED_HOSTS = ['*']
 
-LOGGING_CONFIG = None
-logging.config.dictConfig({
+LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
-        'console': {
-            "()": "coloredlogs.ColoredFormatter",
-            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(message)s',
-        },
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(message)s'
+        }
     },
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'console',
-        },
+        'gunicorn': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': '/var/log/backend/gunicorn.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 mb
+        }
     },
     'loggers': {
-        '': {
+        'gunicorn.errors': {
             'level': 'INFO',
-            'handlers': ['console'],
-        },
-        'gunicorn.access': {
-            'level': 'ERROR',
-            'handlers': ['console'],
+            'handlers': ['gunicorn'],
             'propagate': True,
-            'qualname': 'gunicorn.access',
         },
-        'django.request': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-        },
-    },
-})
+    }
+}
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -112,16 +125,3 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 USE_X_FORWARDED_HOST = True
-
-# ==================================================
-# App-specific stuff
-# ==================================================
-
-LOGIN_REDIRECT_URL = '/'
-MOVIE_LIBRARY_PATH = Path(os.environ.get('MOVIE_LIBRARY_PATH'))
-MOVIE_LIBRARY_URL = os.environ.get('MOVIE_LIBRARY_URL')
-TRIAGE_PATH = Path(os.environ.get('TRIAGE_PATH'))
-VIDEO_EXTENSIONS = (
-    '.mkv', '.avi', '.mpg', '.wmv', '.mov', '.m4v', '.3gp', '.mpeg', '.mpe', '.ogm', '.flv', '.divx', '.mp4'
-)
-SUBTITLE_EXTENSIONS = ('.srt', '.vtt')
