@@ -8,6 +8,7 @@ RUN apt-get update \
 
 # Install the timeline
 WORKDIR /var/lib/timeline
+ADD https://api.github.com/repos/nicbou/timeline/git/refs/heads/master version.json
 RUN git clone https://github.com/nicbou/timeline.git . \
     && pip install -e .
 
