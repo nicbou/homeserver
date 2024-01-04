@@ -21,7 +21,7 @@ VIDEO_EXTENSIONS = (
     '.m4v',
     '.mkv',
     '.mov',
-    '.mp4'
+    '.mp4',
     '.mpe',
     '.mpeg',
     '.mpg',
