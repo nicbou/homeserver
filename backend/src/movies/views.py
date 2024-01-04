@@ -231,26 +231,25 @@ class TriageListView(PermissionRequiredMixin, View):
     raise_exception = True
 
     def get(self, request, *args, **kwargs):
-        video_files = []
-        subtitle_files = []
+        files_in_triage_dir = list(settings.TRIAGE_PATH.rglob('*'))
+        videos_in_triage_dir = set(
+            f for f in files_in_triage_dir if f.suffix.lower() in settings.VIDEO_EXTENSIONS
+        )
+        triaged_paths = set(
+            Path(f) for f in Episode.objects.values_list('triage_path', flat=True)
+        )
+        untriaged_videos = videos_in_triage_dir.difference(triaged_paths)
 
-        # TODO: convert to pathlib
-        for root, dirs, files in os.walk(settings.TRIAGE_PATH):
-            for filename in files:
-                absolute_path = os.path.join(root, filename)
-                if filename.lower().endswith(settings.VIDEO_EXTENSIONS):
-                    video_files.append(absolute_path)
-                if filename.lower().endswith(settings.SUBTITLE_EXTENSIONS):
-                    subtitle_files.append(absolute_path)
+        subtitles_in_triage_dir = [
+            str(f.relative_to(settings.TRIAGE_PATH))
+            for f in files_in_triage_dir
+            if f.suffix.lower() in settings.SUBTITLE_EXTENSIONS
+        ]
 
-        # These movies are still in the completed downloads, but they are already triaged. They're seeding.
-        triaged_movie_files = Episode.objects.filter(triage_path__in=video_files).values_list('triage_path', flat=True)
-        untriaged_video_files = set(video_files).difference(set(triaged_movie_files))
-
-        relative_video_files = [os.path.relpath(abs_path, settings.TRIAGE_PATH) for abs_path in untriaged_video_files]
-        relative_subtitle_files = [os.path.relpath(abs_path, settings.TRIAGE_PATH) for abs_path in subtitle_files]
-
-        return JsonResponse({'movies': list(relative_video_files), 'subtitles': relative_subtitle_files})
+        return JsonResponse({
+            'movies': [str(f.relative_to(settings.TRIAGE_PATH)) for f in untriaged_videos],
+            'subtitles': subtitles_in_triage_dir,
+        })
 
 
 class EpisodeWatchedView(PermissionRequiredMixin, View):
