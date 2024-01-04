@@ -7,8 +7,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the timeline
-WORKDIR /var/lib/timeline
 ADD https://api.github.com/repos/nicbou/timeline/git/refs/heads/master version.json
+WORKDIR /var/lib/timeline
 RUN git clone https://github.com/nicbou/timeline.git . \
     && pip install -e .
 
