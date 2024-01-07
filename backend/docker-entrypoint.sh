@@ -12,7 +12,6 @@ touch /var/log/backend/access.log
 tail -n 0 -f /var/log/backend/*.log &
 
 # Make sure the data directories exist
-mkdir -p /movies
 mkdir -p /movies/triage
 mkdir -p /movies/library
 

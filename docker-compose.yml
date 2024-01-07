@@ -39,7 +39,7 @@ services:
       - PIA_OPENVPN_CONFIG_BUNDLE=openvpn
       - LOCAL_NETWORK=192.168.0.0/16
     volumes:
-      - ${TRANSMISSION_DATA_PATH}:/data
+      - ${MOVIE_LIBRARY_PATH}/transmission:/data
       - ${MOVIE_LIBRARY_PATH}/triage:/triage
     devices:
       - /dev/net/tun:/dev/net/tun

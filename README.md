@@ -28,7 +28,6 @@ You can use the `.env.example` file as a template.
 * `MOVIE_LIBRARY_PATH`: Path to the movie library on your filesystem. Movies, subtitles and covers are stored there.
 * `BACKEND_SECRET_KEY`: A unique, random, secret string used by Django. [Explanation](https://docs.djangoproject.com/en/3.1/ref/settings/#secret-key).
 * `BACKEND_DEBUG` (optional): Set to `1` to enable Django backend debugging. Error pages will have meaningful error messages. Not safe for production.
-* `TRANSMISSION_DATA_PATH`: Path to Transmission's data folder on your filesystem. Incomplete torrents and Transmission settings are stored there.
 * OpenVPN configuration for [the Transmission/OpenVPN image](https://hub.docker.com/r/haugene/transmission-openvpn/):
     * `OPENVPN_PROVIDER`: See documentation for `haugene/transmission-openvpn`. Use 'PIA' for Private Internet Access.
     * `OPENVPN_USERNAME`
