@@ -79,11 +79,23 @@ services:
       - DIGITALOCEAN_TOKEN
       - DOMAIN=nicolasbouliane.com
       - "SUBDOMAINS=home,timeline"
+  gps-logger:
+    build: gps-logger
+    environment:
+      - GPS_LOGGER_USERNAME
+      - GPS_LOGGER_PASSWORD
+    volumes:
+      - mqtt_persistence:/mosquitto/data
+      - "${GPS_LOGS_PATH}:/var/log/gps"
+    ports:
+      - 1883:1883
+    restart: unless-stopped
 volumes:
-  caddy_data:
   caddy_config:
-  django_staticfiles:
+  caddy_data:
   db_persistence:
+  django_staticfiles:
+  mqtt_persistence:
   redis_persistence:
   timeline_persistence:
 networks:
