@@ -30,7 +30,7 @@ def log_position(
     )
     point.source = source
 
-    gpx_path = gpx_dir / time.strftime("%Y-%m-%d") + '.gpx'
+    gpx_path = (gpx_dir / time.strftime("%Y-%m-%d")).with_suffix('.gpx')
 
     # Create or append
     try:
