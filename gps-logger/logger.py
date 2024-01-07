@@ -57,7 +57,7 @@ def on_message(client, userdata, msg):
         data = json.loads(msg.payload)
         if data['_type'] == 'location':
             log_position(
-                date=datetime.fromtimestamp(data['tst'], pytz.UTC),
+                time=datetime.fromtimestamp(data['tst'], pytz.UTC),
                 latitude=Decimal(data['lat']),
                 longitude=Decimal(data['lon']),
                 elevation=data.get('alt'),
