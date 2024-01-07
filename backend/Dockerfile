@@ -1,8 +1,6 @@
 FROM ubuntu:23.10
 MAINTAINER Nicolas Bouliane
 
-COPY requirements.txt /var/backend/requirements.txt
-
 # mediainfo: To check if videos are streamable
 # netcat: To wait for database to be available when starting the backend
 RUN apt-get update && apt-get -y upgrade &&  apt-get install -y \
@@ -15,7 +13,11 @@ RUN apt-get update && apt-get -y upgrade &&  apt-get install -y \
     netcat-traditional \
     git \
     wget \
-    && pip3 install --break-system-packages -r /var/backend/requirements.txt \
+    && pip3 install --no-cache-dir --break-system-packages \
+        Django==3.2.23 \
+        gunicorn==20.1.0 \ 
+        psycopg2==2.9.3 \
+        requests==2.31.0 \
     && mkdir -p /var/log/backend
 
 # Copy entrypoint script into the image
