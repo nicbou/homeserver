@@ -25,7 +25,7 @@ def get_movies_to_convert(input_dir: Path) -> Iterable[Path]:
             and path.suffix.lower() in settings.VIDEO_EXTENSIONS
 
             # File is not a converting/converted video
-            and not path.stem.lower().endswith(('.converting', '.converted'))
+            and not path.stem.lower().endswith('.converted')
 
             # No converted video exists
             and not path.with_suffix('.converted.mp4').exists()
