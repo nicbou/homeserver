@@ -62,12 +62,11 @@ def convert_to_h264(input_file: Path, output_file: Path):
         ffmpeg_path,
         '-i', str(input_file),
         '-codec:v', 'libx264',
-        '-profile:v', 'high',
         '-preset', 'fast',
         '-movflags', 'faststart',  # Moves metadata to start, to allow streaming and skipping
         '-maxrate', str(max_video_bitrate),
         '-bufsize', str(max_video_bitrate * 1.5),
-        '-filter:v', f"scale=-2:'min({default_video_height},ih)'",
+        '-filter:v', f"scale=-2:{default_video_height}",
         '-threads', '0',
         '-ac', '2',  # Stereo audio
         '-af', 'aresample=async=1',  # Keep audio in sync with video
