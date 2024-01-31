@@ -142,7 +142,7 @@ class Episode(models.Model):
 
 @receiver(pre_delete, sender=Episode)
 def episode_delete(sender, instance: Episode, **kwargs):
-    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(instance.base_filename('*')))
+    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(str(instance.base_filename('*'))))
 
     # All episodes share the same cover
     # If deleting the last episode, delete the cover
