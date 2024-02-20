@@ -3,7 +3,6 @@ from django.conf import settings
 from pathlib import Path
 import json
 import logging
-import os
 import subprocess
 
 
@@ -127,7 +126,7 @@ def convert_movie(input_file: Path):
         if is_streamable:
             try:
                 logger.info(f'Original video is already streamable. Hard linking "{input_file.name}" to "{output_file.name}"')
-                os.link(input_file, output_file)
+                output_file.hardlink_to(input_file)
             except:
                 logger.exception(f'Failed to hard link original video "{input_file.name}" to "{output_file.name}"')
                 raise
@@ -138,8 +137,8 @@ def convert_movie(input_file: Path):
                 add_moov_atom(input_file, output_file)
 
                 logger.info(f"Replacing original at {input_file.name}, with the streamable version")
-                os.unlink(input_file)
-                os.link(output_file, input_file)
+                input_file.unlink()
+                output_file.hardlink_to(input_file)
             except:
                 logger.exception(f'Failed to add moov atom to "{input_file.name}"')
                 raise
