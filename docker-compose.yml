@@ -50,9 +50,16 @@ services:
     build: timeline
     environment:
       - GOOGLE_MAPS_API_KEY
+      - TZ=Europe/Berlin
     volumes:
       - ${TIMELINE_DATA_PATH}:/media/timeline
       - timeline_persistence:/var/timeline/output
+  search:
+    build: ./search
+    volumes:
+      - "${SEARCH_LOGS_PATH}:/var/log/search"
+    environment:
+      - TZ=Europe/Berlin
   proxy:
     build:
       context: ./proxy

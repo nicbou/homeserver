@@ -38,6 +38,10 @@ You can use the `.env.example` file as a template.
 * `GPS_LOGGER_USERNAME` and `GPS_LOGGER_PASSWORD`: Credentials for the MQTT server that listens to messages from [Owntracks](https://owntracks.org/) on port 1883.
 * `GPS_LOGS_PATH`: Where the GPS logs are stored on the host filesystem. Ideally, it should be somewhere under `TIMELINE_DATA_PATH`, so that the logs are included on the timeline.
 
+#### Search
+
+* `SEARCH_LOGS_PATH`: Where the search logs are stored on the host filesystem. Ideally, it should be somewhere under `TIMELINE_DATA_PATH`, so that the logs are included on the timeline.
+
 #### Dynamic DNS
 
 * `DIGITALOCEAN_TOKEN` (optional): DigitalOcean API token. Used for dynamic DNS. [Here's how you get that token](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/). If you leave it empty, dynamic DNS will stay disabled.

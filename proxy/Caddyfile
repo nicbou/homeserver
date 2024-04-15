@@ -19,6 +19,11 @@
         file_server
     }
 
+    handle /search* {
+        uri strip_prefix /search
+        reverse_proxy search:80
+    }
+
     handle /api* {
         reverse_proxy backend:80
     }
