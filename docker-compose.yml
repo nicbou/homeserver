@@ -61,12 +61,12 @@ services:
     environment:
       - TZ=Europe/Berlin
   proxy:
-    build:
-      context: ./proxy
+    image: caddy:2.7-alpine
     environment:
       - SSL_DOMAIN
       - SSL_EMAIL
     volumes:
+      - "./proxy/Caddyfile:/etc/caddy/Caddyfile:ro"
       - "./frontend/src:/var/www/movies/frontend:ro"
       - "timeline_persistence:/var/www/timeline:ro"
       - "django_staticfiles:/var/www/movies/django-static:ro"
