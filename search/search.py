@@ -106,7 +106,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 if matches:
                     url = command.format(*(matches.groups() + (subquery,)))
 
-        self.redirect(url, query=subquery, private=is_private)
+        self.redirect(url, query=query, private=is_private)
 
     def log_message(self, format, *args):
         return
