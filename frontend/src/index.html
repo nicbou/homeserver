@@ -34,6 +34,9 @@
                         <li v-if="canManageMovies">
                             <router-link :to="{name: 'triage'}">Triage</router-link>
                         </li>
+                        <li v-if="isAdmin">
+                            <a href="/timeline">Timeline</a>
+                        </li>
                     </ul>
                 </nav>
             </div>
