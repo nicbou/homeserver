@@ -1,4 +1,4 @@
-import { movieSorter, WatchStatus } from './../models/movies.js';
+import { WatchStatus } from './../models/movies.js';
 import SpinnerComponent from './spinner.js';
 import StarComponent from './star.js';
 
@@ -21,8 +21,36 @@ export default Vue.component('movies', {
         Math.seedrandom(this.$route.query.shuffle);
         return () => .5 - Math.random();
       }
+      else if (this.$route.query.sort === 'lastSeen'){
+        return (a, b) => {
+          if (a.lastWatched && b.lastWatched) {
+            return b.lastWatched - a.lastWatched;
+          } else if (a.lastWatched) {
+            return -1;
+          } else if (b.lastWatched) {
+            return 1;
+          } else {
+            return a.dateAdded - b.dateAdded;
+          }
+        }
+      }
+      else if (this.$route.query.sort === 'firstAdded'){
+        return (a, b) => {
+          return a.dateAdded - b.dateAdded;
+        }
+      }
       else {
-        return movieSorter;
+        return (a, b) => {
+          if (a.lastWatched && b.lastWatched) {
+            return a.lastWatched - b.lastWatched;
+          } else if (a.lastWatched) {
+            return 1;
+          } else if (b.lastWatched) {
+            return -1;
+          } else {
+            return b.dateAdded - a.dateAdded;
+          }
+        };
       }
     },
     query() {
@@ -30,6 +58,15 @@ export default Vue.component('movies', {
     },
     page() {
       return parseInt(this.$route.query.p) || 0;
+    },
+    sortType() {
+      return {
+        'fresh': 'New on Nickflix',
+        'firstAdded': 'First added',
+        'lastSeen': 'Watched recently',
+        'newest': 'Newest releases',
+        'oldest': 'Oldest releases',
+      }[this.$route.query.sort || 'fresh'];
     },
     filteredMovies() {
       if (this.query) {
@@ -55,7 +92,7 @@ export default Vue.component('movies', {
     },
     starredMovies() {
       return this.filteredMovies.filter(m => m.isStarred);
-    }
+    },
   },
   created() {
     this.$store.dispatch('movies/getMovies');
@@ -84,10 +121,31 @@ export default Vue.component('movies', {
         query: {}
       };
       if (query) navParams.query.q = query;
+      if(this.$route.query.sort) navParams.query.sort = this.$route.query.sort;
 
       // Don't amend browser history for each keystroke
       this.query ? this.$router.replace(navParams) : this.$router.push(navParams);
+    },
+    setSortType(){
+      const sortOrder = [
+        'fresh',
+        'firstAdded',
+        'lastSeen',
+        'newest',
+        'oldest',
+      ];
+      const nextIndex = (sortOrder.indexOf(this.$route.query.sort || 'fresh') + 1) % (sortOrder.length - 1);
+      const nextSortType = sortOrder[nextIndex];
 
+      const navParams = {
+        name: 'movies',
+        query: {
+          sort: nextSortType,
+        },
+      };
+      if (this.query) navParams.query.q = this.query;
+
+      this.$router.push(navParams);
     },
     onSearchChanged(event) {
       clearTimeout(this.queryDebounceTimeout);
@@ -128,6 +186,7 @@ export default Vue.component('movies', {
         <h2 v-if="query">Results</h2>
         <h2 v-if="!query && page === 0">All movies</h2>
         <h2 v-if="!query && page > 0">More movies...</h2>
+        <button id="sort-button" class="button" @click="setSortType"><i class="fas fa-sort-amount-down"></i> {{ sortType }}</button>
         <button id="shuffle-button" class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
         <button id="clean-button" v-if="canManageMovies" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
         <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">

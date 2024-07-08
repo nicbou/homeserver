@@ -15,19 +15,6 @@ export const MediaType = {
   MOVIE: 2,
 };
 
-export const movieSorter = (a, b) => {
-  // New additions, old additions, watched a long time ago, watched recently
-  if (a.lastWatched && b.lastWatched) {
-    return a.lastWatched - b.lastWatched;
-  } else if (a.lastWatched) {
-    return 1;
-  } else if (b.lastWatched) {
-    return -1;
-  } else {
-    return b.dateAdded - a.dateAdded;
-  }
-};
-
 export const episodeSorter = (a, b) => {
   return a.season - b.season || a.episode - b.episode;
 };
