@@ -111,6 +111,7 @@ export default Vue.component('movies', {
       };
       if (page > 0) navParams.query.p = page;
       if (this.query) navParams.query.q = this.query;
+      if (this.$route.query.sort) navParams.query.sort = this.$route.query.sort;
 
       this.$router.push(navParams);
     },
@@ -121,7 +122,7 @@ export default Vue.component('movies', {
         query: {}
       };
       if (query) navParams.query.q = query;
-      if(this.$route.query.sort) navParams.query.sort = this.$route.query.sort;
+      if (this.$route.query.sort) navParams.query.sort = this.$route.query.sort;
 
       // Don't amend browser history for each keystroke
       this.query ? this.$router.replace(navParams) : this.$router.push(navParams);
@@ -144,7 +145,6 @@ export default Vue.component('movies', {
           sort: nextSortType,
         },
       };
-      if (this.page > 0) navParams.query.p = this.page;
       if (this.query) navParams.query.q = this.query;
 
       this.$router.push(navParams);
