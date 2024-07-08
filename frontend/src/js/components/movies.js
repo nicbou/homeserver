@@ -136,7 +136,7 @@ export default Vue.component('movies', {
         'oldest',
       ];
 
-      const nextIndex = (sortOrder.indexOf(this.$route.query.sort || 'fresh') + 1) % (sortOrder.length - 1);
+      const nextIndex = (sortOrder.indexOf(this.$route.query.sort || 'fresh') + 1) % sortOrder.length;
       const nextSortType = sortOrder[nextIndex];
 
       const navParams = {
