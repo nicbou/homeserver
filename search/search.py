@@ -39,6 +39,7 @@ search_engines = {
     'g': 'https://allaboutberlin.com/glossary/{}',
     'gmail': 'https://mail.google.com/mail/u/0/#search/{}',
     'gmaps': 'https://maps.google.com/maps?q={}',
+    'gpt': 'https://chat.openai.com/?q={}',
     'i': 'https://www.google.com/search?tbm=isch&q={}',
     'images': 'https://www.google.com/search?tbm=isch&q={}',
     'imdb': 'https://www.imdb.com/find?q={}',
