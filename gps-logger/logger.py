@@ -10,7 +10,14 @@ import paho.mqtt.client as mqtt
 import pytz
 
 
+logging.basicConfig(**{
+    'datefmt': '%Y-%m-%d %H:%M:%S',
+    'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
+    'level': logging.INFO,
+})
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 gpx_dir = Path('/var/log/gps')
 
 
