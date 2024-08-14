@@ -20,42 +20,42 @@ def json_format(input):
         return f"Invalid JSON: {e.msg}"
 
 
-default = 'https://www.google.com/search?q={}'
+default = 'https://www.google.com/search?q={query}'
 
 search_engines = {
-    '*': 'https://www.google.com/search?btnI=I\'m+Feeling+Lucky&q={}',
-    'archive': 'https://archive.org/search.php?query={}',
-    'aufenthg': 'https://www.gesetze-im-internet.de/aufenthg_2004/__{}.html',
+    '*': 'https://www.google.com/search?btnI=I\'m+Feeling+Lucky&q={query}',
+    'archive': 'https://web.archive.org/web/20300101000000/{query_raw}',
+    'aufenthg': 'https://www.gesetze-im-internet.de/aufenthg_2004/__{query}.html',
     'aufenthv': 'https://www.gesetze-im-internet.de/aufenthv/__41.html',
-    'bing': 'https://www.bing.com/search?q={}',
-    'bingi': 'https://www.bing.com/images/search?q={}',
-    'bingv': 'https://www.bing.com/videos/search?q={}',
-    'bro': 'https://bropages.org/{}',
-    'collins': 'https://www.collinsdictionary.com/us/dictionary/english/{}',
-    'commons': 'https://commons.wikimedia.org/w/index.php?title=Special:Search&search={}',
-    'dict': 'https://www.google.com/search?q=dictionary#dobs={}',
-    'de': 'https://www.dict.cc/?s={}',
-    'deepl': 'https://www.deepl.com/translator#de/en/{}',
-    'g': 'https://allaboutberlin.com/glossary/{}',
-    'gmail': 'https://mail.google.com/mail/u/0/#search/{}',
-    'gmaps': 'https://maps.google.com/maps?q={}',
-    'gpt': 'https://chat.openai.com/?q={}',
-    'i': 'https://www.google.com/search?tbm=isch&q={}',
-    'images': 'https://www.google.com/search?tbm=isch&q={}',
-    'imdb': 'https://www.imdb.com/find?q={}',
-    'm': 'https://maps.google.com/maps?q={}',
-    'pip': 'https://pypi.org/search/?q={}',
-    'pypi': 'https://pypi.org/search/?q={}',
-    't': 'https://twitter.com/search?q={}',
-    'time': 'https://time.lol/#{}',
-    'thes': 'https://www.thesaurus.com/browse/{}',
-    'twitter': 'https://twitter.com/search?q={}',
-    'udict': 'https://www.urbandictionary.com/define.php?term={}',
-    'v': 'https://www.google.com/search?tbm=vid&q={}',
-    'videos': 'https://www.google.com/search?tbm=vid&q={}',
-    'whois': 'https://who.is/whois/{}',
-    'youtube': 'https://www.youtube.com/results?search_query={}',
-    'yt': 'https://www.youtube.com/results?search_query={}',
+    'bing': 'https://www.bing.com/search?q={query}',
+    'bingi': 'https://www.bing.com/images/search?q={query}',
+    'bingv': 'https://www.bing.com/videos/search?q={query}',
+    'bro': 'https://bropages.org/{query}',
+    'collins': 'https://www.collinsdictionary.com/us/dictionary/english/{query}',
+    'commons': 'https://commons.wikimedia.org/w/index.php?title=Special:Search&search={query}',
+    'dict': 'https://www.google.com/search?q=dictionary#dobs={query}',
+    'de': 'https://www.dict.cc/?s={query}',
+    'deepl': 'https://www.deepl.com/translator#de/en/{query_raw}',
+    'g': 'https://allaboutberlin.com/glossary/{query}',
+    'gmail': 'https://mail.google.com/mail/u/0/#search/{query}',
+    'gmaps': 'https://maps.google.com/maps?q={query}',
+    'gpt': 'https://chat.openai.com/?q={query}',
+    'i': 'https://www.google.com/search?tbm=isch&q={query}',
+    'images': 'https://www.google.com/search?tbm=isch&q={query}',
+    'imdb': 'https://www.imdb.com/find?q={query}',
+    'm': 'https://maps.google.com/maps?q={query}',
+    'pip': 'https://pypi.org/search/?q={query}',
+    'pypi': 'https://pypi.org/search/?q={query}',
+    't': 'https://twitter.com/search?q={query}',
+    'time': 'https://time.lol/#{query}',
+    'thes': 'https://www.thesaurus.com/browse/{query}',
+    'twitter': 'https://twitter.com/search?q={query}',
+    'udict': 'https://www.urbandictionary.com/define.php?term={query}',
+    'v': 'https://www.google.com/search?tbm=vid&q={query}',
+    'videos': 'https://www.google.com/search?tbm=vid&q={query}',
+    'whois': 'https://who.is/whois/{query}',
+    'youtube': 'https://www.youtube.com/results?search_query={query}',
+    'yt': 'https://www.youtube.com/results?search_query={query}',
 }
 
 commands = (
@@ -102,7 +102,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
         subquery = quote_plus(subquery_raw)
         if keyword in search_engines:
-            url = search_engines[keyword].format(subquery)
+            url = search_engines[keyword].format({
+                "query": subquery,
+                "query_raw": subquery_raw
+            })
         else:
             for regex, command in commands:
                 matches = re.match(regex, keyword)
