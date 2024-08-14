@@ -80,9 +80,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         querystring = parse_qs(urlparse(self.path).query)
         query = querystring.get('q', [''])[0]
         is_private = querystring.get('private', [''])[0] == '1'  # Legacy mode that disabled logging in Incognito mode
-        url = default.format({
-            "query": quote_plus(query)
-        })
+        url = default.format(query=quote_plus(query))
 
         if not query:
             self.return_text("""
@@ -104,10 +102,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
         subquery = quote_plus(subquery_raw)
         if keyword in search_engines:
-            url = search_engines[keyword].format({
-                "query": subquery,
-                "query_raw": subquery_raw
-            })
+            url = search_engines[keyword].format(
+                query=subquery,
+                query_raw=subquery_raw
+            )
         else:
             for regex, command in commands:
                 matches = re.match(regex, keyword)
