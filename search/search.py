@@ -80,7 +80,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         querystring = parse_qs(urlparse(self.path).query)
         query = querystring.get('q', [''])[0]
         is_private = querystring.get('private', [''])[0] == '1'  # Legacy mode that disabled logging in Incognito mode
-        url = default.format(quote_plus(query))
+        url = default.format({
+            "query": quote_plus(query)
+        })
 
         if not query:
             self.return_text("""
