@@ -54,12 +54,14 @@ services:
     volumes:
       - ${TIMELINE_DATA_PATH}:/media/timeline
       - timeline_persistence:/var/timeline/output
+    restart: unless-stopped
   search:
     build: ./search
     volumes:
       - "${SEARCH_LOGS_PATH}:/var/log/search"
     environment:
       - TZ=Europe/Berlin
+    restart: unless-stopped
   proxy:
     image: caddy:2.7-alpine
     environment:
