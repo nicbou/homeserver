@@ -88,6 +88,7 @@ services:
       - DIGITALOCEAN_TOKEN
       - DOMAIN=nicolasbouliane.com
       - "SUBDOMAINS=home,timeline"
+    restart: unless-stopped
   gps-logger:
     build: gps-logger
     environment:
