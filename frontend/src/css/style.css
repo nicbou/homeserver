@@ -15,6 +15,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
 :root {
     --border-radius:10px;
     --m: 15px;
+    --c-link: #dd6;
 }
 
 .container{max-width:1280px;width:100%;margin:0 auto;padding:var(--m) 30px;box-sizing:border-box;}
@@ -105,6 +106,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
     .movie-info .cover{max-width: 25%; float:right; margin: 0 0 var(--m) var(--m)}
     .movie-info h2 time{display:block;font:var(--m)/22px sans-serif}
     .movie-info .button-group{clear:both}
+    .movie-info .description p a{color:var(--c-link)}
     .episodes{}
         .episode{}
         .episode:first-child{margin-top: -10px;}

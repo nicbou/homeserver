@@ -2,6 +2,7 @@ import AdminMenuComponent from './../components/episode-admin-menu.js';
 import DownloadMenuComponent from './../components/episode-download-menu.js';
 import EpisodeListItemComponent from './../components/episode-list-item.js';
 import StarComponent from './star.js';
+import { MediaType } from './../models/movies.js';
 
 export default Vue.component('movie', {
   data: function() {
@@ -38,6 +39,10 @@ export default Vue.component('movie', {
     nextEpisodeName: function () {
       return this.nextEpisode ? `S${this.nextEpisode.season}E${this.nextEpisode.episode}` : null;
     },
+    infoUrl() {
+      const type = this.movie.mediaType === MediaType.MOVIE ? 'movie' : 'tv';
+      return `https://www.themoviedb.org/${type}/${this.movie.tmdbId}`;
+    }
   },
   methods: {
     playEpisode: function(episode) {
@@ -63,16 +68,17 @@ export default Vue.component('movie', {
     }
   },
   template: `
-    <div v-if="movie" class="container">
+    <div v-if="movie" class="container" :key="movie.tmdbId">
       <div class="section movie-info">
         <div class="information">
           <div class="section description">
-            <div class="cover"><img :src="movie.coverUrl" :key="movie.tmdbId"/></div>
+            <div class="cover"><img :src="movie.coverUrl"/></div>
             <h2>
               {{movie.title}}
               <time v-text="movie.releaseYear"></time>
             </h2>
             <p v-text="movie.description"></p>
+            <p><a :href="infoUrl" target="_blank">Info and trailer →</a></p>
             <div class="button-group horizontal">
               <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted" class="button large main">
                 <i class="fas fa-play"></i>
