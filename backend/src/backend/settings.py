@@ -14,7 +14,7 @@ MOVIE_LIBRARY_PATH = Path("/movies/library")
 MOVIE_LIBRARY_URL = "/movies"
 
 GPX_LOGS_PATH = Path("/var/log/gps")
-DATABASE_PATH = Path("/var/db/api.db")
+DATABASE_PATH = Path("/var/backend/db/api.db")
 
 VIDEO_EXTENSIONS = (
     ".3gp",

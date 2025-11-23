@@ -1,13 +1,11 @@
 services:
   backend:
     build: backend
-    depends_on:
-      - db
     environment:
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
     volumes:
-      - "db_persistence:/var/db"
+      - "db_persistence:/var/backend/db"
       - "django_staticfiles:/var/backend/staticfiles"
       - "./backend/src:/var/backend/src"
       - "${MOVIE_LIBRARY_PATH}:/movies"
