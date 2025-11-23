@@ -35,8 +35,9 @@ You can use the `.env.example` file as a template.
     
 #### GPS logger
 
-* `GPS_LOGGER_USERNAME` and `GPS_LOGGER_PASSWORD`: Credentials for the MQTT server that listens to messages from [Owntracks](https://owntracks.org/) on port 1883.
-* `GPS_LOGS_PATH`: Where the GPS logs are stored on the host filesystem. Ideally, it should be somewhere under `TIMELINE_DATA_PATH`, so that the logs are included on the timeline.
+A GPS logger is replying to pings at `https://.../api/gps/`. It expects pings from the OwnTracks app, via HTTP.
+
+* `GPS_LOGS_PATH`: Where the GPS logs are stored on the host filesystem. Ideally, it should be somewhere under `TIMELINE_DATA_PATH`, so that the logs are included in the timeline.
 
 #### Search
 

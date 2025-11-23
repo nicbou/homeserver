@@ -13,6 +13,8 @@ TRIAGE_PATH = Path("/movies/triage")
 MOVIE_LIBRARY_PATH = Path("/movies/library")
 MOVIE_LIBRARY_URL = "/movies"
 
+GPX_LOGS_PATH = Path("/var/log/gps")
+
 VIDEO_EXTENSIONS = (
     ".3gp",
     ".avi",
@@ -37,6 +39,10 @@ SECRET_KEY = os.environ.get("BACKEND_SECRET_KEY", False)
 DEBUG = os.environ.get("BACKEND_DEBUG", False) == "1"
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost",
+    "https://home.nicolasbouliane.com",
+]
 
 LOGGING = {
     "version": 1,
@@ -69,6 +75,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "movies",
     "authentication",
+    "gps_logger",
 )
 
 MIDDLEWARE = [

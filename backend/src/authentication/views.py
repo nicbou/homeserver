@@ -1,3 +1,5 @@
+from base64 import b64decode
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.views import View
@@ -17,26 +19,37 @@ logger = logging.getLogger(__name__)
 
 def check_auth(request):
     original_url = request.META.get("HTTP_X_FORWARDED_URI")
-    redirect_url = "/auth/?next=" + urllib.parse.quote_plus(original_url)
+    login_url = "/auth/?next=" + urllib.parse.quote_plus(original_url)
+
+    continue_response = HttpResponse()
+    login_response = HttpResponseRedirect(login_url, status=302)
 
     if not original_url:
-        return HttpResponseRedirect(redirect_url, status=302)
+        return login_response
     elif original_url.startswith("/auth/"):
-        return HttpResponse()
+        return continue_response
 
     parsed_url = urlparse(original_url)
 
     if request.user.is_authenticated:
         for url_matcher, permission in permission_checks:
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
-                return HttpResponseRedirect(redirect_url, status=302)
+                return login_response
 
         if parsed_url.path.startswith("/timeline") and not request.user.is_superuser:
-            return HttpResponseRedirect(redirect_url, status=302)
+            return login_response
 
-        return HttpResponse()
+        return continue_response
     else:
-        return HttpResponseRedirect(redirect_url, status=302)
+        # Also accept basic auth as a fallback. OwnTracks uses basic auth for GPS pings.
+        auth_header = request.META.get("HTTP_AUTHORIZATION")
+        if not auth_header or not auth_header.startswith("Basic "):
+            return login_response
+
+        encoded = auth_header.split(" ", 1)[1].strip()
+        username, password = b64decode(encoded).decode("utf-8").split(":", 1)
+        user = authenticate(request, username=username, password=password)
+        return continue_response if user else login_response
 
 
 class JSONPermissionsView(View):
