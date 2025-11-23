@@ -1,0 +1,101 @@
+[env]
+COMPOSE_PROJECT_NAME = "homeserver"
+BUILDKIT_PROGRESS = "plain"
+
+_.python.venv = { path = ".venv", create = true }
+
+# = INSTALL=====================================================================
+
+[tools]
+uv = "latest"
+ruff = "latest"
+python = "3.13"
+shellcheck = "latest"
+pre-commit = "latest"
+
+[tasks.setup]
+description = "Install local dependencies to run the project"
+alias = "i"
+run = """
+uv pip install -r requirements-dev.txt
+mise generate git-pre-commit --hook=pre-commit --write --task=pre-commit
+mise generate git-pre-commit --hook=pre-push --write --task=pre-push
+"""
+
+# = RUN ========================================================================
+
+[tasks.dev]
+description = "Serve the frontend and the backend in docker."
+alias = "d"
+run = """
+# Starting docker daemon
+if ! docker info >/dev/null 2>&1; then
+  open -a Docker;
+fi
+
+# Waiting for docker daemon to be ready
+while [[ -z "$(! docker stats --no-stream 2> /dev/null)" ]]; do
+  sleep 1;
+done
+
+# Starting docker containers
+if [ "$(docker ps -q | wc -l)" -eq 0 ]; then
+  docker compose up --build -d;
+fi
+
+# Waiting for server to be available
+max_attempts=30
+attempt=1
+until curl --fail -s -k https://localhost >/dev/null; do
+  if [ "$attempt" -ge "$max_attempts" ]; then
+    echo "Can't reach server after $max_attempts seconds."
+    exit 1
+  fi
+  ((attempt++))
+  sleep 1
+done
+"""
+
+# = CLEANUP ====================================================================
+
+[tasks.shellcheck]
+description = "Lint shell scripts with shellcheck"
+run = """
+for file in $(find . -type f -name "*.sh" -not -path '*/[@.]*'); do shellcheck $file; done;
+"""
+
+[tasks.ruff]
+description = "Lint Python code with ruff"
+run = "ruff check"
+
+[tasks.pyright]
+description = "Lint Python code with pyright"
+run = "pyright ."
+
+[tasks.lint]
+description = "Run various linters for the project"
+alias = "l"
+run = """
+mise shellcheck
+# mise pyright
+mise ruff
+ursus lint --level=ERROR -c frontend/ursus_config.py
+"""
+
+[tasks.format]
+description = "Automatically format the code"
+alias = "f"
+run = "ruff format"
+
+[tasks.pre-commit]
+description = "Run git pre-commit checks"
+run = """
+mise format
+mise lint
+"""
+
+[tasks.pre-push]
+description = "Run git pre-push checks"
+run = """
+mise lint
+"""

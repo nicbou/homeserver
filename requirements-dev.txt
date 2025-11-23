@@ -1,0 +1,4 @@
+# Linting tools
+pyright~=1.1
+
+Django==3.2.23
