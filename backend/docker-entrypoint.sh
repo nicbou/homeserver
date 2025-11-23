@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Wait for database
-until nc -z db 5432; do echo Waiting for PostgreSQL; sleep 1; done
-
-python3 manage.py migrate                  # Apply database migrations
-python3 manage.py collectstatic --noinput  # Collect static files
+python3 manage.py migrate
+python3 manage.py collectstatic --noinput
 
 # Prepare log files and output them to stdout
 touch /var/log/backend/gunicorn.log

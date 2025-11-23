@@ -1,13 +1,4 @@
 services:
-  db:
-    image: postgres:14
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=homeserver
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - db_persistence:/var/lib/postgresql/data
-    restart: unless-stopped
   backend:
     build: backend
     depends_on:
@@ -15,11 +6,8 @@ services:
     environment:
       - BACKEND_DEBUG
       - BACKEND_SECRET_KEY
-      - POSTGRES_HOST=db
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=homeserver
-      - POSTGRES_PASSWORD=postgres
     volumes:
+      - "db_persistence:/var/db"
       - "django_staticfiles:/var/backend/staticfiles"
       - "./backend/src:/var/backend/src"
       - "${MOVIE_LIBRARY_PATH}:/movies"
