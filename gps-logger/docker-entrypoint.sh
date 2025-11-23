@@ -12,7 +12,10 @@ touch /mosquitto/config/mosquitto.passwd
 mosquitto_passwd -b /mosquitto/config/mosquitto.passwd "${MQTT_USERNAME}" "${MQTT_PASSWORD}"
 
 # Start mosquitto
+echo "$@"
 exec "$@" &
+
+sleep 10
 
 # Start logging server in background
 /logger.py
