@@ -18,8 +18,7 @@ import datetime
 logger = logging.getLogger(__name__)
 
 
-class MovieListView(PermissionRequiredMixin, View):
-    permission_required = "authentication.movies_watch"
+class MovieListView(View):
     raise_exception = True
 
     def get(self, request, *args, **kwargs):
@@ -253,8 +252,7 @@ class TriageListView(PermissionRequiredMixin, View):
         )
 
 
-class EpisodeWatchedView(PermissionRequiredMixin, View):
-    permission_required = "authentication.movies_watch"
+class EpisodeWatchedView(View):
     raise_exception = True
 
     def post(self, request, *args, **kwargs):
@@ -269,8 +267,7 @@ class EpisodeWatchedView(PermissionRequiredMixin, View):
         return JsonResponse({"result": "success"})
 
 
-class EpisodeUnwatchedView(PermissionRequiredMixin, View):
-    permission_required = "authentication.movies_watch"
+class EpisodeUnwatchedView(View):
     raise_exception = True
 
     def post(self, request, *args, **kwargs):
@@ -286,8 +283,7 @@ class EpisodeUnwatchedView(PermissionRequiredMixin, View):
         return JsonResponse({"result": "success"})
 
 
-class EpisodeStarView(PermissionRequiredMixin, View):
-    permission_required = "authentication.movies_watch"
+class EpisodeStarView(View):
     raise_exception = True
 
     def post(self, request, *args, **kwargs):
@@ -301,8 +297,7 @@ class EpisodeStarView(PermissionRequiredMixin, View):
         return JsonResponse({"result": "success"})
 
 
-class EpisodeUnstarView(PermissionRequiredMixin, View):
-    permission_required = "authentication.movies_watch"
+class EpisodeUnstarView(View):
     raise_exception = True
 
     def post(self, request, *args, **kwargs):
@@ -317,8 +312,7 @@ class EpisodeUnstarView(PermissionRequiredMixin, View):
         return JsonResponse({"result": "success"})
 
 
-class EpisodeProgressView(PermissionRequiredMixin, View):
-    permission_required = "authentication.movies_watch"
+class EpisodeProgressView(View):
     raise_exception = True
 
     def post(self, request, *args, **kwargs):

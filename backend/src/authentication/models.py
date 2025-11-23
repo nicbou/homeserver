@@ -6,6 +6,5 @@ class AccessPermissions(models.Model):
         managed = False
         permissions = (
             ("torrents", "Download and manage torrents"),
-            ("movies_watch", "Watch and download movies"),
             ("movies_manage", "Manage the movie library"),
         )

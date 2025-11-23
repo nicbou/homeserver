@@ -9,10 +9,7 @@ import re
 import urllib.parse
 
 
-permission_checks = (
-    ("^/torrents", "authentication.torrents"),
-    ("^/movies", "authentication.movies_watch"),
-)
+permission_checks = (("^/torrents", "authentication.torrents"),)
 
 logger = logging.getLogger(__name__)
 

@@ -7,13 +7,11 @@ export default Vue.component('episode-list-item', {
     return {
       downloadMenuVisible: false,
       adminMenuVisible: false,
-      canWatchMovies: false,
       canManageMovies: false,
     };
   },
   mounted: function () {
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.canWatchMovies = userSettings.permissions.includes('movies_watch');
       this.canManageMovies = userSettings.permissions.includes('movies_manage');
     });
   },
@@ -65,10 +63,10 @@ export default Vue.component('episode-list-item', {
           <a class="button icon-only" v-if="episode.isConverting" title="Video is converting for web playback">
             <i class="fa fa-spinner fa-spin"></i>
           </a>
-          <a title="Play in browser" class="button icon-only" href="#" v-if="canWatchMovies && episode.isConverted" :href="episode.playbackUrl" @click.prevent="playEpisode">
+          <a title="Play in browser" class="button icon-only" href="#" v-if="episode.isConverted" :href="episode.playbackUrl" @click.prevent="playEpisode">
             <i class="fas fa-play"></i>
           </a>
-          <a title="Download movie and subtitles" class="button icon-only" :class="{selected: downloadMenuVisible}" href="#" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
+          <a title="Download movie and subtitles" class="button icon-only" :class="{selected: downloadMenuVisible}" href="#" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
             <i class="fas fa-download"></i>
           </a>
           <a title="Administrator options" class="button icon-only" :class="{selected: adminMenuVisible}" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">

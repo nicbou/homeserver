@@ -13,7 +13,6 @@ export default Vue.component('episode', {
       subtitlesExistEn: false,
       subtitlesExistFr: false,
       subtitlesExistDe: false,
-      canWatchMovies: false,
     }
   },
   computed: {
@@ -63,11 +62,6 @@ export default Vue.component('episode', {
   },
   mounted: function () {
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.canWatchMovies = userSettings.permissions.includes('movies_watch');
-      if(!this.canWatchMovies) {
-        return;
-      }
-
       // Get movie info
       this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId).then(
         movie => {
@@ -101,7 +95,7 @@ export default Vue.component('episode', {
     }
   },
   template: `
-    <div v-if="episode && canWatchMovies" class="container">
+    <div v-if="episode" class="container">
       <h2>{{ fullTitle }}</h2>
       <video ref="videoElement" controls autoplay v-if="episode.isConverted" :key="this.episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">

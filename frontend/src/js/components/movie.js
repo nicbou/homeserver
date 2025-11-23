@@ -8,7 +8,6 @@ export default Vue.component('movie', {
   data: function() {
     return {
       currentSeasonNumber: null,
-      canWatchMovies: false,
       canManageMovies: false,
       downloadMenuVisible: false,
       adminMenuVisible: false,
@@ -18,7 +17,6 @@ export default Vue.component('movie', {
   mounted: function () {
     this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.canWatchMovies = userSettings.permissions.includes('movies_watch');
       this.canManageMovies = userSettings.permissions.includes('movies_manage');
     });
   },
@@ -79,21 +77,21 @@ export default Vue.component('movie', {
             <p v-text="movie.description"></p>
             <p><a :href="infoUrl" target="_blank">Info and trailer →</a></p>
             <div class="button-group horizontal">
-              <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted" class="button large main">
+              <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="nextEpisode && nextEpisode.isConverted" class="button large main">
                 <i class="fas fa-play"></i>
                 Play
                 <span class="label" v-if="episodeList.length > 1">{{ nextEpisodeName }}</span>
               </a>
-              <a title="Mark as seen" class="button large" href="#" v-if="canWatchMovies && nextEpisode && !nextEpisode.isWatched" @click.prevent="markEpisodeAsWatched(nextEpisode)">
+              <a title="Mark as seen" class="button large" href="#" v-if="nextEpisode && !nextEpisode.isWatched" @click.prevent="markEpisodeAsWatched(nextEpisode)">
                 <i class="far fa-check-circle"></i>
                 Seen
               </a>
-              <a title="Mark as not seen" class="button large" href="#" v-if="canWatchMovies && nextEpisode && nextEpisode.isWatched" @click.prevent="markEpisodeAsUnwatched(nextEpisode)">
+              <a title="Mark as not seen" class="button large" href="#" v-if="nextEpisode && nextEpisode.isWatched" @click.prevent="markEpisodeAsUnwatched(nextEpisode)">
                 <i class="fas fa-check-circle"></i>
                 Seen
               </a>
               <star :movie="movie" class="button large">Star</star>
-              <a title="Download movie and subtitles" href="#" class="button large" v-if="canWatchMovies" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
+              <a title="Download movie and subtitles" href="#" class="button large" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
                 <i class="fas fa-download"></i>
                 Save
               </a>
