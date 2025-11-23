@@ -46,25 +46,37 @@ CSRF_TRUSTED_ORIGINS = [
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": True,
-    "formatters": {"verbose": {"format": "%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(message)s"}},
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {"format": "%(asctime)s %(levelname)s [%(name)s:%(lineno)d] %(message)s"},
+    },
     "handlers": {
-        "gunicorn": {
+        "console": {
             "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "verbose",
-            "filename": "/var/log/backend/gunicorn.log",
-            "maxBytes": 1024 * 1024 * 100,  # 100 mb
-        }
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+        },
     },
     "loggers": {
-        "gunicorn.errors": {
+        "": {
+            "handlers": ["console"],
             "level": "INFO",
-            "handlers": ["gunicorn"],
             "propagate": True,
+        },
+        "django.request": {
+            "level": "ERROR",
+        },
+        "gunicorn": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "gunicorn.access": {
+            "level": "ERROR",
         },
     },
 }
+
 
 INSTALLED_APPS = (
     "django.contrib.admin",
