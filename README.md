@@ -9,7 +9,7 @@ The backend is built with Django and the frontend with Vue.js. It runs inside Do
 ## Setup
 
 1. Set the required environment variables, as described below.
-2. Run `docker-compose up --build -d` to start all the components.
+2. Run `docker compose up --build -d` to start all the components.
 3. If necessary, run `scripts/create-user.sh` to create your first admin user.
 
 ### Environment variables
