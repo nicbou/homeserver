@@ -38,11 +38,6 @@ export default Vue.component('movie', {
     nextEpisodeName: function () {
       return this.nextEpisode ? `S${this.nextEpisode.season}E${this.nextEpisode.episode}` : null;
     },
-    coverCss: function(){
-      return {
-        'background-image': `url('${this.movie.coverUrl}')`
-      }
-    }
   },
   methods: {
     playEpisode: function(episode) {
@@ -70,15 +65,10 @@ export default Vue.component('movie', {
   template: `
     <div v-if="movie" class="container">
       <div class="section movie-info">
-        <div class="cover" :style="coverCss">
-          <img :src="movie.coverUrl" :key="movie.tmdbId"/>
-        </div>
         <div class="information">
           <div class="section description">
-            <h2>
-              <span>{{ movie.title }}</span>
-              <star :movie="movie"></star>
-            </h2>
+            <div class="cover"><img :src="movie.coverUrl" :key="movie.tmdbId"/></div>
+            <h2 v-text="movie.title"></h2>
             <p>{{ movie.description }}</p>
             <div class="button-group horizontal">
               <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted" class="button large main">

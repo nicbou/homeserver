@@ -89,26 +89,24 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
     .header-with-controls input[type=search]{float:right;width:30%;margin: 15px 0;min-width: 135px;line-height:40px;flex:1;}
     .header-with-controls .button{float:right;margin: 15px 15px 15px 0;flex:0 auto;}
 .covers{display:grid;grid-template-columns:repeat(4, 1fr);grid-gap:15px;width: 100%;margin: 0 0 25px;overflow:hidden;border-radius:var(--border-radius);}
-    .covers .cover{border-radius:var(--border-radius);overflow:hidden;background:#191919;}
-        .covers .cover img{cursor:pointer;}
+    .cover{aspect-ratio:27 / 40;border-radius:var(--border-radius);overflow:hidden;background:#191919;}
+        .cover img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;}
     .covers.cleaning-mode .cover:not(.needs-cleaning){opacity:0.2}
         .covers.cleaning-mode .cover .button.clean{position:absolute;bottom:15px;right:15px}
-    .cover{width: 100%;position:relative;}
-        .cover img{max-width:100%;display:block;}
-
         .cover .star{position:absolute;top:10px;right:10px;font-size:24px;text-shadow:0 2px 3px #0005}
         .cover .star.not-starred{opacity:0;color:#fffa;}
             .cover:hover .star.not-starred{opacity:1;}
             .cover .star.not-starred:hover{color:#fff;}
         .cover .star.starred{color:#ff0}
 
-.movie-info{display:grid;grid-template-columns:30% 1fr;grid-gap:30px;}
-    .movie-info .cover{overflow:hidden;border-radius:var(--border-radius)}
+.movie-info{display:grid;gap:30px;}
+    .movie-info .cover{max-width: 25%; float:right; margin: 0 0 15px 15px}
     .movie-info h2{display:flex;justify-content:space-between;}
     .movie-info h2 .star{margin-left:10px;flex:0 0;font-size:24px;}
         h2 .star.not-starred{color:#999;}
         h2 .star.not-starred:hover{color:#fff;}
         h2 .star.starred{color:#ff0}
+    .movie-info .button-group{clear:both}
     .episodes{}
         .episode{}
         .episode:first-child{margin-top: -10px;}
@@ -139,9 +137,6 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
             .covers .cover:first-child:last-child{border-radius:var(--border-radius);}
         .cover .star{opacity:1!important;}
     .header-with-controls h2{flex-basis:100%;margin-bottom:0}
-    .movie-info{grid-template-columns:1fr;}
-        .movie-info .cover{max-height:50vh;display:flex;justify-content:center;border-radius:var(--border-radius)}
-            .movie-info .cover img{box-shadow:0 0 0 2000px #0009}
         .movie-info .button-group .button{flex:1 1 auto;}
     .no-mobile{display:none;}
     .button.large{font-size:15px;}
