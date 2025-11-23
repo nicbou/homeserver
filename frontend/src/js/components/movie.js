@@ -68,8 +68,11 @@ export default Vue.component('movie', {
         <div class="information">
           <div class="section description">
             <div class="cover"><img :src="movie.coverUrl" :key="movie.tmdbId"/></div>
-            <h2 v-text="movie.title"></h2>
-            <p>{{ movie.description }}</p>
+            <h2>
+              {{movie.title}}
+              <time v-text="movie.releaseYear"></time>
+            </h2>
+            <p v-text="movie.description"></p>
             <div class="button-group horizontal">
               <a title="Play in browser" href="#" @click.prevent="playEpisode(nextEpisode)" v-if="canWatchMovies && nextEpisode && nextEpisode.isConverted" class="button large main">
                 <i class="fas fa-play"></i>
