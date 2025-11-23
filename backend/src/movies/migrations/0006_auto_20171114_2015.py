@@ -7,15 +7,14 @@ import movies.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('movies', '0005_movieaccesstoken'),
+        ("movies", "0005_movieaccesstoken"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='movieaccesstoken',
-            name='expiration_date',
+            model_name="movieaccesstoken",
+            name="expiration_date",
             field=models.DateTimeField(default=movies.models.tomorrow),
         ),
     ]

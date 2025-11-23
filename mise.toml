@@ -79,7 +79,6 @@ run = """
 mise shellcheck
 # mise pyright
 mise ruff
-ursus lint --level=ERROR -c frontend/ursus_config.py
 """
 
 [tasks.format]

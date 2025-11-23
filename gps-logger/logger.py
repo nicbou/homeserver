@@ -10,15 +10,17 @@ import paho.mqtt.client as mqtt
 import pytz
 
 
-logging.basicConfig(**{
-    'datefmt': '%Y-%m-%d %H:%M:%S',
-    'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
-    'level': logging.INFO,
-})
+logging.basicConfig(
+    **{
+        "datefmt": "%Y-%m-%d %H:%M:%S",
+        "format": "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+        "level": logging.INFO,
+    }
+)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-gpx_dir = Path('/var/log/gps')
+gpx_dir = Path("/var/log/gps")
 
 
 def log_position(
@@ -37,11 +39,11 @@ def log_position(
     )
     point.source = source
 
-    gpx_path = (gpx_dir / time.strftime("%Y-%m-%d")).with_suffix('.gpx')
+    gpx_path = (gpx_dir / time.strftime("%Y-%m-%d")).with_suffix(".gpx")
 
     # Create or append
     try:
-        with gpx_path.open('r') as gpx_file:
+        with gpx_path.open("r") as gpx_file:
             gpx = gpxpy.parse(gpx_file)
     except:
         gpx = gpxpy.gpx.GPX()
@@ -50,25 +52,25 @@ def log_position(
 
     gpx.tracks[-1].segments[-1].points.append(point)
 
-    with gpx_path.open('w') as gpx_file:
+    with gpx_path.open("w") as gpx_file:
         gpx_file.write(gpx.to_xml())
 
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe("+/+/#")
-    logger.info(f'MQTT client is connected and listening for messages. Return code was {rc}')
+    logger.info(f"MQTT client is connected and listening for messages. Return code was {rc}")
 
 
 def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload)
-        if data['_type'] == 'location':
+        if data["_type"] == "location":
             log_position(
-                time=datetime.fromtimestamp(data['tst'], pytz.UTC),
-                latitude=Decimal(data['lat']),
-                longitude=Decimal(data['lon']),
-                elevation=data.get('alt'),
-                accuracy=data.get('acc'),
+                time=datetime.fromtimestamp(data["tst"], pytz.UTC),
+                latitude=Decimal(data["lat"]),
+                longitude=Decimal(data["lon"]),
+                elevation=data.get("alt"),
+                accuracy=data.get("acc"),
                 source=msg.topic,
             )
     except:
@@ -79,6 +81,6 @@ mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 
-mqtt_client.username_pw_set(os.environ['GPS_LOGGER_USERNAME'], os.environ['GPS_LOGGER_PASSWORD'])
+mqtt_client.username_pw_set(os.environ["GPS_LOGGER_USERNAME"], os.environ["GPS_LOGGER_PASSWORD"])
 mqtt_client.connect("localhost", 1883, 30)
 mqtt_client.loop_forever()

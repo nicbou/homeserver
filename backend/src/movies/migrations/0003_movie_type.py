@@ -6,15 +6,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('movies', '0002_movie_triage_path'),
+        ("movies", "0002_movie_triage_path"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='movie',
-            name='type',
-            field=models.SmallIntegerField(choices=[(1, b'tv'), (2, b'movie'), (2, b'conversion-failed'), (3, b'converted')], default=2),
+            model_name="movie",
+            name="type",
+            field=models.SmallIntegerField(
+                choices=[(1, b"tv"), (2, b"movie"), (2, b"conversion-failed"), (3, b"converted")], default=2
+            ),
         ),
     ]

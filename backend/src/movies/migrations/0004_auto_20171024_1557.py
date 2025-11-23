@@ -6,15 +6,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('movies', '0003_movie_type'),
+        ("movies", "0003_movie_type"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='movie',
-            old_name='type',
-            new_name='media_type',
+            model_name="movie",
+            old_name="type",
+            new_name="media_type",
         ),
     ]

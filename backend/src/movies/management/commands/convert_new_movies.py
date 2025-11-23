@@ -17,11 +17,11 @@ class Command(BaseCommand):
                 try:
                     convert_movie(original_path)
                 except:
-                    logger.exception(f'Could not convert movie {str(original_path)}')
+                    logger.exception(f"Could not convert movie {str(original_path)}")
 
             for original_path in get_subtitles_to_convert(settings.MOVIE_LIBRARY_PATH):
                 try:
                     convert_subtitles_to_vtt(original_path)
                 except:
-                    logger.exception(f'Could not convert subtitles {str(original_path)}')
+                    logger.exception(f"Could not convert subtitles {str(original_path)}")
             time.sleep(30)

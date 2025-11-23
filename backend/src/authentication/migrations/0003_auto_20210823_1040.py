@@ -4,14 +4,20 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('authentication', '0002_auto_20171105_2042'),
+        ("authentication", "0002_auto_20171105_2042"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='accesspermissions',
-            options={'managed': False, 'permissions': (('torrents', 'Download and manage torrents'), ('movies_watch', 'Watch and download movies'), ('movies_manage', 'Manage the movie library'))},
+            name="accesspermissions",
+            options={
+                "managed": False,
+                "permissions": (
+                    ("torrents", "Download and manage torrents"),
+                    ("movies_watch", "Watch and download movies"),
+                    ("movies_manage", "Manage the movie library"),
+                ),
+            },
         ),
     ]

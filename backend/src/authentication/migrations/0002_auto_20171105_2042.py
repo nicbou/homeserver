@@ -6,14 +6,22 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('authentication', '0001_initial'),
+        ("authentication", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='accesspermissions',
-            options={'managed': False, 'permissions': (('torrents', 'Download and manage torrents'), ('movies_watch', 'Watch and download movies'), ('movies_manage', 'Manage the movie library'), ('finances', 'Use the finances feature'), ('habits', 'Use the habits feature'))},
+            name="accesspermissions",
+            options={
+                "managed": False,
+                "permissions": (
+                    ("torrents", "Download and manage torrents"),
+                    ("movies_watch", "Watch and download movies"),
+                    ("movies_manage", "Manage the movie library"),
+                    ("finances", "Use the finances feature"),
+                    ("habits", "Use the habits feature"),
+                ),
+            },
         ),
     ]

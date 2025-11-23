@@ -24,8 +24,8 @@ class Episode(models.Model):
     MOVIE = 2
 
     type_choices = (
-        (TV_SHOW, 'tv'),
-        (MOVIE, 'movie'),
+        (TV_SHOW, "tv"),
+        (MOVIE, "movie"),
     )
 
     # Path to the original file in the finished torrents directory
@@ -48,19 +48,21 @@ class Episode(models.Model):
         return self.base_filename()
 
     def base_filename(self, extension=None, episode_number=True) -> Path:
-        filename = u'{title} ({year})'
+        filename = "{title} ({year})"
         if episode_number and (self.season or self.episode):
-            filename = u'{title} ({year}) {season}{episode}'
+            filename = "{title} ({year}) {season}{episode}"
 
         if extension:
             filename = filename + extension
 
-        return Path(filename.format(
-            season='S{}'.format(self.season) if self.season else '',
-            episode='E{}'.format(self.episode) if self.episode else '',
-            year=self.release_year,
-            title=self.title.replace('/', '-').replace(':', ','),
-        ))
+        return Path(
+            filename.format(
+                season="S{}".format(self.season) if self.season else "",
+                episode="E{}".format(self.episode) if self.episode else "",
+                year=self.release_year,
+                title=self.title.replace("/", "-").replace(":", ","),
+            )
+        )
 
     # Original file
 
@@ -71,7 +73,7 @@ class Episode(models.Model):
 
         # When the original was replaced with the converted version
         if not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
-            return original_filename.with_suffix('.mp4')
+            return original_filename.with_suffix(".mp4")
 
         return original_filename
 
@@ -87,7 +89,7 @@ class Episode(models.Model):
 
     @property
     def converted_filename(self) -> Path:
-        return self.base_filename('.converted.mp4')
+        return self.base_filename(".converted.mp4")
 
     @property
     def converted_path(self) -> Path:
@@ -99,20 +101,20 @@ class Episode(models.Model):
 
     # Subtitles
 
-    def subtitles_filename(self, extension='.srt', language_code='eng') -> Path:
-        return self.base_filename(f'.{language_code}{extension}')
+    def subtitles_filename(self, extension=".srt", language_code="eng") -> Path:
+        return self.base_filename(f".{language_code}{extension}")
 
-    def subtitles_path(self, extension='.srt', language_code='eng') -> Path:
+    def subtitles_path(self, extension=".srt", language_code="eng") -> Path:
         return settings.MOVIE_LIBRARY_PATH / self.subtitles_filename(extension, language_code)
 
-    def subtitles_url(self, extension='.srt', language_code='eng') -> str:
+    def subtitles_url(self, extension=".srt", language_code="eng") -> str:
         return f"{settings.MOVIE_LIBRARY_URL}/{self.subtitles_filename(extension, language_code)}"
 
     # Cover image
 
     @property
     def cover_filename(self) -> Path:
-        return self.base_filename('.jpg', episode_number=False)
+        return self.base_filename(".jpg", episode_number=False)
 
     @property
     def cover_path(self) -> Path:
@@ -126,7 +128,7 @@ class Episode(models.Model):
     def conversion_status(self):
         if self.converted_path.exists():
             return self.CONVERTED
-        elif self.original_path.with_suffix('.converting.mp4').exists:
+        elif self.original_path.with_suffix(".converting.mp4").exists:
             return self.CONVERTING
         else:
             return self.NOT_CONVERTED
@@ -142,7 +144,7 @@ class Episode(models.Model):
 
 @receiver(pre_delete, sender=Episode)
 def episode_delete(sender, instance: Episode, **kwargs):
-    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(str(instance.base_filename('*'))))
+    files_to_delete = list(settings.MOVIE_LIBRARY_PATH.glob(str(instance.base_filename("*"))))
 
     # All episodes share the same cover
     # If deleting the last episode, delete the cover
@@ -154,7 +156,7 @@ def episode_delete(sender, instance: Episode, **kwargs):
         try:
             path.unlink(missing_ok=True)
         except OSError:
-            logger.warning(f'Could not delete file {str(path)}')
+            logger.warning(f"Could not delete file {str(path)}")
 
 
 def tomorrow():
@@ -172,10 +174,10 @@ class EpisodeWatchStatus(models.Model):
     last_watched = models.DateField(default=None, blank=True, null=True)
 
     def __str__(self):
-        return u"{} for user {}".format(self.episode.title, self.user)
+        return "{} for user {}".format(self.episode.title, self.user)
 
     class Meta:
-        unique_together = (('episode', 'user'),)
+        unique_together = (("episode", "user"),)
 
 
 class StarredMovie(models.Model):
@@ -183,7 +185,7 @@ class StarredMovie(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return u"{} for user {}".format(self.tmdb_id, self.user)
+        return "{} for user {}".format(self.tmdb_id, self.user)
 
     class Meta:
-        unique_together = (('tmdb_id', 'user'),)
+        unique_together = (("tmdb_id", "user"),)

@@ -6,22 +6,21 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('movies', '0010_movie_is_starred'),
+        ("movies", "0010_movie_is_starred"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='StarredMovie',
+            name="StarredMovie",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tmdb_id', models.CharField(max_length=12, null=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("tmdb_id", models.CharField(max_length=12, null=True)),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'unique_together': {('tmdb_id', 'user')},
+                "unique_together": {("tmdb_id", "user")},
             },
         ),
     ]

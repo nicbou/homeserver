@@ -9,21 +9,20 @@ import movies.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('movies', '0004_auto_20171024_1557'),
+        ("movies", "0004_auto_20171024_1557"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MovieAccessToken',
+            name="MovieAccessToken",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('expiration_date', models.DateField(default=movies.models.tomorrow)),
-                ('token', models.CharField(default=movies.models.random_uuid, max_length=32)),
-                ('movie', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies.Movie')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("expiration_date", models.DateField(default=movies.models.tomorrow)),
+                ("token", models.CharField(default=movies.models.random_uuid, max_length=32)),
+                ("movie", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="movies.Movie")),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]
