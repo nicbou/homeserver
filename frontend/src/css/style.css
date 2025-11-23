@@ -103,7 +103,6 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
         .cover .star.starred{color:#ff0}
 
 .movie-info{display:grid;gap:30px;}
-    .movie-info .cover{max-width: 25%; float:right; margin: 0 0 var(--m) var(--m)}
     .movie-info h2 time{display:block;font:var(--m)/22px sans-serif}
     .movie-info .button-group{clear:both}
     .movie-info .description p a{color:var(--c-link)}

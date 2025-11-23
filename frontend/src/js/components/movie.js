@@ -72,7 +72,6 @@ export default Vue.component('movie', {
       <div class="section movie-info">
         <div class="information">
           <div class="section description">
-            <div class="cover"><img :src="movie.coverUrl"/></div>
             <h2>
               {{movie.title}}
               <time v-text="movie.releaseYear"></time>
@@ -103,7 +102,7 @@ export default Vue.component('movie', {
               </a>
             </div>
             <download-menu v-if="downloadMenuVisible && nextEpisode" class="button-group vertical" :episode="nextEpisode" :movie="movie"></download-menu>
-            <admin-menu v-if="adminMenuVisible && nextEpisode" class="button-group vertical" :episode="nextEpisode" :movie="movie"></admin-menu>
+            <admin-menu v-if="adminMenuVisible && nextEpisode" class="button-group vertical" :movie="movie"></admin-menu>
           </div>
           <div class="section episodes" v-if="episodeList.length > 1">
             <div class="tab-group">

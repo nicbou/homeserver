@@ -1,51 +1,44 @@
+import { MediaType } from './../models/movies.js';
+
 export default Vue.component('admin-menu', {
   props: ['episode', 'movie'],
   data: function() {
     return {
-      showDeleteOriginalFile: true,
-      showDeleteEpisode: true,
+      canDelete: true,
     }
   },
   computed: {
+    isTvShow(){
+      return this.movie.mediaType === MediaType.TV_SHOW;
+    },
   },
   methods: {
-    deleteEpisode: function(episode) {
+    deleteEpisode(episode) {
       this.$store.dispatch('movies/deleteEpisode', {
         tmdbId: this.movie.tmdbId,
         episodeId: episode.id,
       });
-      this.showDeleteEpisode = false;
+      this.postDelete();
+      this.canDelete = false;
     },
-    deleteOriginalFile: function(episode) {
-      this.$store.dispatch('movies/deleteOriginalFile', {
-        tmdbId: this.movie.tmdbId,
-        episodeId: episode.id,
-      });
-      this.showDeleteOriginalFile = false;
+    deleteSeason(){
+      this.movie.episodeList.filter(ep => ep.season === this.episode.season).forEach(this.deleteEpisode);
     },
-    deleteSeason: function(){
-      this.movie.episodeList
-        .filter(ep => ep.season === this.episode.season)
-        .forEach(ep => this.deleteEpisode(ep))
+    deleteAllEpisodes(){
+      this.movie.episodeList.forEach(this.deleteEpisode);
     },
-    deleteAllEpisodes: function(){
-      this.movie.episodeList.forEach(ep => this.deleteEpisode(ep));
-    },
+    postDelete(){
+      if(this.movie.episodeList.length === 0){
+        this.$router.push({ name: 'movies' });
+      }
+    }
   },
   template: `
     <div>
-      <a class="button" href="#" @click.prevent="deleteEpisode(episode)" v-if="showDeleteEpisode">
-        <i class="fas fa-trash-alt"></i> Delete and remove from library
-      </a>
-      <a class="button" href="#" @click.prevent="deleteOriginalFile(episode)" v-if="episode.isConverted && episode.originalVideoPreserved && showDeleteOriginalFile">
-        <i class="fas fa-broom"></i> Delete original, keep converted version
-      </a>
-      <a class="button" href="#" @click.prevent="deleteSeason" v-if="movie.episodeList && showDeleteEpisode">
-        <i class="fas fa-broom"></i> Delete season
-      </a>
-      <a class="button" href="#" @click.prevent="deleteAllEpisodes" v-if="movie.episodeList && showDeleteEpisode">
-        <i class="fas fa-broom"></i> Delete show
-      </a>
+      <button class="button" v-if="canDelete && episode" @click="deleteEpisode(episode)"><i class="fas fa-trash-alt"></i> Delete this episode</button>
+      <button class="button" v-if="canDelete && episode" @click="deleteSeason"><i class="fas fa-trash-alt"></i> Delete this season</button>
+      <button class="button" v-if="canDelete && isTvShow" @click="deleteAllEpisodes"><i class="fas fa-trash-alt"></i> Delete all episodes</button>
+      <button class="button" v-if="canDelete && !isTvShow" @click="deleteAllEpisodes"><i class="fas fa-trash-alt"></i> Delete this movie</button>
     </div>
   `
 });
