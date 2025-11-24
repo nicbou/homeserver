@@ -6,6 +6,7 @@ services:
       - BACKEND_SECRET_KEY
     volumes:
       - "db_persistence:/var/backend/db"
+      - "${DATABASE_BACKUPS_PATH:-/tmp/db-backups}:/var/backend/db-backups"
       - "django_staticfiles:/var/backend/staticfiles"
       - "./backend/src:/var/backend/src"
       - "${MOVIE_LIBRARY_PATH}:/movies"

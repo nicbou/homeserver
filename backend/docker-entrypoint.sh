@@ -15,6 +15,18 @@ mkdir -p /movies/library
 # Convert movies in the background
 python3 /var/backend/src/manage.py convert_new_movies &
 
+# Capture cron logs
+rm -f /tmp/stdout /tmp/stderr
+mkfifo /tmp/stdout /tmp/stderr
+chmod 0666 /tmp/stdout /tmp/stderr
+tail -f /tmp/stdout &
+tail -f /tmp/stderr >&2 &
+
+# Start cron and pass environment variables to it
+printenv > /etc/environment
+crontab /var/backend/crontab.conf
+service cron start
+
 # Start Gunicorn processes
 echo Starting Gunicorn.
 exec gunicorn backend.wsgi:application \

@@ -5,6 +5,7 @@ MAINTAINER Nicolas Bouliane
 # netcat: To wait for database to be available when starting the backend
 COPY requirements.txt /requirements.txt
 RUN apt-get update && apt-get -y upgrade && apt-get install -y \
+    cron \
     ffmpeg \
     libpq-dev \
     python3 \
@@ -16,7 +17,6 @@ RUN apt-get update && apt-get -y upgrade && apt-get install -y \
     && pip3 install --no-cache-dir --break-system-packages -r /requirements.txt \
     && mkdir -p /var/log/backend
 
-# Copy entrypoint script into the image
+COPY ./crontab.conf ./docker-entrypoint.sh /var/backend/
 WORKDIR /var/backend/src
-COPY ./docker-entrypoint.sh /var/backend/docker-entrypoint.sh
 ENTRYPOINT ["/var/backend/docker-entrypoint.sh"]

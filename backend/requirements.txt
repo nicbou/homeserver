@@ -2,6 +2,6 @@
 Django==5.2.8
 gpxpy==1.6.2
 gunicorn==23.0.0
-psycopg2==2.9.11
 pytz
 requests==2.32.5
+python-dateutil~=2.9

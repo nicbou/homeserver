@@ -15,6 +15,7 @@ MOVIE_LIBRARY_URL = "/movies"
 
 GPX_LOGS_PATH = Path("/var/log/gps")
 DATABASE_PATH = Path("/var/backend/db/api.db")
+DATABASE_BACKUPS_PATH = Path("/var/backend/db-backups")
 
 VIDEO_EXTENSIONS = (
     ".3gp",
@@ -89,6 +90,7 @@ INSTALLED_APPS = (
     "movies",
     "authentication",
     "gps_logger",
+    "management",
 )
 
 MIDDLEWARE = [

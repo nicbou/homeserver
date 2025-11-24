@@ -17,7 +17,7 @@ pre-commit = "latest"
 description = "Install local dependencies to run the project"
 alias = "i"
 run = """
-uv pip install -r requirements.txt
+uv pip install -r backend/requirements.txt
 uv pip install -r requirements-dev.txt
 mise generate git-pre-commit --hook=pre-commit --write --task=pre-commit
 mise generate git-pre-commit --hook=pre-push --write --task=pre-push
