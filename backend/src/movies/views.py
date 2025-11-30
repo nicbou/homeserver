@@ -54,6 +54,7 @@ class MovieListView(View):
                         "conversionStatus": movie.conversion_status,
                         "convertedVideoUrl": movie.converted_url,
                         "dateAdded": movie.date_added,
+                        "duration": movie.duration,
                         "id": movie.id,
                         "lastWatched": watch_status.last_watched if watch_status else None,
                         "originalVideoUrl": movie.original_url,

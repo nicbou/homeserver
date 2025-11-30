@@ -40,6 +40,7 @@ class Episode(models.Model):
     media_type = models.SmallIntegerField(default=MOVIE, choices=type_choices)
     season = models.SmallIntegerField(null=True, blank=True)
     episode = models.SmallIntegerField(null=True, blank=True)
+    duration = models.IntegerField(null=True, blank=True, default=None)
 
     # Library
     date_added = models.DateField(auto_now_add=True)

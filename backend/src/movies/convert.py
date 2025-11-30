@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from decimal import Decimal
 from django.conf import settings
 from pathlib import Path
 import json
@@ -199,6 +200,25 @@ def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
             and not path.with_suffix(".vtt").exists()
         ):
             yield path
+
+
+def get_duration(file: Path) -> int:
+    # Get video metadata
+    ffprobe_output = json.loads(
+        subprocess.check_output(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "json",
+                str(file),
+            ],
+        ).decode("utf-8")
+    )
+    return int(Decimal(ffprobe_output["format"]["duration"]))
 
 
 def convert_subtitles_to_vtt(input_file: Path):
