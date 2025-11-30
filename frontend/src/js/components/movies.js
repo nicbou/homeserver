@@ -10,9 +10,9 @@ export default Vue.component('movies', {
       cleaningMode: false,
       isAdmin: false,
       showFilters: false,
-      showNew: false,
-      showInProgress: false,
-      showSeen: false,
+      showNew: true,
+      showInProgress: true,
+      showSeen: true,
       showStarred: true,
     }
   },
@@ -45,23 +45,19 @@ export default Vue.component('movies', {
       return this.$route.query.q || null;
     },
     filteredMovies() {
-      let results = this.movies;
+      let results = this.movies.filter(m => {
+        return (
+          (this.showSeen && m.isWatched)
+          || (this.showNew && !m.isWatched && !m.progress)
+          || (this.showInProgress && m.progress && !m.isWatched)
+        );
+      });
 
       if(this.cleaningMode){
         results = results.filter(m => m.needsCleaning);
       }
 
-      const hasStatusFilter = this.showNew || this.showSeen || this.showInProgress;
-
-      if(hasStatusFilter){
-        results = results.filter(m => {
-          return (
-            (this.showSeen && m.isWatched)
-            || (this.showNew && !m.isWatched && !m.progress)
-            || (this.showInProgress && m.progress && !m.isWatched)
-          );
-        });
-      }
+      results = results
 
       if(this.query) {
         const lowerCaseQuery = this.query.toLocaleLowerCase();
