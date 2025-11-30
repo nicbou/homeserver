@@ -68,6 +68,9 @@ export default Vue.component('movie', {
   template: `
     <div v-if="movie" class="container" :key="movie.tmdbId">
       <div class="section movie-info">
+        <div class="cover">
+          <img :src="movie.coverUrl" loading="lazy"/>
+        </div>
         <div class="information">
           <div class="section description">
             <h2>

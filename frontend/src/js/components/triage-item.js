@@ -186,7 +186,7 @@ export default Vue.component('triage-item', {
     }
   },
   template: `
-    <div class="tab-body section movie-info" v-if="!saved">
+    <div class="tab-body section movie-info triage" v-if="!saved">
       <div class="cover">
         <img v-if="coverUrl" :src="coverUrl">
         <div v-if="!coverUrl" class="placeholder"></div>
