@@ -7,12 +7,12 @@ export default Vue.component('episode-list-item', {
     return {
       downloadMenuVisible: false,
       adminMenuVisible: false,
-      canManageMovies: false,
+      isAdmin: false,
     };
   },
   mounted(){
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.canManageMovies = userSettings.permissions.includes('movies_manage');
+      this.isAdmin = userSettings.permissions.includes('movies_manage');
     });
   },
   computed: {
@@ -69,7 +69,7 @@ export default Vue.component('episode-list-item', {
           <a title="Download movie and subtitles" class="button icon-only" :class="{selected: downloadMenuVisible}" href="#" @click.prevent="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
             <i class="fas fa-download"></i>
           </a>
-          <a title="Administrator options" class="button icon-only" :class="{selected: adminMenuVisible}" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
+          <a title="Administrator options" class="button icon-only" :class="{selected: adminMenuVisible}" href="#" v-if="isAdmin" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
             <i class="fas fa-ellipsis-h"></i>
           </a>
         </div>

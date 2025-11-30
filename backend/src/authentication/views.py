@@ -1,6 +1,5 @@
 from base64 import b64decode
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.views import View
 from urllib.parse import urlparse
@@ -54,17 +53,10 @@ class JSONPermissionsView(View):
         if not request.user.is_authenticated:
             JsonResponse({"result": "failure", "message": "Not authenticated"}, status=401)
 
-        permissions = []
-        if request.user.is_superuser:
-            permissions = Permission.objects.all()
-        else:
-            permissions = request.user.user_permissions.all() | Permission.objects.filter(group__user=request.user)
-
         return JsonResponse(
             {
                 "user": request.user.get_username(),
                 "displayName": request.user.first_name or request.user.get_username(),
                 "isAdmin": request.user.is_superuser,
-                "permissions": [p.codename for p in permissions],
             }
         )

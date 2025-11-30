@@ -28,10 +28,10 @@
                         <li>
                             <router-link :to="{name: 'movies'}">Movies</router-link>
                         </li>
-                        <li v-if="canManageTorrents">
+                        <li v-if="isAdmin">
                             <router-link :to="{name: 'torrents'}">Torrents</router-link>
                         </li>
-                        <li v-if="canManageMovies">
+                        <li v-if="isAdmin">
                             <router-link :to="{name: 'triage'}">Triage</router-link>
                         </li>
                         <li v-if="isAdmin">

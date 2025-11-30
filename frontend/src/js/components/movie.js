@@ -8,7 +8,7 @@ export default Vue.component('movie', {
   data(){
     return {
       currentSeasonNumber: null,
-      canManageMovies: false,
+      isAdmin: false,
       downloadMenuVisible: false,
       adminMenuVisible: false,
       downloadMenuVisible: false,
@@ -17,7 +17,7 @@ export default Vue.component('movie', {
   mounted(){
     this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.canManageMovies = userSettings.permissions.includes('movies_manage');
+      this.isAdmin = userSettings.isAdmin;
     });
   },
   computed: {
@@ -98,7 +98,7 @@ export default Vue.component('movie', {
                 <i class="fas fa-download"></i>
                 Save
               </a>
-              <a title="Administrator options" class="button large" href="#" v-if="canManageMovies" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
+              <a title="Administrator options" class="button large" href="#" v-if="isAdmin" @click.prevent="adminMenuVisible = !adminMenuVisible;downloadMenuVisible = false">
                 <i class="fas fa-ellipsis-h"></i>
               </a>
             </div>
