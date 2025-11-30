@@ -9,6 +9,11 @@ export default Vue.component('movies', {
       queryDebounceTimeout: null,
       cleaningMode: false,
       isAdmin: false,
+      showFilters: false,
+      showNew: false,
+      showInProgress: false,
+      showSeen: false,
+      showStarred: true,
     }
   },
   computed: {
@@ -20,67 +25,42 @@ export default Vue.component('movies', {
         Math.seedrandom(this.$route.query.shuffle);
         return () => .5 - Math.random();
       }
-      else if (this.$route.query.sort === 'lastSeen'){
-        return (a, b) => {
-          if(a.isStarred !== b.isStarred){
-            return Number(b.isStarred) - Number(a.isStarred);
-          }
-
-          if (a.lastWatched && b.lastWatched) {
-            return b.lastWatched - a.lastWatched;
-          } else if (a.lastWatched) {
-            return -1;
-          } else if (b.lastWatched) {
-            return 1;
-          } else {
-            return a.dateAdded - b.dateAdded;
-          }
+      return (a, b) => {
+        if(this.showStarred && a.isStarred !== b.isStarred){
+          return Number(b.isStarred) - Number(a.isStarred);
         }
-      }
-      else if (this.$route.query.sort === 'firstAdded'){
-        return (a, b) => {
-          if(a.isStarred !== b.isStarred){
-            return Number(b.isStarred) - Number(a.isStarred);
-          }
 
-          return a.dateAdded - b.dateAdded;
+        if (a.lastWatched && b.lastWatched) {
+          return a.lastWatched - b.lastWatched;
+        } else if (a.lastWatched) {
+          return 1;
+        } else if (b.lastWatched) {
+          return -1;
+        } else {
+          return b.dateAdded - a.dateAdded;
         }
-      }
-      else {
-        return (a, b) => {
-          if(a.isStarred !== b.isStarred){
-            return Number(b.isStarred) - Number(a.isStarred);
-          }
-
-          if (a.lastWatched && b.lastWatched) {
-            return a.lastWatched - b.lastWatched;
-          } else if (a.lastWatched) {
-            return 1;
-          } else if (b.lastWatched) {
-            return -1;
-          } else {
-            return b.dateAdded - a.dateAdded;
-          }
-        };
-      }
+      };
     },
     query() {
       return this.$route.query.q || null;
-    },
-    sortType() {
-      return {
-        'fresh': 'New on Nickflix',
-        'firstAdded': 'First added',
-        'lastSeen': 'Watched recently',
-        'newest': 'Newest releases',
-        'oldest': 'Oldest releases',
-      }[this.$route.query.sort || 'fresh'];
     },
     filteredMovies() {
       let results = this.movies;
 
       if(this.cleaningMode){
         results = results.filter(m => m.needsCleaning);
+      }
+
+      const hasStatusFilter = this.showNew || this.showSeen || this.showInProgress;
+
+      if(hasStatusFilter){
+        results = results.filter(m => {
+          return (
+            (this.showSeen && m.isWatched)
+            || (this.showNew && !m.isWatched && !m.progress)
+            || (this.showInProgress && m.progress && !m.isWatched)
+          );
+        });
       }
 
       if(this.query) {
@@ -106,55 +86,23 @@ export default Vue.component('movies', {
     openMovie(movie) {
       this.$router.push({ name: 'movie', params: { tmdbId: movie.tmdbId } });
     },
-    setQuery(query) {
-      // Note: the page number is reset when the query changes
-      const navParams = {
-        name: 'movies',
-        query: {}
-      };
-      if (query) navParams.query.q = query;
-      if (this.$route.query.sort) navParams.query.sort = this.$route.query.sort;
-
-      // Don't amend browser history for each keystroke
-      this.query ? this.$router.replace(navParams) : this.$router.push(navParams);
-    },
-    setSortType(){
-      const sortOrder = [
-        'fresh',
-        'firstAdded',
-        'lastSeen',
-        'newest',
-        'oldest',
-      ];
-
-      const nextIndex = (sortOrder.indexOf(this.$route.query.sort || 'fresh') + 1) % sortOrder.length;
-      const nextSortType = sortOrder[nextIndex];
-
-      const navParams = {
-        name: 'movies',
-        query: {
-          sort: nextSortType,
-        },
-      };
-      if (this.query) navParams.query.q = this.query;
-
-      this.$router.push(navParams);
-    },
     onSearchChanged(event) {
       clearTimeout(this.queryDebounceTimeout);
       this.queryDebounceTimeout = setTimeout(() => {
-        this.setQuery(event.target.value.trim());
+        this.$router.push({
+          name: 'movies',
+          query: Object.assign({}, this.$route.query, {
+            q: event.target.value.trim(),
+          }),
+        });
       }, 200);
     },
     shuffleMovies() {
-      const seed = Math.random().toString(36).substr(2, 5);
-
-      // Add the seed to history, to make the shuffling persist navigation
       this.$router.push({
         name: 'movies',
-        query: {
-          shuffle: seed,
-        }
+        query: Object.assign({}, this.$route.query, {
+          shuffle: Math.random().toString(36).substr(2, 5),
+        }),
       });
     },
     deleteOriginalFiles: function(movie) {
@@ -170,14 +118,39 @@ export default Vue.component('movies', {
     <div id="movies" class="container">
       <div class="filters">
         <input class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
-        <button class="button" @click="setSortType"><i class="fas fa-sort-amount-down"></i> {{ sortType }}</button>
-        <button class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
-        <button v-if="isAdmin" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
+        <button class="button" @click="shuffleMovies"><i class="fas fa-random"></i></button>
+        <label class="input">
+          <input type="checkbox" v-model="showFilters"> <i class="fas fa-filter"></i>
+        </label>
+      </div>
+      <div class="filters" v-if="showFilters">
+        <div class="filter-group">
+          <label class="input">
+            <input type="checkbox" v-model="showNew">
+            <i class="far fa-circle"></i> New
+          </label>
+          <label class="input">
+            <input type="checkbox" v-model="showInProgress">
+            <i class="far fa-dot-circle"></i> In progress
+          </label>
+          <label class="input">
+            <input type="checkbox" v-model="showSeen">
+            <i class="fas fa-check-circle"></i> Seen
+          </label>
+        </div>
+        <label class="input">
+          <input type="checkbox" v-model="showStarred"> <i class="fas fa-star"></i> Starred
+        </label>
+        <label class="input">
+          <input type="checkbox" v-model="cleaningMode">
+          <i class="fas fa-broom"></i> Cleaning mode
+        </label>
       </div>
       <spinner v-if="movies.length === 0"></spinner>
       <p v-if="movies.length > 0 && filteredMovies.length === 0">No movies found</p>
       <div class="covers">
         <div class="cover" v-for="movie in filteredMovies" :key="movie.tmdbId">
+          <progress v-if="movie.percentSeen && movie.percentSeen !== 100" :value="movie.percentSeen" :max="100"/>
           <img @click="cleaningMode ? deleteOriginalFiles(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <div class="icons">
             <star :movie="movie"></star>

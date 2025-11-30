@@ -65,6 +65,13 @@ export class Episode {
 }
 
 export class Movie {
+  get percentSeen(){
+    if(this.episodeList.length === 1){
+      return Math.round(this.episodeList[0].progress / this.episodeList[0].duration * 100);
+    }
+    return Math.round(this.episodeList.filter(e => e.isWatched).length / this.episodeList.length * 100);
+  }
+
   get watchStatus() {
     const episodeList = this.episodeList;
     if (episodeList.every(p => p.watchStatus === WatchStatus.WATCHED)) {
@@ -168,6 +175,7 @@ export class Movie {
           episode.srtSubtitlesUrlFr = jsonEpisode.srtSubtitlesUrlFr;
           episode.releaseYear = jsonEpisode.releaseYear;
           episode.progress = jsonEpisode.progress;
+          episode.durtion = jsonEpisode.duration;
           episode.dateAdded = moment(jsonEpisode.dateAdded);
           episode.originalVideoPreserved = jsonEpisode.originalVideoPreserved;
           episodes[episode.id] = episode;
@@ -198,6 +206,7 @@ export class Movie {
     episode.srtSubtitlesUrlFr = null;
     episode.releaseYear = releaseDate ? parseInt(releaseDate.substring(0,4)) : null;
     episode.progress = 0;
+    episode.duration = null;
     episode.dateAdded = moment();
 
     const movie = new Movie();
