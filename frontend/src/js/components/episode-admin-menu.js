@@ -2,7 +2,7 @@ import { MediaType } from './../models/movies.js';
 
 export default Vue.component('admin-menu', {
   props: ['episode', 'movie'],
-  data: function() {
+  data(){
     return {
       canDelete: true,
     }

@@ -2,14 +2,14 @@ import MoviesService from './../services/movies-service.js';
 
 export default Vue.component('download-menu', {
   props: ['episode', 'movie'],
-  data: function() {
+  data(){
     return {
       subtitlesExistEn: false,
       subtitlesExistFr: false,
       subtitlesExistDe: false,
     };
   },
-  mounted: function() {
+  mounted(){
     MoviesService.subtitlesExist(this.episode).then(
       availableSubtitles => {
         this.subtitlesExistEn = availableSubtitles.en;

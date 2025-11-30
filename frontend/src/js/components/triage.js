@@ -3,14 +3,14 @@ import TriageItemComponent from './../components/triage-item.js';
 import SpinnerComponent from './spinner.js';
 
 export default Vue.component('triage', {
-  data: function() {
+  data(){
     return {
       movieFiles: [],
       subtitleFiles: [],
       loading: true,
     }
   },
-  created: function () {
+  created(){
     TriageService.getFilesToTriage().then(
       (data) => {
         data.movies.sort();

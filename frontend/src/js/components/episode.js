@@ -2,7 +2,7 @@ import MoviesService from './../services/movies-service.js';
 import { MediaType } from './../models/movies.js';
 
 export default Vue.component('episode', {
-  data: function() {
+  data(){
     return {
       socket: null,
       ignorePlayerEvents: false,
@@ -16,22 +16,22 @@ export default Vue.component('episode', {
     }
   },
   computed: {
-    fullTitle: function() {
+    fullTitle(){
       if (this.isMovie) {
         return `${this.movie.title}`;
       }
       return `${this.movie.title}, S${this.episode.season || '?'}E${this.episode.episode || '?'}`;
     },
-    episodeIndex: function() {
+    episodeIndex(){
       return this.movie.episodeList.indexOf(this.episode);
     },
-    previousEpisode: function() {
+    previousEpisode(){
       return this.movie.episodeList[this.episodeIndex-1] || null;
     },
-    nextEpisode: function() {
+    nextEpisode(){
       return this.movie.episodeList[this.episodeIndex+1] || null;
     },
-    isMovie: function() {
+    isMovie(){
       return this.movie.mediaType === MediaType.MOVIE;
     },
   },
@@ -47,20 +47,20 @@ export default Vue.component('episode', {
         });
       }
     },
-    markEpisodeAsWatched: function() {
+    markEpisodeAsWatched(){
       this.$store.dispatch('movies/markEpisodeAsWatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
-    markEpisodeAsUnwatched: function() {
+    markEpisodeAsUnwatched(){
       this.$store.dispatch('movies/markEpisodeAsUnwatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
   },
-  mounted: function () {
+  mounted(){
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
       // Get movie info
       this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId).then(
@@ -87,7 +87,7 @@ export default Vue.component('episode', {
       );
     });
   },
-  beforeDestroy: function () {
+  beforeDestroy(){
     clearInterval(this.progressInterval);
     this.saveProgress();
     if(this.socket) {

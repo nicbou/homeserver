@@ -5,7 +5,7 @@ import StarComponent from './star.js';
 import { MediaType } from './../models/movies.js';
 
 export default Vue.component('movie', {
-  data: function() {
+  data(){
     return {
       currentSeasonNumber: null,
       canManageMovies: false,
@@ -14,27 +14,27 @@ export default Vue.component('movie', {
       downloadMenuVisible: false,
     }
   },
-  mounted: function () {
+  mounted(){
     this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
       this.canManageMovies = userSettings.permissions.includes('movies_manage');
     });
   },
   computed: {
-    movie: function () {
+    movie(){
       return this.$store.state.movies.movies[this.$route.params.tmdbId] || null;
     },
-    episodeList: function () {
+    episodeList(){
       return this.movie.episodeList;
     },
-    currentSeason: function () {
+    currentSeason(){
       const seasonNumber = this.currentSeasonNumber || (this.movie.nextEpisodeToPlay && this.movie.nextEpisodeToPlay.season);
       return this.movie.seasons.find(s => s.seasonNumber === seasonNumber) || this.movie.seasons[0];
     },
-    nextEpisode: function() {
+    nextEpisode(){
       return this.movie.nextEpisodeToPlay || this.movie.episodeList[0];
     },
-    nextEpisodeName: function () {
+    nextEpisodeName(){
       return this.nextEpisode ? `S${this.nextEpisode.season}E${this.nextEpisode.episode}` : null;
     },
     infoUrl() {

@@ -1,7 +1,7 @@
 export default Vue.component('star', {
   props: ['movie'],
   methods: {
-    starMovie: function() {
+    starMovie(){
       const action = this.movie.isStarred ? 'movies/unstarMovie' : 'movies/starMovie';
       this.$store.dispatch(action, {tmdbId: this.movie.tmdbId});
     },

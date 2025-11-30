@@ -3,25 +3,25 @@ import DownloadMenuComponent from './../components/episode-download-menu.js';
 
 export default Vue.component('episode-list-item', {
   props: ['episode', 'movie'],
-  data: function() {
+  data(){
     return {
       downloadMenuVisible: false,
       adminMenuVisible: false,
       canManageMovies: false,
     };
   },
-  mounted: function () {
+  mounted(){
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
       this.canManageMovies = userSettings.permissions.includes('movies_manage');
     });
   },
   computed: {
-    expanded: function() {
+    expanded(){
       return this.downloadMenuVisible || this.adminMenuVisible;
     }
   },
   methods: {
-    playEpisode: function() {
+    playEpisode(){
       this.$router.push({
         name: 'episode',
         params: {
@@ -30,19 +30,19 @@ export default Vue.component('episode-list-item', {
         },
       });
     },
-    deleteEpisode: function() {
+    deleteEpisode(){
       this.$store.dispatch('movies/deleteEpisode', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
-    markEpisodeAsWatched: function() {
+    markEpisodeAsWatched(){
       this.$store.dispatch('movies/markEpisodeAsWatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,
       });
     },
-    markEpisodeAsUnwatched: function() {
+    markEpisodeAsUnwatched(){
       this.$store.dispatch('movies/markEpisodeAsUnwatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: this.episode.id,

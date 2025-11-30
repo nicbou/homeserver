@@ -18,7 +18,7 @@ function debounce(func, wait, immediate) {
 
 export default Vue.component('triage-item', {
   props: ['file', 'subtitles'],
-  data: function() {
+  data(){
     return {
       description: '',
       episode: null,
@@ -36,13 +36,13 @@ export default Vue.component('triage-item', {
     }
   },
   computed: {
-    sanitizedSeason: function() {
+    sanitizedSeason(){
       return Math.abs(parseInt(this.season, 10)) || null;
     },
-    sanitizedEpisode: function() {
+    sanitizedEpisode(){
       return Math.abs(parseInt(this.episode, 10)) || null;
     },
-    richFile: function() {
+    richFile(){
       const parts = this.file.split('/').filter(Boolean);
 
       // Parent directories
@@ -52,7 +52,7 @@ export default Vue.component('triage-item', {
       }
 
       // Non-title words
-      ['dts', 'multisub', 'etrg', '720p', '1080p', 'hdrip', 'x264', 'ac3', '5.1', 'esubs', 'eng', 'webrip', 'brrip', 'x265', 'hevc', 'bluray', 'galaxytv', 'hulu'].forEach(
+      ['dts', 'multisub', 'etrg', '720p', '1080p', 'hdrip', 'x264', 'ac3', '5.1', 'esubs', 'eng', 'webrip', 'brrip', 'x265', 'hevc', 'bluray', 'galaxytv', 'hulu', 'amzn', 'galaxyrg265', 'ddp5.1'].forEach(
         (word) => parts[parts.length - 1] = parts[parts.length - 1].replace(new RegExp('\\b'+word+'\\b', 'gi'), '<span class="faded">$&</span>')
       );
 
@@ -70,7 +70,7 @@ export default Vue.component('triage-item', {
       parts[parts.length - 1] = `<strong>${parts[parts.length - 1]}</strong>`;
       return parts.join('<br>/');
     },
-    fullTitle: function() {
+    fullTitle(){
       if (this.selectedMovie) {
         if (this.sanitizedEpisode) {
           return `${this.selectedMovie.title}, S${this.sanitizedSeason || '?'}E${this.sanitizedEpisode || '?'}`;
@@ -79,7 +79,7 @@ export default Vue.component('triage-item', {
       }
       return this.movieFile;
     },
-    coverUrl: function() {
+    coverUrl(){
       if (this.selectedMovie) {
         return this.selectedMovie.coverUrl;
       }
@@ -106,23 +106,23 @@ export default Vue.component('triage-item', {
         }
       },
     },
-    query: function (newQuery) {
+    query(newQuery) {
       this.getResults(newQuery);
     },
-    suggestions: function () {
+    suggestions(){
       this.highlightedSuggestion = this.suggestions.length ? 0 : null;
     },
-    sanitizedSeason: function (newSeason) {
+    sanitizedSeason(newSeason) {
       if (this.selectedMovie) {
         this.selectedMovie.episodeList[0].season = newSeason;
       }
     },
-    sanitizedEpisode: function (newEpisode) {
+    sanitizedEpisode(newEpisode) {
       if (this.selectedMovie) {
         this.selectedMovie.episodeList[0].episode = newEpisode;
       }
     },
-    selectedMovie: function () {
+    selectedMovie(){
       if (this.selectedMovie) {
         this.selectedMovie.episodeList[0].season = this.sanitizedSeason;
         this.selectedMovie.episodeList[0].episode = this.sanitizedEpisode;
@@ -134,7 +134,7 @@ export default Vue.component('triage-item', {
         this.description = '';
       }
     },
-    description: function () {
+    description(){
       if (this.selectedMovie) {
         this.selectedMovie.description = this.description;
       }
@@ -150,26 +150,26 @@ export default Vue.component('triage-item', {
         this.suggestions = Array.from(this.$store.state.triage.recentMovieSuggestions);
       }
     }, 500),
-    focused: function() {
+    focused(){
       this.highlightedSuggestion = this.suggestions.length ? 0 : null;
       this.suggestionsVisible = true;
       if(!this.query && !this.suggestions.length){
         this.getResults(this.query);
       }
     },
-    blurred: function() {
+    blurred(){
       this.highlightedSuggestion = null;
       setTimeout(() => {
         this.suggestionsVisible = false;
       }, 200)
     },
-    movieInputEnter: function() {
+    movieInputEnter(){
       if (this.highlightedSuggestion !== null) {
         this.selectedMovie = this.suggestions[this.highlightedSuggestion];
         document.getElementById(`${this._uid}-season`).focus();
       }
     },
-    addToLibrary: function() {
+    addToLibrary(){
       this.savingInProgress = true;
       MoviesService.save(
         this.selectedMovie, {
