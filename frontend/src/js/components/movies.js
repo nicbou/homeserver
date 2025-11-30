@@ -6,7 +6,6 @@ import StarComponent from './star.js';
 export default Vue.component('movies', {
   data() {
     return {
-      moviesPerPage: 20,
       queryDebounceTimeout: null,
       cleaningMode: false,
       isAdmin: false,
@@ -56,9 +55,6 @@ export default Vue.component('movies', {
     query() {
       return this.$route.query.q || null;
     },
-    page() {
-      return parseInt(this.$route.query.p) || 0;
-    },
     sortType() {
       return {
         'fresh': 'New on Nickflix',
@@ -82,14 +78,6 @@ export default Vue.component('movies', {
       };
       return this.movies;
     },
-    paginatedMovies() {
-      const start = this.page * this.moviesPerPage;
-      const end = start + this.moviesPerPage;
-      return this.filteredMovies.slice(start, end);
-    },
-    maxPage() {
-      return Math.ceil(this.filteredMovies.length / this.moviesPerPage) - 1;
-    },
     starredMovies() {
       return this.filteredMovies.filter(m => m.isStarred);
     },
@@ -103,17 +91,6 @@ export default Vue.component('movies', {
   methods: {
     openMovie(movie) {
       this.$router.push({ name: 'movie', params: { tmdbId: movie.tmdbId } });
-    },
-    setPage(page) {
-      const navParams = {
-        name: 'movies',
-        query: {}
-      };
-      if (page > 0) navParams.query.p = page;
-      if (this.query) navParams.query.q = this.query;
-      if (this.$route.query.sort) navParams.query.sort = this.$route.query.sort;
-
-      this.$router.push(navParams);
     },
     setQuery(query) {
       // Note: the page number is reset when the query changes
@@ -177,8 +154,8 @@ export default Vue.component('movies', {
   },
   template: `
     <div id="movies" class="container">
-      <h2 v-if="starredMovies.length > 0 && page === 0">Starred movies</h2>
-      <div class="covers" v-if="page === 0">
+      <h2 v-if="starredMovies.length > 0">Starred movies</h2>
+      <div class="covers">
         <div class="cover" v-for="movie in starredMovies" :key="movie.tmdbId">
           <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <star :movie="movie"></star>
@@ -186,8 +163,7 @@ export default Vue.component('movies', {
       </div>
       <div class="header-with-controls">
         <h2 v-if="query">Results</h2>
-        <h2 v-if="!query && page === 0">All movies</h2>
-        <h2 v-if="!query && page > 0">More movies...</h2>
+        <h2 v-if="!query">All movies</h2>
         <button id="sort-button" class="button" @click="setSortType"><i class="fas fa-sort-amount-down"></i> {{ sortType }}</button>
         <button id="shuffle-button" class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
         <button id="clean-button" v-if="isAdmin" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
@@ -196,15 +172,11 @@ export default Vue.component('movies', {
       <spinner v-if="movies.length === 0"></spinner>
       <p v-if="movies.length > 0 && filteredMovies.length === 0">No movies found</p>
       <div class="covers" :class="{'cleaning-mode': cleaningMode}">
-        <div class="cover" :class="{'needs-cleaning': movie.needsCleaning}" v-for="movie in paginatedMovies" :key="movie.tmdbId">
+        <div class="cover" :class="{'needs-cleaning': movie.needsCleaning}" v-for="movie in movies" :key="movie.tmdbId">
           <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <star :movie="movie"></star>
           <button v-if="cleaningMode && movie.needsCleaning" class="button clean" @click="deleteOriginalFiles(movie)"><i class="fas fa-broom"></i></button>
         </div>
-      </div>
-      <div class="button-group horizontal">
-        <button @click="setPage(page - 1)" class="button" v-if="page > 0">Previous page</button>
-        <button @click="setPage(page + 1)" class="button" v-if="page < maxPage">Next page</button>
       </div>
     </div>
   `
