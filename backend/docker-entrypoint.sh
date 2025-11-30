@@ -15,6 +15,7 @@ mkdir -p /movies/library
 
 # Convert movies in the background
 python3 /var/backend/src/manage.py convert_new_movies &
+python3 /var/backend/src/manage.py set_duration &
 
 # Capture cron logs
 rm -f /tmp/stdout /tmp/stderr
