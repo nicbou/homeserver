@@ -49,7 +49,7 @@ iframe{width:100%;height:calc(100vh - 52px);border:none;}
         .form .input{float:right;width:30%;margin: 5px 0;min-width: 135px;display: block;width: 100%;}
         .input:focus, .input:active, .input:hover{border-color:#666;}
         .input::placeholder{color:#666;}
-        .input.filename{font-family:monospace;line-height:20px;padding:5px 10px;}
+        .input.filename{font-family:monospace;line-height:20px;padding:5px 10px;word-wrap:break-word;grid-column:1/-1}
         textarea.input{line-height:22px;height:100px;padding: 5px 10px;}
         .checkbox{border:0;padding: 0;color:inherit;cursor:pointer;}
             .checkbox input{width: var(--m);height: var(--l);position: relative;display: inline-block;line-height: var(--l);}
