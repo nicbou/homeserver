@@ -22,6 +22,10 @@ export default Vue.component('movies', {
       }
       else if (this.$route.query.sort === 'lastSeen'){
         return (a, b) => {
+          if(a.isStarred !== b.isStarred){
+            return Number(b.isStarred) - Number(a.isStarred);
+          }
+
           if (a.lastWatched && b.lastWatched) {
             return b.lastWatched - a.lastWatched;
           } else if (a.lastWatched) {
@@ -35,11 +39,19 @@ export default Vue.component('movies', {
       }
       else if (this.$route.query.sort === 'firstAdded'){
         return (a, b) => {
+          if(a.isStarred !== b.isStarred){
+            return Number(b.isStarred) - Number(a.isStarred);
+          }
+
           return a.dateAdded - b.dateAdded;
         }
       }
       else {
         return (a, b) => {
+          if(a.isStarred !== b.isStarred){
+            return Number(b.isStarred) - Number(a.isStarred);
+          }
+
           if (a.lastWatched && b.lastWatched) {
             return a.lastWatched - b.lastWatched;
           } else if (a.lastWatched) {
@@ -65,21 +77,23 @@ export default Vue.component('movies', {
       }[this.$route.query.sort || 'fresh'];
     },
     filteredMovies() {
-      if (this.query) {
+      let results = this.movies;
+
+      if(this.cleaningMode){
+        results = results.filter(m => m.needsCleaning);
+      }
+
+      if(this.query) {
         const lowerCaseQuery = this.query.toLocaleLowerCase();
-        return this.movies
-          .filter((movie) => {
-            return (
-              lowerCaseQuery === ''
-              || movie.title.toLocaleLowerCase().includes(lowerCaseQuery)
-              || movie.description.toLocaleLowerCase().includes(lowerCaseQuery)
-            );
-          })
+        return results.filter(movie => {
+          return (
+            lowerCaseQuery === ''
+            || movie.title.toLocaleLowerCase().includes(lowerCaseQuery)
+            || movie.description.toLocaleLowerCase().includes(lowerCaseQuery)
+          );
+        })
       };
-      return this.movies;
-    },
-    starredMovies() {
-      return this.filteredMovies.filter(m => m.isStarred);
+      return results;
     },
   },
   created() {
@@ -154,28 +168,21 @@ export default Vue.component('movies', {
   },
   template: `
     <div id="movies" class="container">
-      <h2 v-if="starredMovies.length > 0">Starred movies</h2>
-      <div class="covers">
-        <div class="cover" v-for="movie in starredMovies" :key="movie.tmdbId">
-          <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
-          <star :movie="movie"></star>
-        </div>
-      </div>
-      <div class="header-with-controls">
-        <h2 v-if="query">Results</h2>
-        <h2 v-if="!query">All movies</h2>
-        <button id="sort-button" class="button" @click="setSortType"><i class="fas fa-sort-amount-down"></i> {{ sortType }}</button>
-        <button id="shuffle-button" class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
-        <button id="clean-button" v-if="isAdmin" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
-        <input id="search-box" class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
+      <div class="filters">
+        <input class="input" type="search" :value="query" @input="onSearchChanged" placeholder="Search movies">
+        <button class="button" @click="setSortType"><i class="fas fa-sort-amount-down"></i> {{ sortType }}</button>
+        <button class="button" @click="shuffleMovies"><i class="fas fa-random"></i> Shuffle</button>
+        <button v-if="isAdmin" class="button" @click="cleaningMode = !cleaningMode"><i class="fas fa-broom"></i></button>
       </div>
       <spinner v-if="movies.length === 0"></spinner>
       <p v-if="movies.length > 0 && filteredMovies.length === 0">No movies found</p>
-      <div class="covers" :class="{'cleaning-mode': cleaningMode}">
-        <div class="cover" :class="{'needs-cleaning': movie.needsCleaning}" v-for="movie in movies" :key="movie.tmdbId">
-          <img @click="openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
-          <star :movie="movie"></star>
-          <button v-if="cleaningMode && movie.needsCleaning" class="button clean" @click="deleteOriginalFiles(movie)"><i class="fas fa-broom"></i></button>
+      <div class="covers">
+        <div class="cover" v-for="movie in filteredMovies" :key="movie.tmdbId">
+          <img @click="cleaningMode ? deleteOriginalFiles(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
+          <div class="icons">
+            <star :movie="movie"></star>
+            <i class="fas fa-check-circle" title="Seen" v-if="movie.isWatched"></i>
+          </div>
         </div>
       </div>
     </div>
