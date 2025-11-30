@@ -42,33 +42,57 @@ export default Vue.component('triage-item', {
     sanitizedEpisode(){
       return Math.abs(parseInt(this.episode, 10)) || null;
     },
-    richFile(){
+    richFilename(){
+      const faded = '<span class="faded">$&</span>';
       const parts = this.file.split('/').filter(Boolean);
-
-      // Parent directories
-      if(parts.length > 1) {
-        parts[0] = '<span class="faded">' + parts[0];
-        parts[parts.length - 2] += '</span>';
-      }
+      const path = '<span class="faded">' + parts.slice(0, -1).join('/') + '</span>';
+      let filename = parts.at(-1);
 
       // Non-title words
-      ['dts', 'multisub', 'etrg', '720p', '1080p', 'hdrip', 'x264', 'ac3', '5.1', 'esubs', 'eng', 'webrip', 'brrip', 'x265', 'hevc', 'bluray', 'galaxytv', 'hulu', 'amzn', 'galaxyrg265', 'ddp5.1'].forEach(
-        (word) => parts[parts.length - 1] = parts[parts.length - 1].replace(new RegExp('\\b'+word+'\\b', 'gi'), '<span class="faded">$&</span>')
+      [
+        '1080p',
+        '10bit',
+        '5.1',
+        '720p',
+        'ac3',
+        'amzn',
+        'bluray',
+        'brrip',
+        'ddp5.1',
+        'dts',
+        'eng',
+        'esubs',
+        'etrg',
+        'galaxyrg',
+        'galaxyrg265',
+        'galaxytv',
+        'hdrip',
+        'h264',
+        'hevc',
+        'hulu',
+        'multisub',
+        'webrip',
+        'web-dl',
+        'x264',
+        'x265',
+      ].forEach(
+        (word) => filename = filename.replace(new RegExp('\\b'+word+'\\b', 'gi'), faded)
       );
 
       // Samples
       ['sample'].forEach(
-        (word) => parts[parts.length - 1] = parts[parts.length - 1].replace(new RegExp('\\b'+word+'\\b', 'gi'), '<span class="error">$&</span>')
+        (word) => filename = filename.replace(new RegExp('\\b'+word+'\\b', 'gi'), '<span class="error">$&</span>')
       );
 
       // Stuff in square brackets
-      parts[parts.length - 1] = parts[parts.length - 1].replace(/\[[^\]]+\]/ig, '<span class="faded">$&</span>');
+      filename = filename.replace(/\[[^\]]+\]/ig, faded);
 
       // Extension
-      parts[parts.length - 1] = parts[parts.length - 1].replace(/\.[a-z0-9]{2,4}$/, '<span class="faded">$&</span>');
+      filename = filename.replace(/\.[a-z0-9]{2,4}$/, faded);
 
-      parts[parts.length - 1] = `<strong>${parts[parts.length - 1]}</strong>`;
-      return parts.join('<br>/');
+      filename = filename.replaceAll('.', faded);
+
+      return `${path}<br><strong>${filename}</strong>`;
     },
     fullTitle(){
       if (this.selectedMovie) {
@@ -194,17 +218,17 @@ export default Vue.component('triage-item', {
       <div class="information">
         <div class="form">
           <div class="control">
-            <label>File</label>
-            <span class="input filename" v-html="richFile"></span>
+            <span class="input filename" v-html="richFilename"></span>
           </div>
           <div class="control">
             <label :for="_uid + '-title'">Title</label>
             <input
               autocomplete="off"
               class="input"
-              type="text"
+              type="search"
               v-model="query"
               :id="_uid + '-title'"
+              :placeholder="queryFromFilename"
               @blur="blurred" 
               @focus="focused"
               @keyup.enter="movieInputEnter"
