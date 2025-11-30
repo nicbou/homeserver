@@ -85,6 +85,18 @@ mise ruff
 [tasks.create-user]
 run = "docker compose exec backend python3 manage.py createsuperuser"
 
+[tasks.import-db]
+description = "Imports the latest backup of the production database"
+run = """
+TMP_DB=${TMPDIR:-/tmp}/api.db
+
+scp "hs:/var/homeserver/db-backups/$(date -I).db" "$TMP_DB"
+docker compose cp "$TMP_DB" backend:/var/backend/db/api.db
+rm "$TMP_DB"
+
+rsync -avz -e 'ssh -p2200' root@home.nicolasbouliane.com:/media/external2/movies/library/*.jpg ../movies/library/
+"""
+
 [tasks.format]
 description = "Automatically format the code"
 alias = "f"
