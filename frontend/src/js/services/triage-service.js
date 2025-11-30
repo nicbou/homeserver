@@ -19,10 +19,9 @@ export default class {
 
     const searchUrl = new URL('https://api.themoviedb.org/3/search/multi');
     searchUrl.search = new URLSearchParams({
-      search_type: 'ngram',
       api_key: '9606c6bb1f60afb5a30ef4e830d95936', 
       query: query,
-      language: 'en',
+      language: 'en-US',
     })
 
     return fetch(searchUrl).then((response) => {
