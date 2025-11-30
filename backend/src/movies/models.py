@@ -45,7 +45,7 @@ class Episode(models.Model):
     date_added = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.base_filename()
+        return str(self.base_filename())
 
     def base_filename(self, extension=None, episode_number=True) -> Path:
         filename = "{title} ({year})"
