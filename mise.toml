@@ -82,6 +82,9 @@ mise shellcheck
 mise ruff
 """
 
+[tasks.create-user]
+run = "docker compose exec backend python3 manage.py createsuperuser"
+
 [tasks.format]
 description = "Automatically format the code"
 alias = "f"
