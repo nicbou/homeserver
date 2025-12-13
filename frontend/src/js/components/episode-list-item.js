@@ -12,7 +12,7 @@ export default Vue.component('episode-list-item', {
   },
   mounted(){
     this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.isAdmin = userSettings.permissions.includes('movies_manage');
+      this.isAdmin = userSettings.isAdmin;
     });
   },
   computed: {
