@@ -147,37 +147,4 @@ export class Movie {
   get needsCleaning() {
     return this.episodeList.some(e => e.needsCleaning);
   }
-
-  static fromTMDBSearchResult(result) {
-    const coverRelativeUrl = result.poster_path || result.cover_path;
-    const releaseDate = result.release_date || result.first_air_date;
-
-    const episode = new Episode();
-    episode.id = null;
-    episode.season = null;
-    episode.episode = null;
-    episode.conversionStatus = ConversionStatus.NOT_CONVERTED;
-    episode.lastWatched = null;
-    episode.convertedVideoUrl = null;
-    episode.originalVideoUrl = null;
-    episode.vttSubtitlesUrlEn = null;
-    episode.vttSubtitlesUrlDe = null;
-    episode.vttSubtitlesUrlFr = null;
-    episode.srtSubtitlesUrlEn = null;
-    episode.srtSubtitlesUrlDe = null;
-    episode.srtSubtitlesUrlFr = null;
-    episode.releaseYear = releaseDate ? parseInt(releaseDate.substring(0,4)) : null;
-    episode.progress = 0;
-    episode.duration = null;
-    episode.dateAdded = moment();
-
-    const movie = new Movie();
-    movie.tmdbId = result.id;
-    movie.title = result.title || result.name;
-    movie.description = result.overview;
-    movie.coverUrl = coverRelativeUrl ? `https://image.tmdb.org/t/p/w500${coverRelativeUrl}` : null;
-    movie.mediaType = result.media_type == 'tv' ? MediaType.TV_SHOW : MediaType.MOVIE;
-    movie.episodeMap = {[episode.id]: episode};
-    return movie;
-  }
 }
