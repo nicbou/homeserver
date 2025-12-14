@@ -39,7 +39,7 @@ export default class {
           {});
 
         return movie;
-      });
+      }));
     });
   }
 
