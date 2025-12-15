@@ -1,7 +1,7 @@
 import { Movie } from './../models/movies.js';
 
 export default class {
-  async static getMovies() {
+  static async getMovies() {
     const response = await fetch('/api/movies/');
     const responseJson = await response.json();
     return responseJson.movies.map(jsonMovie => {
