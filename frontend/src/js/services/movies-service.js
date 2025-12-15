@@ -1,47 +1,45 @@
 import { Movie } from './../models/movies.js';
 
 export default class {
-  static getMovies() {
-    return fetch('/api/movies/').then(r => r.json()).then(
-      data => data.movies.map(
-        jsonMovie => {
-          const movie = new Movie();
-          movie.isStarred = !!jsonResponse.isStarred;
-          movie.tmdbId = jsonResponse.tmdbId;
-          movie.title = jsonResponse.title;
-          movie.description = jsonResponse.description;
-          movie.coverUrl = jsonResponse.coverUrl;
-          movie.mediaType = jsonResponse.mediaType;
-          movie.episodeMap = jsonResponse.episodes.reduce(
-            (episodes, jsonEpisode) => {
-              const episode = new Episode();
-              episode.id = jsonEpisode.id;
-              episode.season = jsonEpisode.season;
-              episode.episode = jsonEpisode.episode;
-              episode.conversionStatus = jsonEpisode.conversionStatus;
-              episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
-              episode.convertedVideoUrl = jsonEpisode.convertedVideoUrl;
-              episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
-              episode.vttSubtitlesUrlEn = jsonEpisode.vttSubtitlesUrlEn;
-              episode.vttSubtitlesUrlDe = jsonEpisode.vttSubtitlesUrlDe;
-              episode.vttSubtitlesUrlFr = jsonEpisode.vttSubtitlesUrlFr;
-              episode.srtSubtitlesUrlEn = jsonEpisode.srtSubtitlesUrlEn;
-              episode.srtSubtitlesUrlDe = jsonEpisode.srtSubtitlesUrlDe;
-              episode.srtSubtitlesUrlFr = jsonEpisode.srtSubtitlesUrlFr;
-              episode.releaseYear = jsonEpisode.releaseYear;
-              episode.progress = jsonEpisode.progress;
-              episode.duration = jsonEpisode.duration;
-              episode.dateAdded = moment(jsonEpisode.dateAdded);
-              episode.originalVideoPreserved = jsonEpisode.originalVideoPreserved;
-              episodes[episode.id] = episode;
-              return episodes
-            },
-            {}
-          );
-          return movie;
-        }
-      )
-    );
+  async static getMovies() {
+    const response = await fetch('/api/movies/')
+    const responseJson = await response.json();
+    return responseJson.movies.map(jsonMovie => {
+      const movie = new Movie();
+      movie.isStarred = !!jsonMovie.isStarred;
+      movie.tmdbId = jsonMovie.tmdbId;
+      movie.title = jsonMovie.title;
+      movie.description = jsonMovie.description;
+      movie.coverUrl = jsonMovie.coverUrl;
+      movie.mediaType = jsonMovie.mediaType;
+      movie.episodeMap = jsonMovie.episodes.reduce(
+        (episodes, jsonEpisode) => {
+          const episode = new Episode();
+          episode.id = jsonEpisode.id;
+          episode.season = jsonEpisode.season;
+          episode.episode = jsonEpisode.episode;
+          episode.conversionStatus = jsonEpisode.conversionStatus;
+          episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
+          episode.convertedVideoUrl = jsonEpisode.convertedVideoUrl;
+          episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
+          episode.vttSubtitlesUrlEn = jsonEpisode.vttSubtitlesUrlEn;
+          episode.vttSubtitlesUrlDe = jsonEpisode.vttSubtitlesUrlDe;
+          episode.vttSubtitlesUrlFr = jsonEpisode.vttSubtitlesUrlFr;
+          episode.srtSubtitlesUrlEn = jsonEpisode.srtSubtitlesUrlEn;
+          episode.srtSubtitlesUrlDe = jsonEpisode.srtSubtitlesUrlDe;
+          episode.srtSubtitlesUrlFr = jsonEpisode.srtSubtitlesUrlFr;
+          episode.releaseYear = jsonEpisode.releaseYear;
+          episode.progress = jsonEpisode.progress;
+          episode.duration = jsonEpisode.duration;
+          episode.dateAdded = moment(jsonEpisode.dateAdded);
+          episode.originalVideoPreserved = jsonEpisode.originalVideoPreserved;
+          episodes[episode.id] = episode;
+          return episodes
+        },
+        {}
+      );
+      return movie;
+    });
   }
 
   static markAsWatched(id) {
