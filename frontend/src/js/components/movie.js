@@ -14,11 +14,9 @@ export default Vue.component('movie', {
       downloadMenuVisible: false,
     }
   },
-  mounted(){
+  async mounted(){
     this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
-    this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.isAdmin = userSettings.isAdmin;
-    });
+    this.isAdmin = (await this.$store.dispatch('users/getUserSettings')).isAdmin;
   },
   computed: {
     movie(){

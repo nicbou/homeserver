@@ -72,11 +72,9 @@ export default Vue.component('movies', {
       return results;
     },
   },
-  created() {
+  async created() {
     this.$store.dispatch('movies/getMovies');
-    this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.isAdmin = userSettings.isAdmin;
-    });
+    this.isAdmin = (await this.$store.dispatch('users/getUserSettings')).isAdmin;
   },
   methods: {
     openMovie(movie) {

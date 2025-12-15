@@ -10,10 +10,8 @@ export default Vue.component('episode-list-item', {
       isAdmin: false,
     };
   },
-  mounted(){
-    this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.isAdmin = userSettings.isAdmin;
-    });
+  async mounted(){
+    this.isAdmin = (await this.$store.dispatch('users/getUserSettings')).isAdmin;
   },
   computed: {
     expanded(){

@@ -6,10 +6,8 @@ export const app = new Vue({
   data: {
     isAdmin: false,
   },
-  created: function(){
-    this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      this.isAdmin = userSettings.isAdmin;
-    });
+  async created(){
+    this.isAdmin = (await this.$store.dispatch('users/getUserSettings')).isAdmin;
   },
   router,
   store,
