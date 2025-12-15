@@ -193,20 +193,20 @@ export default Vue.component('triage-item', {
         document.getElementById(`${this._uid}-season`).focus();
       }
     },
-    addToLibrary(){
+    async addToLibrary(){
       this.savingInProgress = true;
-      MoviesService.save(
-        this.selectedMovie, {
+      await MoviesService.save(
+        this.selectedMovie,
+        {
           movieFile: this.file, 
           subtitlesFileEn: this.selectedSubtitlesEn || null, 
           subtitlesFileDe: this.selectedSubtitlesDe || null, 
           subtitlesFileFr: this.selectedSubtitlesFr || null, 
         }
-      ).then(() => {
-        this.savingInProgress = false;
-        this.saved = true;
-        this.$store.dispatch('movies/getMovies', true);
-      })
+      )
+      this.savingInProgress = false;
+      this.saved = true;
+      this.$store.dispatch('movies/getMovies', true);
     }
   },
   template: `

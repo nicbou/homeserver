@@ -132,10 +132,8 @@ export class Movie {
         return seasons;
       }, [])
       .filter(Boolean)
-      .map((season) => {
-        season.unseenEpisodeCount = function () {
-          return season.filter(e => e.watchStatus !== WatchStatus.WATCHED).length
-        }
+      .map(season => {
+        season.unseenEpisodeCount = () => season.filter(e => e.watchStatus !== WatchStatus.WATCHED).length;
         return season;
       })
   }

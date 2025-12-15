@@ -9,14 +9,12 @@ export default Vue.component('download-menu', {
       subtitlesExistDe: false,
     };
   },
-  mounted(){
-    MoviesService.subtitlesExist(this.episode).then(
-      availableSubtitles => {
-        this.subtitlesExistEn = availableSubtitles.en;
-        this.subtitlesExistFr = availableSubtitles.fr;
-        this.subtitlesExistDe = availableSubtitles.de;
-      }
-    )
+  async mounted(){
+    MoviesService.subtitlesExist(this.episode).then(availableSubtitles => {
+      this.subtitlesExistEn = availableSubtitles.en;
+      this.subtitlesExistFr = availableSubtitles.fr;
+      this.subtitlesExistDe = availableSubtitles.de;
+    })
   },
   template: `
     <div>

@@ -41,7 +41,7 @@ export default Vue.component('movie', {
     }
   },
   methods: {
-    playEpisode: function(episode) {
+    playEpisode(episode) {
       this.$router.push({
         name: 'episode',
         params: {
@@ -50,13 +50,13 @@ export default Vue.component('movie', {
         },
       });
     },
-    markEpisodeAsWatched: function(episode) {
+    markEpisodeAsWatched(episode) {
       this.$store.dispatch('movies/markEpisodeAsWatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: episode.id,
       });
     },
-    markEpisodeAsUnwatched: function(episode) {
+    markEpisodeAsUnwatched(episode) {
       this.$store.dispatch('movies/markEpisodeAsUnwatched', {
         tmdbId: this.movie.tmdbId,
         episodeId: episode.id,

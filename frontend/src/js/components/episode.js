@@ -60,31 +60,22 @@ export default Vue.component('episode', {
       });
     },
   },
-  mounted(){
-    this.$store.dispatch('users/getUserSettings').then(userSettings => {
-      // Get movie info
-      this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId).then(
-        movie => {
-          this.movie = movie;
-          this.episode = this.movie.episodeMap[this.$route.params.episodeId];
+  async mounted(){
+    this.movie = await this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
+    this.episode = this.movie.episodeMap[this.$route.params.episodeId];
 
-          MoviesService.subtitlesExist(this.episode).then(
-            availableSubtitles => {
-              this.subtitlesExistEn = availableSubtitles.en;
-              this.subtitlesExistFr = availableSubtitles.fr;
-              this.subtitlesExistDe = availableSubtitles.de;
-            }
-          )
+    MoviesService.subtitlesExist(this.episode).then(availableSubtitles => {
+      this.subtitlesExistEn = availableSubtitles.en;
+      this.subtitlesExistFr = availableSubtitles.fr;
+      this.subtitlesExistDe = availableSubtitles.de;
+    })
 
-          this.$nextTick(function () {
-            // Save video position
-            if (this.episode.isConverted) {
-              this.$refs.videoElement.currentTime = this.episode.progress;
-              this.progressInterval = setInterval(this.saveProgress, 3000);
-            }
-          });
-        }
-      );
+    this.$nextTick(function(){
+      // Save video position
+      if (this.episode.isConverted) {
+        this.$refs.videoElement.currentTime = this.episode.progress;
+        this.progressInterval = setInterval(this.saveProgress, 3000);
+      }
     });
   },
   beforeDestroy(){

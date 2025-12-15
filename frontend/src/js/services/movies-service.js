@@ -2,7 +2,7 @@ import { Movie } from './../models/movies.js';
 
 export default class {
   async static getMovies() {
-    const response = await fetch('/api/movies/')
+    const response = await fetch('/api/movies/');
     const responseJson = await response.json();
     return responseJson.movies.map(jsonMovie => {
       const movie = new Movie();
@@ -34,7 +34,7 @@ export default class {
           episode.dateAdded = moment(jsonEpisode.dateAdded);
           episode.originalVideoPreserved = jsonEpisode.originalVideoPreserved;
           episodes[episode.id] = episode;
-          return episodes
+          return episodes;
         },
         {}
       );
@@ -43,21 +43,11 @@ export default class {
   }
 
   static markAsWatched(id) {
-    return fetch(
-      `/api/movies/${id}/watched/`,
-      {method: 'POST'}
-    ).then((response) => {
-      return response.json();
-    });
+    return fetch(`/api/movies/${id}/watched/`, {method: 'POST'}).then(r => r.json());
   }
 
   static markAsUnwatched(id) {
-    return fetch(
-      `/api/movies/${id}/unwatched/`,
-      {method: 'POST'}
-    ).then((response) => {
-      return response.json();
-    });
+    return fetch(`/api/movies/${id}/unwatched/`, {method: 'POST'}).then(r => r.json());
   }
 
   static setProgress(id, progressInSeconds) {
@@ -94,21 +84,19 @@ export default class {
   }
 
   static save(movie, params={}) {
-    const jsonEpisodes = movie.episodeList.map((episode) => {
-      return {
-        lastWatched: episode.lastWatched,
-        season: episode.season,
-        episode: episode.episode,
-        progress: episode.progress,
-        releaseYear: episode.releaseYear,
-        triage: {
-          movieFile: params.movieFile || null,
-          subtitlesFileEn: params.subtitlesFileEn || null,
-          subtitlesFileDe: params.subtitlesFileDe || null,
-          subtitlesFileFr: params.subtitlesFileFr || null,
-        },
-      }
-    })
+    const jsonEpisodes = movie.episodeList.map(episode => ({
+      lastWatched: episode.lastWatched,
+      season: episode.season,
+      episode: episode.episode,
+      progress: episode.progress,
+      releaseYear: episode.releaseYear,
+      triage: {
+        movieFile: params.movieFile || null,
+        subtitlesFileEn: params.subtitlesFileEn || null,
+        subtitlesFileDe: params.subtitlesFileDe || null,
+        subtitlesFileFr: params.subtitlesFileFr || null,
+      },
+    }));
 
     return fetch(
       '/api/movies/',
@@ -126,51 +114,32 @@ export default class {
           episodes: jsonEpisodes
         }),
       }
-    ).then((response) => {
-      return response.json();
-    });
+    ).then(r => r.json());
   }
 
   static delete(id) {
-    return fetch(
-      `/api/movies/${id}/`,
-      {method: 'DELETE'}
-    ).then((response) => {
-      return response.json();
-    });
+    return fetch(`/api/movies/${id}/`, {method: 'DELETE'}).then(r => r.json());
   }
 
   static deleteOriginalFile(id) {
-    return fetch(
-      `/api/movies/${id}/originalFile/`,
-      {method: 'DELETE'}
-    ).then((response) => {
-      return response.json();
-    });
+    return fetch(`/api/movies/${id}/originalFile/`, {method: 'DELETE'}).then(r => r.json());
   }
 
-  static subtitlesExist(episode){
+  static async subtitlesExist(episode){
     function fileExists(url) {
-      return fetch(url, {
-        method: 'HEAD',
-        cache: 'no-cache',
-      })
-      .then((response) => {
-        return (response.status >= 200 && response.status < 300);
-      })
-      .catch(err => false)
+      return fetch(url, {method: 'HEAD', cache: 'no-cache'}).then(r => r.ok).catch(err => false)
     };
 
-    return Promise.all([
+    const [enSubsExist, frSubsExist, deSubsExist] = await Promise.all([
       fileExists(episode.srtSubtitlesUrlEn),
       fileExists(episode.srtSubtitlesUrlFr),
       fileExists(episode.srtSubtitlesUrlDe)
-    ]).then(results => {
-      return {
-        'en': results[0],
-        'fr': results[1],
-        'de': results[2],
-      }
-    });
+    ]);
+
+    return {
+      en: enSubsExist,
+      fr: frSubsExist,
+      de: deSubsExist,
+    }
   }
 }

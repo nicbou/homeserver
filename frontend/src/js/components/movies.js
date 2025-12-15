@@ -99,7 +99,7 @@ export default Vue.component('movies', {
         }),
       });
     },
-    deleteOriginalFiles: function(movie) {
+    deleteOriginalFiles(movie) {
       movie.episodeList.filter(e => e.needsCleaning).forEach(episode => {
         this.$store.dispatch('movies/deleteOriginalFile', {
           tmdbId: movie.tmdbId,

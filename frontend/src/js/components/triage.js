@@ -10,16 +10,13 @@ export default Vue.component('triage', {
       loading: true,
     }
   },
-  created(){
-    TriageService.getFilesToTriage().then(
-      (data) => {
-        data.movies.sort();
-        data.subtitles.sort();
-        this.subtitleFiles = data.subtitles;
-        this.movieFiles = data.movies;
-        this.loading = false;
-      }
-    )
+  async created(){
+    const data = await TriageService.getFilesToTriage();
+    data.movies.sort();
+    data.subtitles.sort();
+    this.subtitleFiles = data.subtitles;
+    this.movieFiles = data.movies;
+    this.loading = false;
   },
   template: `
     <div id="triage" class="container">
