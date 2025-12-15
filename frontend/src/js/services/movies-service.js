@@ -2,17 +2,17 @@ import { Movie } from './../models/movies.js';
 
 export default class {
   static getMovies() {
-    return fetch('/api/movies/').then(r => r.json()).then(data => data.movies.map(
-      jsonMovie => {
-        const movie = new Movie();
-        movie.isStarred = !!jsonResponse.isStarred;
-        movie.tmdbId = jsonResponse.tmdbId;
-        movie.title = jsonResponse.title;
-        movie.description = jsonResponse.description;
-        movie.coverUrl = jsonResponse.coverUrl;
-        movie.mediaType = jsonResponse.mediaType;
-        movie.episodeMap = jsonResponse.episodes
-          .reduce(
+    return fetch('/api/movies/').then(r => r.json()).then(
+      data => data.movies.map(
+        jsonMovie => {
+          const movie = new Movie();
+          movie.isStarred = !!jsonResponse.isStarred;
+          movie.tmdbId = jsonResponse.tmdbId;
+          movie.title = jsonResponse.title;
+          movie.description = jsonResponse.description;
+          movie.coverUrl = jsonResponse.coverUrl;
+          movie.mediaType = jsonResponse.mediaType;
+          movie.episodeMap = jsonResponse.episodes.reduce(
             (episodes, jsonEpisode) => {
               const episode = new Episode();
               episode.id = jsonEpisode.id;
@@ -36,11 +36,12 @@ export default class {
               episodes[episode.id] = episode;
               return episodes
             },
-          {});
-
-        return movie;
-      }));
-    });
+            {}
+          );
+          return movie;
+        }
+      )
+    );
   }
 
   static markAsWatched(id) {
