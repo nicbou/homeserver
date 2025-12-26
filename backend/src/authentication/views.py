@@ -32,7 +32,7 @@ def check_auth(request):
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
                 return login_response
 
-        if parsed_url.path.startswith("/timeline") and not request.user.is_superuser:
+        if parsed_url.path.startswith(("/timeline", "/files")) and not request.user.is_superuser:
             return login_response
 
         return continue_response

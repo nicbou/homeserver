@@ -62,6 +62,7 @@ services:
       - "${MOVIE_LIBRARY_PATH}/library:/var/www/movies/library:ro"
       - "caddy_data:/data"
       - "caddy_config:/config"
+      - "${CLOUD_FILES_PATH}:/var/www/files"
     ports:
       - "80:80"
       - "443:443"

@@ -33,6 +33,10 @@ You can use the `.env.example` file as a template.
     * `OPENVPN_USERNAME`
     * `OPENVPN_PASSWORD`
     
+#### Static files
+
+* `CLOUD_FILES_PATH`: Files under this path will be browsable and downloadable at `https://.../files`. This endpoint is password-protected.
+
 #### GPS logger
 
 A GPS logger is replying to pings at `https://.../api/gps/`. It expects pings from the OwnTracks app, via HTTP.

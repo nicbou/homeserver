@@ -38,6 +38,12 @@
         file_server
     }
 
+    handle /files/* {
+        uri strip_prefix /files
+        root * /var/www/files
+        file_server browse
+    }
+
     handle /static/* {
         uri strip_prefix /static
         root * /var/www/movies/django-static
