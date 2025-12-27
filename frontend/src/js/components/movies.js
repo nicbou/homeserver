@@ -10,10 +10,6 @@ export default Vue.component('movies', {
       cleaningMode: false,
       isAdmin: false,
       showFilters: false,
-      showNew: true,
-      showInProgress: true,
-      showSeen: true,
-      showStarred: true,
     }
   },
   computed: {
@@ -43,6 +39,38 @@ export default Vue.component('movies', {
     },
     query() {
       return this.$route.query.q || null;
+    },
+    showStarred: {
+      get() {
+        return this.getQueryStringBool("starred");
+      },
+      set(value){
+        this.setQueryStringBool("starred", value);
+      }
+    },
+    showNew: {
+      get() {
+        return this.getQueryStringBool("new");
+      },
+      set(value){
+        this.setQueryStringBool("new", value);
+      }
+    },
+    showSeen: {
+      get() {
+        return this.getQueryStringBool("seen");
+      },
+      set(value){
+        this.setQueryStringBool("seen", value);
+      }
+    },
+    showInProgress: {
+      get() {
+        return this.getQueryStringBool("inprogress");
+      },
+      set(value){
+        this.setQueryStringBool("inprogress", value);
+      }
     },
     filteredMovies() {
       let results = this.movies.filter(m => {
@@ -77,6 +105,19 @@ export default Vue.component('movies', {
     this.isAdmin = (await this.$store.dispatch('users/getUserSettings')).isAdmin;
   },
   methods: {
+    getQueryStringBool(key){
+      return this.$route.query[key] === "0" ? false : true;
+    },
+    setQueryStringBool(key, value){
+      const query = {...this.$route.query};
+      if(value){
+        delete query[key];
+      }
+      else{
+        query[key] = "0";
+      }
+      this.$router.push({name: 'movies', query});
+    },
     openMovie(movie) {
       this.$router.push({ name: 'movie', params: { tmdbId: movie.tmdbId } });
     },

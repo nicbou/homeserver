@@ -22,6 +22,7 @@ progress::-moz-progress-bar, progress::-webkit-progress-value {background-color:
     --m: 15px;
     --l: 30px;
     --c-link: #dd6;
+    --c-text-light: #fff6;
 }
 
 .container{max-width:1280px;width:100%;margin:0 auto;padding:var(--m) var(--l);box-sizing:border-box;}
@@ -98,17 +99,17 @@ progress::-moz-progress-bar, progress::-webkit-progress-value {background-color:
     .filters > * {flex: 0 0 auto;align-content: center;}
     .filters .filter-group{display:flex;align-content: center;gap:1px;border-radius: var(--border-radius);overflow: hidden;}
         .filters .filter-group > * {border-radius:0;border:none;align-content:center;}
-        .filters label{line-height:40px;background-color: #444}
+        .filters label{line-height:40px;background-color: #444; color: var(--c-text-light)}
         .filters label input{clip-path: polygon(0 0);position: absolute;}
-        .filters label:has(:checked){background-color:#fff4}
+        .filters label:has(:checked){background-color:#fff4; color: #fff}
     .filters input[type=search]{flex:1 0 auto}
 .covers{display:grid;grid-template-columns:repeat(4, 1fr);gap:var(--m);width: 100%;margin: 0 0 25px;overflow:hidden;border-radius:var(--border-radius);}
     .covers .cover{cursor: pointer;}
     .cover{aspect-ratio:27 / 40;border-radius:var(--border-radius);overflow:hidden;background:#191919;position: relative;}
         .cover img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;}
         .cover progress{position: absolute;width:100%;bottom:0;left:0;}
-        .cover .icons{position:absolute;top:10px;right:10px;font-size:24px;color:#fffa;text-shadow:0 2px 3px #0005}
-        .cover .star.not-starred{opacity:0;color:#fffa;}
+        .cover .icons{position:absolute;top:10px;right:10px;font-size:24px;color:var(--c-text-light);text-shadow:0 2px 3px #0005}
+        .cover .star.not-starred{opacity:0;color:var(--c-text-light);}
             .cover:hover .star.not-starred{opacity:1;}
             .cover .star.not-starred:hover{color:#fff;}
         .cover .star.starred{color:#ff0}
