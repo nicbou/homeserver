@@ -59,8 +59,12 @@ export class Episode {
     return this.isWatched && this.originalVideoPreserved;
   }
 
+  get convertedVideoUrl(){
+    return this.originalVideoUrl.replace(/\.[^.]+$/, '.converted.mp4');
+  }
+
   subtitlesUrl(format, language){
-    return this.convertedVideoUrl.replace('.converted.mp4', `.${language}.${format}`);
+    return this.originalVideoUrl.replace(/\.[^.]+$/, `.${language}.${format}`);
   }
 }
 

@@ -20,7 +20,6 @@ export default class {
           episode.episode = jsonEpisode.episode;
           episode.conversionStatus = jsonEpisode.conversionStatus;
           episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
-          episode.convertedVideoUrl = jsonEpisode.convertedVideoUrl;
           episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
           episode.releaseYear = jsonEpisode.releaseYear;
           episode.progress = jsonEpisode.progress;

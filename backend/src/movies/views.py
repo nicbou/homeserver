@@ -52,7 +52,6 @@ class MovieListView(View):
                 json_movie["episodes"].append(
                     {
                         "conversionStatus": movie.conversion_status,
-                        "convertedVideoUrl": movie.converted_url,
                         "dateAdded": movie.date_added,
                         "duration": movie.duration,
                         "id": movie.id,
