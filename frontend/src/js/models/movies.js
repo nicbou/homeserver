@@ -55,12 +55,12 @@ export class Episode {
     return this.conversionStatus === ConversionStatus.CONVERTED;
   }
 
-  get playbackUrl() {
-    return `/player/play/${ this.id }/`;
-  }
-
   get needsCleaning() {
     return this.isWatched && this.originalVideoPreserved;
+  }
+
+  subtitlesUrl(format, language){
+    return this.convertedVideoUrl.replace('.converted.mp4', `.${language}.${format}`);
   }
 }
 

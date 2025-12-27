@@ -37,12 +37,6 @@ export default class {
         episode.lastWatched = null;
         episode.convertedVideoUrl = null;
         episode.originalVideoUrl = null;
-        episode.vttSubtitlesUrlEn = null;
-        episode.vttSubtitlesUrlDe = null;
-        episode.vttSubtitlesUrlFr = null;
-        episode.srtSubtitlesUrlEn = null;
-        episode.srtSubtitlesUrlDe = null;
-        episode.srtSubtitlesUrlFr = null;
         episode.releaseYear = releaseDate ? parseInt(releaseDate.substring(0,4)) : null;
         episode.progress = 0;
         episode.duration = null;

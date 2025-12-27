@@ -22,12 +22,6 @@ export default class {
           episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
           episode.convertedVideoUrl = jsonEpisode.convertedVideoUrl;
           episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
-          episode.vttSubtitlesUrlEn = jsonEpisode.vttSubtitlesUrlEn;
-          episode.vttSubtitlesUrlDe = jsonEpisode.vttSubtitlesUrlDe;
-          episode.vttSubtitlesUrlFr = jsonEpisode.vttSubtitlesUrlFr;
-          episode.srtSubtitlesUrlEn = jsonEpisode.srtSubtitlesUrlEn;
-          episode.srtSubtitlesUrlDe = jsonEpisode.srtSubtitlesUrlDe;
-          episode.srtSubtitlesUrlFr = jsonEpisode.srtSubtitlesUrlFr;
           episode.releaseYear = jsonEpisode.releaseYear;
           episode.progress = jsonEpisode.progress;
           episode.duration = jsonEpisode.duration;
@@ -131,9 +125,9 @@ export default class {
     };
 
     const [enSubsExist, frSubsExist, deSubsExist] = await Promise.all([
-      fileExists(episode.srtSubtitlesUrlEn),
-      fileExists(episode.srtSubtitlesUrlFr),
-      fileExists(episode.srtSubtitlesUrlDe)
+      fileExists(episode.subtitlesUrl('srt', 'eng')),
+      fileExists(episode.subtitlesUrl('srt', 'fre')),
+      fileExists(episode.subtitlesUrl('srt', 'ger'))
     ]);
 
     return {

@@ -62,12 +62,6 @@ class MovieListView(View):
                         "episode": movie.episode,
                         "progress": watch_status.stopped_at if watch_status else 0,
                         "releaseYear": movie.release_year,
-                        "srtSubtitlesUrlEn": movie.subtitles_url(".srt", "eng"),
-                        "srtSubtitlesUrlDe": movie.subtitles_url(".srt", "ger"),
-                        "srtSubtitlesUrlFr": movie.subtitles_url(".srt", "fre"),
-                        "vttSubtitlesUrlEn": movie.subtitles_url(".vtt", "eng"),
-                        "vttSubtitlesUrlDe": movie.subtitles_url(".vtt", "ger"),
-                        "vttSubtitlesUrlFr": movie.subtitles_url(".vtt", "fre"),
                         "originalVideoPreserved": not movie.original_is_same_as_converted,
                     }
                 )
