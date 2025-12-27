@@ -70,6 +70,31 @@ export default Vue.component('episode', {
       this.subtitlesExistDe = availableSubtitles.de;
     })
 
+    // Enable keyboard media nav
+    navigator.mediaSession.setActionHandler("previoustrack", () => {
+      if(this.previousEpisode){
+        this.$router.push({
+          name: 'episode',
+          params: {
+            tmdbId: this.movie.tmdbId,
+            episodeId: this.previousEpisode.id
+          }
+        });
+      }
+    });
+
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      if(this.nextEpisode){
+        this.$router.push({
+          name: 'episode',
+          params: {
+            tmdbId: this.movie.tmdbId,
+            episodeId: this.nextEpisode.id
+          }
+        });
+      }
+    });
+
     this.$nextTick(function(){
       // Save video position
       if (this.episode.isConverted) {
