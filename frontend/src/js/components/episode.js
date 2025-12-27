@@ -113,7 +113,7 @@ export default Vue.component('episode', {
   template: `
     <div v-if="episode" class="container">
       <h2>{{ fullTitle }}</h2>
-      <video ref="videoElement" controls autoplay v-if="episode.isConverted" :key="this.episode.id">
+      <video ref="videoElement" controls autoplay v-if="episode.isConverted" :poster="movie.coverUrl" :key="episode.id">
         <source :src="episode.convertedVideoUrl" type="video/mp4">
         <track v-if="subtitlesExistEn" label="English" kind="captions" srclang="en" :src="episode.vttSubtitlesUrlEn" default>
         <track v-if="subtitlesExistFr" label="French" kind="captions" srclang="fr" :src="episode.vttSubtitlesUrlFr">

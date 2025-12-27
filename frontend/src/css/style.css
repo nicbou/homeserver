@@ -140,7 +140,7 @@ progress::-moz-progress-bar, progress::-webkit-progress-value {background-color:
 
 @media screen and ( max-width: 800px ) {
     html, body{background:#111;}
-    video{margin: 0 calc(var(--m) * -1);border-radius:0;width: calc(100% + var(--l));}
+    video{margin: 0 calc(var(--m) * -1);border-radius:0;width: calc(100% + var(--l)); background:#111}
     iframe{border-radius:var(--border-radius)}
     .container{padding-left:var(--m);padding-right:var(--m);}
     .covers{grid-template-columns:repeat(2, 1fr);gap:1px;margin:0 calc(var(--m) * -1);width:calc(100% + var(--l));}
