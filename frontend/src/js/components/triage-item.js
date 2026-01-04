@@ -228,7 +228,6 @@ export default Vue.component('triage-item', {
               type="search"
               v-model="query"
               :id="_uid + '-title'"
-              :placeholder="queryFromFilename"
               @blur="blurred" 
               @focus="focused"
               @keyup.enter="movieInputEnter"
