@@ -1,4 +1,4 @@
-import { Movie, Episode } from './../models/movies.js';
+import { Movie, Episode, ConversionStatus } from './../models/movies.js';
 
 export default class {
   constructor(omdbApiKey = '') {
