@@ -29,17 +29,17 @@ mise generate git-pre-commit --hook=pre-push --write --task=pre-push
 description = "Serve the frontend and the backend in docker."
 alias = "d"
 run = """
-# Starting docker daemon
+echo "Starting docker daemon"
 if ! docker info >/dev/null 2>&1; then
   open -a Docker;
 fi
 
-# Waiting for docker daemon to be ready
-while [[ -z "$(! docker stats --no-stream 2> /dev/null)" ]]; do
+echo "Waiting for docker daemon to be ready"
+while ! docker ps > /dev/null 2>&1; do
   sleep 1;
 done
 
-# Starting docker containers
+echo "Starting docker containers"
 if [ "$(docker ps -q | wc -l)" -eq 0 ]; then
   docker compose up --build -d;
 fi
