@@ -36,16 +36,16 @@ export default class {
   }
 
   static markAsWatched(id) {
-    return fetch(`/api/movies/${id}/watched/`, {method: 'POST'}).then(r => r.json());
+    return fetch(`/api/episodes/${id}/watched/`, {method: 'POST'}).then(r => r.json());
   }
 
   static markAsUnwatched(id) {
-    return fetch(`/api/movies/${id}/unwatched/`, {method: 'POST'}).then(r => r.json());
+    return fetch(`/api/episodes/${id}/unwatched/`, {method: 'POST'}).then(r => r.json());
   }
 
   static setProgress(id, progressInSeconds) {
     return fetch(
-      `/api/movies/${id}/progress/`,
+      `/api/episodes/${id}/progress/`,
       {
         method: 'POST',
         headers: {
@@ -111,11 +111,11 @@ export default class {
   }
 
   static delete(id) {
-    return fetch(`/api/movies/${id}/`, {method: 'DELETE'}).then(r => r.json());
+    return fetch(`/api/episodes/${id}/`, {method: 'DELETE'}).then(r => r.json());
   }
 
   static deleteOriginalFile(id) {
-    return fetch(`/api/movies/${id}/originalFile/`, {method: 'DELETE'}).then(r => r.json());
+    return fetch(`/api/episodes/${id}/originalFile/`, {method: 'DELETE'}).then(r => r.json());
   }
 
   static async subtitlesExist(episode){

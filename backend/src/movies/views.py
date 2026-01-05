@@ -1,26 +1,24 @@
 # -*- coding: utf-8 -*-
+from .models import Episode, EpisodeWatchStatus, StarredMovie
+from django.conf import settings
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db import transaction
+from django.http import JsonResponse
+from django.http import StreamingHttpResponse, Http404
+from django.views import View
 from pathlib import Path
 from typing import List
-
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.http import JsonResponse
-
-from .models import Episode, EpisodeWatchStatus, StarredMovie
-from django.views import View
-from django.conf import settings
-from django.db import transaction
+import datetime
 import json
 import logging
 import requests
-import datetime
+import subprocess
 
 
 logger = logging.getLogger(__name__)
 
 
 class MovieListView(View):
-    raise_exception = True
-
     def get(self, request, *args, **kwargs):
         """
         Return all movies/shows and their episodes as a nested list
@@ -175,7 +173,6 @@ class MovieListView(View):
 
 class DeleteOriginalView(PermissionRequiredMixin, View):
     permission_required = "authentication.movies_manage"
-    raise_exception = True
 
     def delete(self, request, *args, **kwargs):
         """
@@ -200,7 +197,6 @@ class DeleteOriginalView(PermissionRequiredMixin, View):
 
 class EpisodeView(PermissionRequiredMixin, View):
     permission_required = "authentication.movies_manage"
-    raise_exception = True
 
     def delete(self, request, *args, **kwargs):
         if not request.user.has_perm("authentication.movies_manage"):
@@ -224,7 +220,6 @@ class TriageListView(PermissionRequiredMixin, View):
     """
 
     permission_required = "authentication.movies_manage"
-    raise_exception = True
 
     def get(self, request, *args, **kwargs):
         files_in_triage_dir = list(settings.TRIAGE_PATH.rglob("*"))
@@ -247,8 +242,6 @@ class TriageListView(PermissionRequiredMixin, View):
 
 
 class EpisodeWatchedView(View):
-    raise_exception = True
-
     def post(self, request, *args, **kwargs):
         episode_id = kwargs.get("id")
         try:
@@ -262,8 +255,6 @@ class EpisodeWatchedView(View):
 
 
 class EpisodeUnwatchedView(View):
-    raise_exception = True
-
     def post(self, request, *args, **kwargs):
         episode_id = kwargs.get("id")
         try:
@@ -278,8 +269,6 @@ class EpisodeUnwatchedView(View):
 
 
 class EpisodeStarView(View):
-    raise_exception = True
-
     def post(self, request, *args, **kwargs):
         episode_id = kwargs.get("id")
         try:
@@ -292,8 +281,6 @@ class EpisodeStarView(View):
 
 
 class EpisodeUnstarView(View):
-    raise_exception = True
-
     def post(self, request, *args, **kwargs):
         episode_id = kwargs.get("id")
         try:
@@ -307,8 +294,6 @@ class EpisodeUnstarView(View):
 
 
 class EpisodeProgressView(View):
-    raise_exception = True
-
     def post(self, request, *args, **kwargs):
         episode_id = kwargs.get("id")
         payload = json.loads(request.body)
@@ -326,3 +311,53 @@ class EpisodeProgressView(View):
         except ValueError:
             return JsonResponse({"result": "failure", "message": "`progress` must be an integer"}, status=400)
         return JsonResponse({"result": "success"})
+
+
+class EpisodeStreamView(View):
+    def get(self, request, *args, **kwargs):
+        try:
+            episode = Episode.objects.get(pk=kwargs.get("id"))
+        except Episode.DoesNotExist:
+            raise Http404("Movie not found")
+
+        # FFmpeg command: convert video/audio/subtitles without scaling
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-i",
+            settings.MOVIE_LIBRARY_PATH / episode.base_filename(".mp4"),
+            "-map",
+            "0:v",
+            "-map",
+            "0:a",
+            "-map",
+            "0:s:m:codec_name=mov_text?",
+            "-c:s",
+            "copy",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-crf",
+            "24",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-ac",
+            "2",
+            "-ar",
+            "44100",
+            "-af",
+            "aresample=async=1",
+            "-movflags",
+            "+frag_keyframe+empty_moov+faststart",
+            "-f",
+            "mp4",
+            "pipe:1",
+        ]
+
+        process = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+
+        response = StreamingHttpResponse(process.stdout, content_type="video/mp4")
+        response["Content-Disposition"] = f'inline; filename="{episode.base_filename(".mp4")}"'
+        return response
