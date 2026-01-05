@@ -10,10 +10,10 @@ import subprocess
 logger = logging.getLogger(__name__)
 ffmpeg_path = "/usr/bin/ffmpeg"
 
-max_video_bitrate = 3000000
-default_video_height = 720
-
 subtitle_languages = ("eng", "fre", "ger")  # ISO 639-2/B (eng, ger, fre...)
+
+small_video_bitrate = 3_000_000
+small_video_height = 720
 
 
 def get_movies_to_convert(input_dir: Path) -> Iterable[Path]:
@@ -50,9 +50,9 @@ def add_moov_atom(input_file: Path, output_file: Path):
             "-c:v",
             "copy",
             "-movflags",
-            "faststart",
+            "+faststart+frag_keyframe+empty_moov",
             "-loglevel",
-            "warning",
+            "error",
             "-strict",
             "-2",
             "-y",
@@ -61,7 +61,7 @@ def add_moov_atom(input_file: Path, output_file: Path):
     )
 
 
-def convert_to_h264(input_file: Path, output_file: Path):
+def convert_to_small_h264(input_file: Path, output_file: Path):
     """
     Converts a video to a format that can be played on the web
     """
@@ -70,28 +70,71 @@ def convert_to_h264(input_file: Path, output_file: Path):
             ffmpeg_path,
             "-i",
             str(input_file),
-            "-codec:v",
-            "libx264",
-            "-preset",
-            "fast",
-            "-movflags",
-            "faststart",  # Moves metadata to start, to allow streaming and skipping
-            "-maxrate",
-            str(max_video_bitrate),
+            "-preset",  # Slower conversion, smaller output file
+            "slow",
+            "-maxrate",  # Limit total bit rate
+            str(small_video_bitrate),
             "-bufsize",
-            str(max_video_bitrate * 1.5),
-            "-filter:v",
-            f"scale=-2:{default_video_height}",
-            "-threads",
-            "0",
-            "-ac",
-            "2",  # Stereo audio
-            "-af",
-            "aresample=async=1",  # Keep audio in sync with video
-            "-loglevel",
-            "warning",
-            "-codec:a",
+            str(int(small_video_bitrate * 1.5)),
+            "-crf",  # Sacrifice some quality for smaller files
+            "24",
+            "-codec:a",  # Audio: AAC codec, best compatibility
             "aac",
+            "-b:a",  # Audio: Reasonable quality
+            "128k",
+            "-ac",  # Audio: Stereo
+            "2",
+            "-ar",  # Audio: Standardize sample rate
+            "44100",
+            "-af",  # Audio: Keep in sync with video
+            "aresample=async=1",
+            "-codec:v",  # Video: H.264 codec, best compatibility
+            "libx264",
+            "-filter:v",  # Video: Downscale to correct resolution, but do not upscale
+            f"scale=-2:min(ih\\,{small_video_height})",
+            "-movflags",  # Enable skipping and instant streaming
+            "+faststart+frag_keyframe+empty_moov",
+            "-threads",  # Multithreading
+            "0",
+            "-loglevel",
+            "error",
+            "-y",
+            "-f",
+            "mp4",
+            str(output_file),
+        ]
+    )
+
+
+def convert_to_large_h264(input_file: Path, output_file: Path):
+    large_video_height = 2160
+    return subprocess.check_output(
+        [
+            ffmpeg_path,
+            "-i",
+            str(input_file),
+            "-preset",  # Slower conversion, smaller output file
+            "slow",
+            "-crf",  # Keep good quality
+            "20",
+            "-codec:a",  # Audio: AAC codec, best compatibility
+            "aac",
+            "-b:a",  # Audio: Reasonable quality
+            "192k",
+            "-ac",  # Audio: Stereo
+            "2",
+            "-af",  # Audio: Keep in sync with video
+            "aresample=async=1",
+            "-codec:v",  # Video: H.264 codec, best compatibility
+            "libx264",
+            "-filter:v",  # Video: Downscale to correct resolution, but do not upscale
+            f"scale=-2:min(ih\\,{large_video_height})",
+            "-movflags",  # Enable skipping and instant streaming
+            "+faststart+frag_keyframe+empty_moov",
+            "-threads",  # Multithreading
+            "0",
+            "-loglevel",
+            "error",
             "-y",
             "-f",
             "mp4",
@@ -150,7 +193,7 @@ def convert_movie(input_file: Path):
         f"- Streams: {video_streams}"
     )
 
-    has_correct_bitrate = total_bitrate <= max_video_bitrate
+    has_correct_bitrate = total_bitrate <= small_video_bitrate * 1.25
 
     if has_correct_codecs and has_correct_bitrate:
         if is_streamable:
@@ -177,8 +220,8 @@ def convert_movie(input_file: Path):
                 raise
     else:
         try:
-            logger.info(f'Converting "{input_file.name}" to "{tmp_file.name}"')
-            convert_to_h264(input_file, tmp_file)
+            logger.info(f'Converting "{input_file.name}" to "{tmp_file.name}" (low definition)')
+            convert_to_small_h264(input_file, tmp_file)
             logger.info(f"Conversion of {tmp_file.name} successful. Renaming to {output_file.name}")
             tmp_file.rename(output_file)
         except subprocess.CalledProcessError as exc:
@@ -223,7 +266,7 @@ def get_duration(file: Path) -> int:
 
 def convert_subtitles_to_vtt(input_file: Path):
     output_file = Path(input_file).with_suffix(".vtt")
-    ffmpeg_command = [ffmpeg_path, "-y", "-loglevel", "warning", "-i", str(input_file), str(output_file)]
+    ffmpeg_command = [ffmpeg_path, "-y", "-loglevel", "error", "-i", str(input_file), str(output_file)]
     try:
         logger.info(f"Converting {input_file} subtitles to .vtt")
         subprocess.check_output(ffmpeg_command)
@@ -262,7 +305,7 @@ def extract_subtitles(input_file: Path):
         ).decode("utf-8")
     )["streams"]
 
-    ffmpeg_command = [ffmpeg_path, "-y", "-loglevel", "warning", "-i", str(input_file)]
+    ffmpeg_command = [ffmpeg_path, "-y", "-loglevel", "error", "-i", str(input_file)]
 
     processed_subtitle_languages = set()
     for subtitle_stream in subtitle_streams:
