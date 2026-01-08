@@ -6,7 +6,6 @@ from gps_logger.views import GpsLoggerView
 from movies.views import (
     EpisodeProgressView,
     MovieListView,
-    EpisodeStreamView,
     EpisodeView,
     EpisodeUnwatchedView,
     EpisodeWatchedView,
@@ -23,7 +22,6 @@ urlpatterns = [
     path("api/movies/<int:id>/star/", EpisodeStarView.as_view()),
     path("api/movies/<int:id>/unstar/", EpisodeUnstarView.as_view()),
     path("api/movies/triage/", TriageListView.as_view()),
-    path("api/episodes/<int:id>.mp4", EpisodeStreamView.as_view()),
     path("api/episodes/<int:id>/", EpisodeView.as_view()),
     path("api/episodes/<int:id>/originalFile/", DeleteOriginalView.as_view()),
     path("api/episodes/<int:id>/progress/", EpisodeProgressView.as_view()),

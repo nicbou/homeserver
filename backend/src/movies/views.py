@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db import transaction
 from django.http import JsonResponse
-from django.http import StreamingHttpResponse, Http404
 from django.views import View
 from pathlib import Path
 from typing import List
@@ -12,7 +11,6 @@ import datetime
 import json
 import logging
 import requests
-import subprocess
 
 
 logger = logging.getLogger(__name__)
@@ -311,49 +309,3 @@ class EpisodeProgressView(View):
         except ValueError:
             return JsonResponse({"result": "failure", "message": "`progress` must be an integer"}, status=400)
         return JsonResponse({"result": "success"})
-
-
-class EpisodeStreamView(View):
-    def get(self, request, *args, **kwargs):
-        try:
-            episode = Episode.objects.get(pk=kwargs.get("id"))
-        except Episode.DoesNotExist:
-            raise Http404("Movie not found")
-
-        # FFmpeg command: convert video/audio/subtitles without scaling
-        ffmpeg_cmd = [
-            "ffmpeg",
-            "-i",
-            settings.MOVIE_LIBRARY_PATH / episode.base_filename(".mp4"),
-            "-map",
-            "0:v",
-            "-map",
-            "0:a",
-            "-c:v",
-            "libx264",
-            "-preset",
-            "ultrafast",
-            "-crf",
-            "24",
-            "-c:a",
-            "aac",
-            "-b:a",
-            "128k",
-            "-ac",
-            "2",
-            "-ar",
-            "44100",
-            "-af",
-            "aresample=async=1",
-            "-movflags",
-            "+frag_keyframe+empty_moov+faststart+default_base_moof",
-            "-f",
-            "mp4",
-            "pipe:1",
-        ]
-
-        process = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-
-        response = StreamingHttpResponse(process.stdout, content_type="video/mp4")
-        response["Content-Disposition"] = f'inline; filename="{episode.base_filename(".mp4")}"'
-        return response
