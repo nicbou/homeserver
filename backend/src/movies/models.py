@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import datetime
 import logging
-import uuid
 from pathlib import Path
 
 from django.conf import settings
@@ -10,7 +8,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -158,14 +155,6 @@ def episode_delete(sender, instance: Episode, **kwargs):
             path.unlink(missing_ok=True)
         except OSError:
             logger.warning(f"Could not delete file {str(path)}")
-
-
-def tomorrow():
-    return timezone.now() + datetime.timedelta(days=1)
-
-
-def random_uuid() -> str:
-    return uuid.uuid4().hex
 
 
 class EpisodeWatchStatus(models.Model):
