@@ -37,6 +37,10 @@ def check_auth(request):
 
         return continue_response
     else:
+        # Enable unauthenticated access to movie files, for Apple TV and Chromecast to work
+        if parsed_url.path.startswith("/movies/"):
+            return continue_response
+
         # Also accept basic auth as a fallback. OwnTracks uses basic auth for GPS pings.
         auth_header = request.META.get("HTTP_AUTHORIZATION")
         if not auth_header or not auth_header.startswith("Basic "):
