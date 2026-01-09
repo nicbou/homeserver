@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from movies.convert import get_duration
+from movies.convert import get_video_metadata
 from movies.models import Episode
 import logging
 import time
@@ -17,7 +17,7 @@ class Command(BaseCommand):
                 continue
             logger.info(f"Setting duration of {episode}")
             try:
-                episode.duration = get_duration(episode.converted_path)
+                episode.duration = get_video_metadata(episode.converted_path)["duration"]
                 logger.info(f"Duration: {episode.duration}")
             except:
                 logger.exception("Could not get episode duration")

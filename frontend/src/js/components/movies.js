@@ -140,9 +140,9 @@ export default Vue.component('movies', {
         }),
       });
     },
-    deleteOriginalFiles(movie) {
+    deleteLargeVideos(movie) {
       movie.episodeList.filter(e => e.needsCleaning).forEach(episode => {
-        this.$store.dispatch('movies/deleteOriginalFile', {
+        this.$store.dispatch('movies/deleteLargeVideo', {
           tmdbId: movie.tmdbId,
           episodeId: episode.id,
         });
@@ -186,7 +186,7 @@ export default Vue.component('movies', {
       <div class="covers">
         <div class="cover" v-for="movie in filteredMovies" :key="movie.tmdbId">
           <progress v-if="movie.percentSeen && movie.percentSeen !== 100" :value="movie.percentSeen" :max="100"/>
-          <img @click="cleaningMode ? deleteOriginalFiles(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
+          <img @click="cleaningMode ? deleteLargeVideos(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <div class="icons">
             <star :movie="movie"></star>
             <i class="fas fa-check-circle" title="Seen" v-if="movie.isWatched"></i>

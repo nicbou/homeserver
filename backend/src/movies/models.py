@@ -62,42 +62,26 @@ class Episode(models.Model):
             )
         )
 
-    # Original file
-
     @property
-    def original_filename(self) -> Path:
+    def original_filename(self):
         original_extension = Path(self.triage_path).suffix
-        original_filename = self.base_filename(original_extension)
-
-        # When the original was replaced with the converted version
-        if not (settings.MOVIE_LIBRARY_PATH / original_filename).exists():
-            return original_filename.with_suffix(".mp4")
-
-        return original_filename
+        return self.base_filename(f".original{original_extension}")
 
     @property
-    def original_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.original_filename
+    def cover_filename(self) -> Path:
+        return self.base_filename(".jpg", episode_number=False)
 
     @property
-    def original_url(self) -> str:
-        return f"{settings.MOVIE_LIBRARY_URL}/{self.original_filename}"
-
-    # Converted file
+    def temporary_video_filename(self) -> Path:
+        return self.base_filename(".converting.mp4")
 
     @property
-    def converted_filename(self) -> Path:
-        return self.base_filename(".converted.mp4")
+    def small_video_filename(self) -> Path:
+        return self.base_filename(".small.mp4")
 
     @property
-    def converted_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.converted_filename
-
-    @property
-    def converted_url(self) -> str:
-        return f"{settings.MOVIE_LIBRARY_URL}/{self.converted_filename}"
-
-    # Subtitles
+    def large_video_filename(self) -> Path:
+        return self.base_filename(".large.mp4")
 
     def subtitles_filename(self, extension=".srt", language_code="eng") -> Path:
         return self.base_filename(f".{language_code}{extension}")
@@ -108,36 +92,33 @@ class Episode(models.Model):
     def subtitles_url(self, extension=".srt", language_code="eng") -> str:
         return f"{settings.MOVIE_LIBRARY_URL}/{self.subtitles_filename(extension, language_code)}"
 
-    # Cover image
-
-    @property
-    def cover_filename(self) -> Path:
-        return self.base_filename(".jpg", episode_number=False)
-
-    @property
-    def cover_path(self) -> Path:
-        return settings.MOVIE_LIBRARY_PATH / self.cover_filename
-
-    @property
-    def cover_url(self) -> str:
-        return f"{settings.MOVIE_LIBRARY_URL}/{self.cover_filename}"
-
     @property
     def conversion_status(self):
-        if self.converted_path.exists():
-            return self.CONVERTED
-        elif self.original_path.with_suffix(".converting.mp4").exists:
+        if self.temporary_video_path.exists():
             return self.CONVERTING
+        elif self.small_video_path.exists():
+            return self.CONVERTED
         else:
             return self.NOT_CONVERTED
 
     @property
-    def original_is_same_as_converted(self):
+    def has_large_version(self):
+        # If the original file is small enough, the small and large video files are a
+        # hard link to the same file.
         return (
-            self.original_path.exists()
-            and self.converted_path.exists()
-            and self.original_path.samefile(self.converted_path)
+            self.small_video_path.exists()
+            and self.large_video_path.exists()
+            and not self.small_video_path.samefile(self.large_video_path)
         )
+
+    def __getattr__(self, attr) -> Path | str | None:
+        if attr.endswith("_path"):
+            filename = getattr(self, attr.removesuffix("_path") + "_filename")
+            return settings.MOVIE_LIBRARY_PATH / filename
+        elif attr.endswith("_url"):
+            filename = getattr(self, attr.removesuffix("_url") + "_filename")
+            return f"{settings.MOVIE_LIBRARY_URL}/{filename}"
+        return super(Episode, self).__getattr__(attr)
 
 
 @receiver(pre_delete, sender=Episode)

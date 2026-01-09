@@ -56,15 +56,15 @@ export class Episode {
   }
 
   get needsCleaning() {
-    return this.isWatched && this.originalVideoPreserved;
+    return this.isWatched && this.hasLargeVersion;
   }
 
-  get convertedVideoUrl(){
-    return this.originalVideoUrl.replace(/\.[^.]+$/, '.converted.mp4');
+  get smallVideoUrl(){
+    return this.largeVideoUrl.replace('.large.mp4', '.small.mp4');
   }
 
   subtitlesUrl(format, language){
-    return this.originalVideoUrl.replace(/\.[^.]+$/, `.${language}.${format}`);
+    return this.largeVideoUrl.replace('.large.mp4', `.${language}.${format}`);
   }
 }
 

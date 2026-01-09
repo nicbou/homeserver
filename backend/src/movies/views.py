@@ -52,12 +52,12 @@ class MovieListView(View):
                         "duration": movie.duration,
                         "id": movie.id,
                         "lastWatched": watch_status.last_watched if watch_status else None,
-                        "originalVideoUrl": movie.original_url,
+                        "largeVideoUrl": movie.large_video_url,
                         "season": movie.season,
                         "episode": movie.episode,
                         "progress": watch_status.stopped_at if watch_status else 0,
                         "releaseYear": movie.release_year,
-                        "originalVideoPreserved": not movie.original_is_same_as_converted,
+                        "hasLargeVersion": movie.has_large_version,
                     }
                 )
 
@@ -132,9 +132,11 @@ class MovieListView(View):
                 if episode_triage_path.exists():
                     episode.triage_path = episode_triage_path
 
-                    logger.info(f'Copying video "{str(episode_triage_path)}" to "{str(episode.original_path)}"')
+                    # If it replaces an existing episode
                     episode.original_path.unlink(missing_ok=True)
-                    episode.original_path.hardlink_to(episode_triage_path)
+                    episode.original_path.hardlink_to(episode.triage_path)
+                    episode.small_video_path.unlink(missing_ok=True)
+                    episode.large_video_path.unlink(missing_ok=True)
                     episode.save()
 
                 # Create hard link to subtitle files in the movie library
@@ -169,27 +171,22 @@ class MovieListView(View):
             logger.error(f"Could not download file at {url}.")
 
 
-class DeleteOriginalView(PermissionRequiredMixin, View):
+class DeleteLargeVideoView(PermissionRequiredMixin, View):
     permission_required = "authentication.movies_manage"
 
     def delete(self, request, *args, **kwargs):
         """
-        Delete an original video, and replace it with the converted version. For example, delete the 4K version and keep
-        only the smaller web version.
+        Delete the large version of the video and replace it with a hard link to the small one
         """
         episode_id = kwargs.get("id")
         try:
             episode = Episode.objects.get(pk=episode_id)
-            episode.original_path.unlink(missing_ok=True)
-            episode.original_path.with_suffix(".mp4").unlink(missing_ok=True)
-            episode.original_path.hardlink_to(episode.converted_path)
+            episode.large_video_path.unlink(missing_ok=True)
+            episode.large_video_path.hardlink_to(episode.small_video_path)
         except Episode.DoesNotExist:
             message = "Episode does not exist."
             logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
             return JsonResponse({"result": "failure", "message": message}, status=404)
-        except ConnectionError:
-            logger.error(f"Failed to replace original of episode #{episode_id}. Could not connect to server.")
-            return JsonResponse({"result": "failure", "message": "Failed to replace original of episode."}, status=500)
         return JsonResponse({"result": "success"})
 
 

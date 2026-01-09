@@ -12,7 +12,7 @@ from movies.views import (
     TriageListView,
     EpisodeUnstarView,
     EpisodeStarView,
-    DeleteOriginalView,
+    DeleteLargeVideoView,
 )
 
 urlpatterns = [
@@ -23,7 +23,7 @@ urlpatterns = [
     path("api/movies/<int:id>/unstar/", EpisodeUnstarView.as_view()),
     path("api/movies/triage/", TriageListView.as_view()),
     path("api/episodes/<int:id>/", EpisodeView.as_view()),
-    path("api/episodes/<int:id>/originalFile/", DeleteOriginalView.as_view()),
+    path("api/episodes/<int:id>/large/", DeleteLargeVideoView.as_view()),
     path("api/episodes/<int:id>/progress/", EpisodeProgressView.as_view()),
     path("api/episodes/<int:id>/unwatched/", EpisodeUnwatchedView.as_view()),
     path("api/episodes/<int:id>/watched/", EpisodeWatchedView.as_view()),

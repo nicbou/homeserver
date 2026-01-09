@@ -18,11 +18,11 @@ export default Vue.component('download-menu', {
   },
   template: `
     <div>
-      <a class="button" :href="episode.originalVideoUrl" download>
-        <i class="fas fa-film"></i> <span>Download original video</span>
+      <a class="button" :href="episode.largeVideoUrl" download v-if="episode.hasLargeVersion">
+        <i class="fas fa-film"></i> <span>Download large video</span>
       </a>
-      <a class="button" :href="episode.convertedVideoUrl" download v-if="episode.isConverted">
-        <i class="fas fa-film"></i> <span>Download converted video</span>
+      <a class="button" :href="episode.smallVideoUrl" download v-if="episode.isConverted">
+        <i class="fas fa-film"></i> <span>Download small video</span>
       </a>
       <a class="button" :href="episode.subtitlesUrl('srt', 'eng')" download v-if="subtitlesExistEn">
         <i class="far fa-closed-captioning"></i> <span>Download English subtitles</span>

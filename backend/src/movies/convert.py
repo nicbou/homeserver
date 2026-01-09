@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from decimal import Decimal
-from django.conf import settings
 from pathlib import Path
+from typing import Any
 import json
 import logging
 import subprocess
@@ -18,26 +18,16 @@ small_video_height = 720
 
 def get_movies_to_convert(input_dir: Path) -> Iterable[Path]:
     for path in input_dir.iterdir():
+        small_video_file = path.with_suffix(".small.mp4")
+        large_video_file = path.with_suffix(".large.mp4")
         if (
             path.is_file()
-            # File is a video
-            and path.suffix.lower() in settings.VIDEO_EXTENSIONS
-            # File is not a converting/converted video
-            and not path.stem.lower().endswith(".converted")
-            # No converted video exists
-            and not path.with_suffix(".converted.mp4").exists()
+            # File is the original video
+            and path.stem.endswith(".original")
+            # File is not already converted
+            and not (small_video_file.exists() or large_video_file.exists())
         ):
             yield path
-
-
-def is_video_streamable(input_file: Path) -> bool:
-    # Check if faststart is enabled (https://stackoverflow.com/a/46895695/1067337)
-    return (
-        subprocess.check_output(["mediainfo", "--Inform=General;%IsStreamable%", str(input_file)])
-        .decode("utf-8")
-        .strip()
-        == "Yes"
-    )
 
 
 def add_moov_atom(input_file: Path, output_file: Path):
@@ -143,22 +133,7 @@ def convert_to_large_h264(input_file: Path, output_file: Path):
     )
 
 
-def convert_movie(input_file: Path):
-    """
-    Converts an input file to a video that can be streamed in a web browser.
-
-    The converted movie has the same name, but the .converted.mp4 extension
-
-    While it converts, it has the .converting.mp4 extension.
-
-    If a video is already streamable, a hard link to the original is created instead.
-    """
-    tmp_file = input_file.with_suffix(".converting.mp4")
-    tmp_file.unlink(missing_ok=True)
-
-    output_file = input_file.with_suffix(".converted.mp4")
-    output_file.unlink(missing_ok=True)
-
+def get_video_metadata(file: Path) -> dict[str, Any]:
     # Get original video metadata
     ffprobe_output = json.loads(
         subprocess.check_output(
@@ -170,67 +145,60 @@ def convert_movie(input_file: Path):
                 "format=format_name,duration:stream=bit_rate,width,height,codec_name",
                 "-of",
                 "json",
-                str(input_file),
+                str(file),
             ],
         ).decode("utf-8")
     )
-    video_streams = ffprobe_output["streams"]
-    video_format = ffprobe_output["format"]
-    total_bitrate = sum(int(s.get("bit_rate", 0)) for s in video_streams)
-    has_mp4_container = "mp4" in video_format["format_name"].split(",")
-    has_aac_audio = any(s.get("codec_name") == "aac" for s in video_streams)
-    has_h264_video = any(s.get("codec_name") == "h264" for s in video_streams)
-    has_correct_codecs = has_mp4_container and has_h264_video and has_aac_audio
+    return {
+        "format": ffprobe_output["format"]["format_name"],
+        "total_bitrate": sum(int(s.get("bit_rate", 0)) for s in ffprobe_output["streams"]),
+        "duration": int(Decimal(ffprobe_output["format"]["duration"])),
+    }
 
-    is_streamable = is_video_streamable(input_file)
 
+def convert_movie(input_file: Path):
+    """
+    Converts an input file to a video that can be streamed in a web browser.
+
+    The converted movie has the same name, but the .small.mp4 and .large.mp4 extensions
+
+    While it converts, it has the .converting.*.mp4 extension.
+    """
+    tmp_file = input_file.with_suffix(".converting.mp4")
+    large_output_file = input_file.with_suffix(".large.mp4")
+    small_output_file = input_file.with_suffix(".small.mp4")
+
+    original_metadata = get_video_metadata(input_file)
     logger.info(
         f"Processing {str(input_file)}:\n"
-        f"- Output file: {tmp_file.name} then {output_file.name}\n"
-        f"- Bitrate: {total_bitrate}\n"
-        f"- Streamable: {is_streamable}\n"
-        f"- Format: {video_format['format_name']}\n"
-        f"- Streams: {video_streams}"
+        f"- Output file: {large_output_file} then {small_output_file}\n"
+        f"- Format: {original_metadata['format']}\n"
+        f"- Duration: {original_metadata['duration']}\n"
+        f"- Bitrate: {original_metadata['total_bitrate']}\n"
     )
 
-    has_correct_bitrate = total_bitrate <= small_video_bitrate * 1.25
-
-    if has_correct_codecs and has_correct_bitrate:
-        if is_streamable:
-            try:
-                logger.info(
-                    f'Original video is already streamable. Hard linking "{input_file.name}" to "{output_file.name}"'
-                )
-                output_file.hardlink_to(input_file)
-            except:
-                logger.exception(f'Failed to hard link original video "{input_file.name}" to "{output_file.name}"')
-                raise
-        else:
-            try:
-                logger.info(
-                    f'Original video has right format, but is not streamable. Adding moov atom to "{input_file.name}".'
-                )
-                add_moov_atom(input_file, output_file)
-
-                logger.info(f"Replacing original at {input_file.name}, with the streamable version")
-                input_file.unlink()
-                output_file.hardlink_to(input_file)
-            except:
-                logger.exception(f'Failed to add moov atom to "{input_file.name}"')
-                raise
-    else:
-        try:
-            logger.info(f'Converting "{input_file.name}" to "{tmp_file.name}" (low definition)')
-            convert_to_small_h264(input_file, tmp_file)
-            logger.info(f"Conversion of {tmp_file.name} successful. Renaming to {output_file.name}")
-            tmp_file.rename(output_file)
-        except subprocess.CalledProcessError as exc:
-            logger.exception(
-                f'Failed to convert "{input_file.name}" to "{output_file.name}"\nOutput: {exc.output.decode("utf-8")}'
-            )
-            raise
-
+    logger.info(f"Extracting subtitles from {input_file}")
     extract_subtitles(input_file)
+
+    logger.info(f"Converting {input_file} to {large_output_file}")
+    convert_to_large_h264(input_file, tmp_file)
+    large_output_file.unlink(missing_ok=True)
+    tmp_file.rename(large_output_file)
+
+    large_video_bitrate = get_video_metadata(large_output_file)["total_bitrate"]
+    logger.info(f"Bitrate of {large_output_file} is {large_video_bitrate}")
+
+    if large_video_bitrate >= small_video_bitrate * 1.25:
+        logger.info(f"Converting {large_output_file} to {small_output_file}")
+        convert_to_small_h264(large_output_file, tmp_file)
+        small_output_file.unlink(missing_ok=True)
+        tmp_file.rename(small_output_file)
+    else:
+        logger.info(f"Skipping conversion to {small_output_file} because the large version is small enough.")
+        small_output_file.hardlink_to(large_output_file)
+
+    logger.info(f"Conversion finished. Deleting original at {input_file}.")
+    input_file.unlink(missing_ok=True)
 
 
 def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
@@ -243,25 +211,6 @@ def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
             and not path.with_suffix(".vtt").exists()
         ):
             yield path
-
-
-def get_duration(file: Path) -> int:
-    # Get video metadata
-    ffprobe_output = json.loads(
-        subprocess.check_output(
-            [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "json",
-                str(file),
-            ],
-        ).decode("utf-8")
-    )
-    return int(Decimal(ffprobe_output["format"]["duration"]))
 
 
 def convert_subtitles_to_vtt(input_file: Path):

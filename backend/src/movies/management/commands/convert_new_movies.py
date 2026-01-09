@@ -13,15 +13,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         while True:
-            for original_path in get_movies_to_convert(settings.MOVIE_LIBRARY_PATH):
+            for movie_path in get_movies_to_convert(settings.MOVIE_LIBRARY_PATH):
                 try:
-                    convert_movie(original_path)
+                    convert_movie(movie_path)
                 except:
-                    logger.exception(f"Could not convert movie {str(original_path)}")
+                    logger.exception(f"Could not convert video {str(movie_path)}")
 
-            for original_path in get_subtitles_to_convert(settings.MOVIE_LIBRARY_PATH):
+            for subtitles_path in get_subtitles_to_convert(settings.MOVIE_LIBRARY_PATH):
                 try:
-                    convert_subtitles_to_vtt(original_path)
+                    convert_subtitles_to_vtt(subtitles_path)
                 except:
-                    logger.exception(f"Could not convert subtitles {str(original_path)}")
+                    logger.exception(f"Could not convert subtitles {str(subtitles_path)}")
             time.sleep(30)
