@@ -82,7 +82,6 @@ volumes:
   caddy_data:
   db_persistence:
   django_staticfiles:
-  redis_persistence:
   timeline_persistence:
 networks:
   default:
