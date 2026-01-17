@@ -118,7 +118,6 @@ class Episode(models.Model):
         elif attr.endswith("_url"):
             filename = getattr(self, attr.removesuffix("_url") + "_filename")
             return f"{settings.MOVIE_LIBRARY_URL}/{filename}"
-        return super(Episode, self).__getattr__(attr)
 
 
 @receiver(pre_delete, sender=Episode)
