@@ -1,6 +1,5 @@
 from collections.abc import Iterable
 from decimal import Decimal
-from django.conf import settings
 from pathlib import Path
 from typing import Any
 import json
@@ -19,15 +18,7 @@ small_video_height = 720
 
 def get_movies_to_convert(input_dir: Path) -> Iterable[Path]:
     for path in input_dir.iterdir():
-        small_video_file = settings.MOVIE_LIBRARY_PATH / path.stem.replace(".original", ".small.mp4")
-        large_video_file = settings.MOVIE_LIBRARY_PATH / path.stem.replace(".original", ".large.mp4")
-        if (
-            path.is_file()
-            # File is the original video
-            and path.stem.endswith(".original")
-            # File is not already converted
-            and not (small_video_file.exists() or large_video_file.exists())
-        ):
+        if path.is_file() and path.stem.endswith(".original"):
             yield path
 
 
