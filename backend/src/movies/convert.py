@@ -156,8 +156,8 @@ def convert_movie(input_file: Path):
 
     While it converts, it has the .converting.*.mp4 extension.
     """
-    tmp_file = input_file.with_suffix(".converting.mp4")
     base_name = input_file.stem.rstrip(".original")
+    tmp_file = input_file.with_name(base_name + ".converting.mp4")
     large_output_file = input_file.with_name(base_name + ".large.mp4")
     small_output_file = input_file.with_name(base_name + ".small.mp4")
 
