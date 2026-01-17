@@ -57,7 +57,7 @@ class MovieListView(View):
                         "episode": movie.episode,
                         "progress": watch_status.stopped_at if watch_status else 0,
                         "releaseYear": movie.release_year,
-                        "hasLargeVersion": movie.has_large_version,
+                        "hasLargeVersion": movie.large_video_path.exists(),
                     }
                 )
 

@@ -164,7 +164,7 @@ def convert_movie(input_file: Path):
     original_metadata = get_video_metadata(input_file)
     logger.info(
         f"Processing {str(input_file)}:\n"
-        f"- Output file: {large_output_file} then {small_output_file}\n"
+        f"- Output file: {large_output_file.name} then {small_output_file.name}\n"
         f"- Format: {original_metadata['format']}\n"
         f"- Duration: {original_metadata['duration']}\n"
         f"- Bitrate: {original_metadata['total_bitrate']}\n"
@@ -182,13 +182,13 @@ def convert_movie(input_file: Path):
     logger.info(f"Bitrate of {large_output_file} is {large_video_bitrate}")
 
     if large_video_bitrate >= small_video_bitrate * 1.25:
-        logger.info(f"Converting {large_output_file} to {small_output_file}")
+        logger.info(f"Converting {large_output_file.name} to {small_output_file.name}")
         convert_to_small_h264(large_output_file, tmp_file)
         small_output_file.unlink(missing_ok=True)
         tmp_file.rename(small_output_file)
     else:
-        logger.info(f"Skipping conversion to {small_output_file} because the large version is small enough.")
-        small_output_file.hardlink_to(large_output_file)
+        logger.info(f"Renaming {large_output_file.name} to {small_output_file.name} because it is small enough.")
+        large_output_file.rename(small_output_file)
 
     logger.info(f"Conversion finished. Deleting original at {input_file}.")
     input_file.unlink(missing_ok=True)

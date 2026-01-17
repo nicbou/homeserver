@@ -101,16 +101,6 @@ class Episode(models.Model):
         else:
             return self.NOT_CONVERTED
 
-    @property
-    def has_large_version(self):
-        # If the original file is small enough, the small and large video files are a
-        # hard link to the same file.
-        return (
-            self.small_video_path.exists()
-            and self.large_video_path.exists()
-            and not self.small_video_path.samefile(self.large_video_path)
-        )
-
     def __getattr__(self, attr) -> Path | str | None:
         if attr.endswith("_path"):
             filename = getattr(self, attr.removesuffix("_path") + "_filename")
