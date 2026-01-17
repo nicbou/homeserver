@@ -8,7 +8,7 @@ def rename_files(apps, schema_editor):
     for path in settings.MOVIE_LIBRARY_PATH.iterdir():
         # Fix mangled subtitle names from previous migration
         if path.suffix.lower() in (".srt", ".vtt"):
-            lang_suffix = "".join([s for s in path.suffixes if s in (".eng", ".fre", ".ger")])
+            lang_suffix = "".join([s for s in path.suffixes if s in (".eng", ".fre", ".ger")][0])
             new_name = path.stem.rstrip("".join(path.suffixes)) + lang_suffix + path.suffix  # "file.eng.vtt"
             path.rename(path.with_name(new_name))
 
