@@ -9,7 +9,7 @@ def rename_files(apps, schema_editor):
         # Fix mangled subtitle names from previous migration
         if path.suffix.lower() in (".srt", ".vtt"):
             lang_suffix = "".join([s for s in path.suffixes if s in (".eng", ".fre", ".ger")])
-            new_name = path.stem + lang_suffix + path.suffix  # "file.eng.vtt"
+            new_name = path.stem.rstrip("".join(path.suffixes)) + lang_suffix + path.suffix  # "file.eng.vtt"
             path.rename(path.with_name(new_name))
 
 
