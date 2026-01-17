@@ -101,13 +101,14 @@ class Episode(models.Model):
         else:
             return self.NOT_CONVERTED
 
-    def __getattr__(self, attr) -> Path | str | None:
+    def __getattribute__(self, attr) -> Path | str | None:
         if attr.endswith("_path"):
             filename = getattr(self, attr.removesuffix("_path") + "_filename")
             return settings.MOVIE_LIBRARY_PATH / filename
         elif attr.endswith("_url"):
             filename = getattr(self, attr.removesuffix("_url") + "_filename")
             return f"{settings.MOVIE_LIBRARY_URL}/{filename}"
+        return super().__getattribute__(attr)
 
 
 @receiver(pre_delete, sender=Episode)

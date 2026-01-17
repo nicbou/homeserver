@@ -9,7 +9,7 @@ class EpisodeAdmin(admin.ModelAdmin):
 
 @admin.register(EpisodeWatchStatus)
 class EpisodeWatchStatusAdmin(admin.ModelAdmin):
-    list_display = ("episode__title", "user", "last_watched", "stopped_at")
+    list_display = ("episode", "user", "last_watched", "stopped_at")
 
 
 @admin.register(StarredMovie)
