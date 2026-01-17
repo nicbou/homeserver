@@ -22,27 +22,6 @@ def get_movies_to_convert(input_dir: Path) -> Iterable[Path]:
             yield path
 
 
-def add_moov_atom(input_file: Path, output_file: Path):
-    # Add moov atom at the begining to allow streaming/seeking
-    subprocess.check_output(
-        [
-            ffmpeg_path,
-            "-i",
-            str(input_file),
-            "-c:v",
-            "copy",
-            "-movflags",
-            "+faststart+frag_keyframe+empty_moov",
-            "-loglevel",
-            "error",
-            "-strict",
-            "-2",
-            "-y",
-            str(output_file),
-        ]
-    )
-
-
 def convert_to_small_h264(input_file: Path, output_file: Path):
     """
     Converts a video to a format that can be played on the web
@@ -148,13 +127,14 @@ def get_video_metadata(file: Path) -> dict[str, Any]:
     }
 
 
-def convert_movie(input_file: Path):
+def convert_video(input_file: Path):
     """
     Converts an input file to a video that can be streamed in a web browser.
+    Extracts subtitles to separate files.
 
-    The converted movie has the same name, but the .small.mp4 and .large.mp4 extensions
+    The converted movie has the same name, but with a .small.mp4 and .large.mp4 extension
 
-    While it converts, it has the .converting.*.mp4 extension.
+    While it converts, it has the .converting.* extension.
     """
     base_name = input_file.stem.rstrip(".original")
     tmp_file = input_file.with_name(base_name + ".converting.mp4")

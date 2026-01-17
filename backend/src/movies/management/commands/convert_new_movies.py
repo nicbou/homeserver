@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from movies.convert import get_movies_to_convert, convert_movie, get_subtitles_to_convert, convert_subtitles_to_vtt
+from movies.convert import get_movies_to_convert, convert_video, get_subtitles_to_convert, convert_subtitles_to_vtt
 import logging
 import time
 
@@ -15,7 +15,7 @@ class Command(BaseCommand):
         while True:
             for movie_path in get_movies_to_convert(settings.MOVIE_LIBRARY_PATH):
                 try:
-                    convert_movie(movie_path)
+                    convert_video(movie_path)
                 except:
                     logger.exception(f"Could not convert video {str(movie_path)}")
 
