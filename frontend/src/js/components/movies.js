@@ -74,18 +74,18 @@ export default Vue.component('movies', {
     },
     onlyShowWithLargeVersion: {
       get() {
-        return this.getQueryStringBool("hd");
+        return this.getQueryStringBool("hd", true);
       },
       set(value){
-        this.setQueryStringBool("hd", value);
+        this.setQueryStringBool("hd", value, true);
       }
     },
     onlyShowWithSubtitles: {
       get() {
-        return this.getQueryStringBool("subs");
+        return this.getQueryStringBool("subs", true);
       },
       set(value){
-        this.setQueryStringBool("subs", value);
+        this.setQueryStringBool("subs", value, true);
       }
     },
     filteredMovies() {
@@ -125,16 +125,29 @@ export default Vue.component('movies', {
     this.isAdmin = (await this.$store.dispatch('users/getUserSettings')).isAdmin;
   },
   methods: {
-    getQueryStringBool(key){
+    getQueryStringBool(key, defaultVal=false){
+      if(defaultVal === "true"){
+        return this.$route.query[key] === "1" ? true : false;
+      }
       return this.$route.query[key] === "0" ? false : true;
     },
-    setQueryStringBool(key, value){
+    setQueryStringBool(key, value, defaultVal=false){
       const query = {...this.$route.query};
-      if(value){
-        delete query[key];
+      if(defaultVal === true){
+        if(value){
+          query[key] = "1";
+        }
+        else{
+          delete query[key];
+        }
       }
       else{
-        query[key] = "0";
+        if(value){
+          delete query[key];
+        }
+        else{
+          query[key] = "0";
+        }
       }
       this.$router.push({name: 'movies', query});
     },
@@ -202,7 +215,13 @@ export default Vue.component('movies', {
         </label>
         <label class="input">
           <input type="checkbox" v-model="onlyShowWithLargeVersion">
+          <i class="fas fa-plus-square"></i>
           HD
+        </label>
+        <label class="input">
+          <input type="checkbox" v-model="onlyShowWithSubtitles">
+          <i class="far fa-closed-captioning"></i>
+          Subtitles
         </label>
       </div>
       <spinner v-if="movies.length === 0"></spinner>
