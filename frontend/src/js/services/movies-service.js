@@ -26,6 +26,7 @@ export default class {
           episode.duration = jsonEpisode.duration;
           episode.dateAdded = moment(jsonEpisode.dateAdded);
           episode.hasLargeVersion = jsonEpisode.hasLargeVersion;
+          episode.hasSubtitles = jsonEpisode.hasSubtitles;
           episodes[episode.id] = episode;
           return episodes;
         },

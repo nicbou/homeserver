@@ -58,7 +58,7 @@ class MovieListView(View):
                         "progress": watch_status.stopped_at if watch_status else 0,
                         "releaseYear": episode.release_year,
                         "hasLargeVersion": episode.large_video_path.exists(),
-                        "hasSubtitles": episode.subtitles_path(".srt", "eng").exists(),
+                        "hasSubtitles": episode.subtitles_path(".vtt", "eng").exists(),
                     }
                 )
 
