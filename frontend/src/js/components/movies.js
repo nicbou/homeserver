@@ -82,7 +82,7 @@ export default Vue.component('movies', {
       });
 
       if(this.cleaningMode){
-        results = results.filter(m => m.needsCleaning);
+        results = results.filter(m => m.hasLargeVersion);
       }
 
       results = results
@@ -141,7 +141,7 @@ export default Vue.component('movies', {
       });
     },
     deleteLargeVideos(movie) {
-      movie.episodeList.filter(e => e.needsCleaning).forEach(episode => {
+      movie.episodeList.filter(e => e.hasLargeVersion).forEach(episode => {
         this.$store.dispatch('movies/deleteLargeVideo', {
           tmdbId: movie.tmdbId,
           episodeId: episode.id,
