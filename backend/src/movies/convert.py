@@ -153,7 +153,7 @@ def convert_video(input_file: Path):
     )
 
     logger.info(f"Extracting subtitles from {input_file}")
-    extract_subtitles(input_file)
+    extract_subtitles(input_file, input_file.with_name(base_name + ".srt"))
 
     logger.info(f"Converting {input_file} to {large_output_file}")
     convert_to_large_h264(input_file, tmp_file)
@@ -177,6 +177,9 @@ def convert_video(input_file: Path):
 
 
 def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
+    """
+    Get subtitles that must be converted from .srt to .vtt
+    """
     for path in input_dir.iterdir():
         if (
             path.is_file()
@@ -200,7 +203,7 @@ def convert_subtitles_to_vtt(input_file: Path):
         raise
 
 
-def extract_subtitles(input_file: Path):
+def extract_subtitles(input_file: Path, subs_file: Path):
     """
     Extract subs in .srt and .vtt format
     https://nicolasbouliane.com/blog/ffmpeg-extract-subtitles
@@ -252,7 +255,7 @@ def extract_subtitles(input_file: Path):
         processed_subtitle_languages.add(language_code)
 
         for suffix in (".srt", ".vtt"):
-            subs_output_file = input_file.with_suffix(f".{language_code}{suffix}")
+            subs_output_file = subs_file.with_suffix(f".{language_code}{suffix}")
             subs_output_file.unlink(missing_ok=True)
             logger.info(f"Extracting {language_code} subtitles to {str(subs_output_file)}")
             ffmpeg_command.extend(["-map", f"0:{stream_index}", str(subs_output_file)])
