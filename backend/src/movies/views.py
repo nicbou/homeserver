@@ -21,47 +21,48 @@ class MovieListView(View):
         """
         Return all movies/shows and their episodes as a nested list
         """
-        movies_by_tmdb_id = {}
+        episodes_by_tmdb_id = {}
 
         watch_statuses = {wp.episode_id: wp for wp in EpisodeWatchStatus.objects.filter(user=request.user)}
         starred_movies = {s.tmdb_id: s for s in StarredMovie.objects.filter(user=request.user)}
 
-        for movie in Episode.objects.all():
-            if not movies_by_tmdb_id.get(movie.tmdb_id):
-                movies_by_tmdb_id[movie.tmdb_id] = []
-            movies_by_tmdb_id[movie.tmdb_id].append(movie)
+        for episode in Episode.objects.all():
+            if not episodes_by_tmdb_id.get(episode.tmdb_id):
+                episodes_by_tmdb_id[episode.tmdb_id] = []
+            episodes_by_tmdb_id[episode.tmdb_id].append(episode)
 
         json_movies = []
-        for tmdb_id, movies in movies_by_tmdb_id.items():
-            json_movie = {
+        for tmdb_id, episodes in episodes_by_tmdb_id.items():
+            movie_or_show = {
                 "tmdbId": tmdb_id,
-                "mediaType": movies[0].media_type,
-                "title": movies[0].title,
-                "description": movies[0].description,
-                "coverUrl": movies[0].cover_url,
+                "mediaType": episodes[0].media_type,
+                "title": episodes[0].title,
+                "description": episodes[0].description,
+                "coverUrl": episodes[0].cover_url,
                 "episodes": [],
                 "isStarred": tmdb_id in starred_movies,
             }
 
-            for movie in movies:
-                watch_status = watch_statuses.get(movie.pk)
-                json_movie["episodes"].append(
+            for episode in episodes:
+                watch_status = watch_statuses.get(episode.pk)
+                movie_or_show["episodes"].append(
                     {
-                        "conversionStatus": movie.conversion_status,
-                        "dateAdded": movie.date_added,
-                        "duration": movie.duration,
-                        "id": movie.id,
+                        "conversionStatus": episode.conversion_status,
+                        "dateAdded": episode.date_added,
+                        "duration": episode.duration,
+                        "id": episode.id,
                         "lastWatched": watch_status.last_watched if watch_status else None,
-                        "largeVideoUrl": movie.large_video_url,
-                        "season": movie.season,
-                        "episode": movie.episode,
+                        "largeVideoUrl": episode.large_video_url,
+                        "season": episode.season,
+                        "episode": episode.episode,
                         "progress": watch_status.stopped_at if watch_status else 0,
-                        "releaseYear": movie.release_year,
-                        "hasLargeVersion": movie.large_video_path.exists(),
+                        "releaseYear": episode.release_year,
+                        "hasLargeVersion": episode.large_video_path.exists(),
+                        "hasSubtitles": episode.subtitles_path(".srt", "eng").exists(),
                     }
                 )
 
-            json_movies.append(json_movie)
+            json_movies.append(movie_or_show)
 
         return JsonResponse({"movies": json_movies})
 
