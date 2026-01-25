@@ -72,6 +72,14 @@ export default Vue.component('movies', {
         this.setQueryStringBool("inprogress", value);
       }
     },
+    onlyShowWithLargeVersion: {
+      get() {
+        return this.getQueryStringBool("hd");
+      },
+      set(value){
+        this.setQueryStringBool("hd", value);
+      }
+    },
     filteredMovies() {
       let results = this.movies.filter(m => {
         return (
@@ -81,7 +89,7 @@ export default Vue.component('movies', {
         );
       });
 
-      if(this.cleaningMode){
+      if(this.cleaningMode || this.onlyShowWithLargeVersion){
         results = results.filter(m => m.hasLargeVersion);
       }
 
@@ -179,6 +187,10 @@ export default Vue.component('movies', {
         <label class="input">
           <input type="checkbox" v-model="cleaningMode">
           <i class="fas fa-broom"></i> Cleaning mode
+        </label>
+        <label class="input">
+          <input type="checkbox" v-model="onlyShowWithLargeVersion">
+          HD
         </label>
       </div>
       <spinner v-if="movies.length === 0"></spinner>
