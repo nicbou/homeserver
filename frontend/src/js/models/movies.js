@@ -142,7 +142,7 @@ export class Movie {
     return Object.values(this.episodeMap).sort(episodeSorter);
   }
 
-  get needsCleaning() {
+  get hasLargeVersion() {
     return this.episodeList.some(e => e.hasLargeVersion);
   }
 }
