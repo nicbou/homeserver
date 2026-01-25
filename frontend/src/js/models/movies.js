@@ -55,10 +55,6 @@ export class Episode {
     return this.conversionStatus === ConversionStatus.CONVERTED;
   }
 
-  get needsCleaning() {
-    return this.isWatched && this.hasLargeVersion;
-  }
-
   get smallVideoUrl(){
     return this.largeVideoUrl.replace('.large.mp4', '.small.mp4');
   }
@@ -147,6 +143,6 @@ export class Movie {
   }
 
   get needsCleaning() {
-    return this.episodeList.some(e => e.needsCleaning);
+    return this.episodeList.some(e => e.hasLargeVersion);
   }
 }
