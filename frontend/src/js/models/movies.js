@@ -145,4 +145,8 @@ export class Movie {
   get hasLargeVersion() {
     return this.episodeList.some(e => e.hasLargeVersion);
   }
+
+  get hasSubtitles() {
+    return this.episodeList.some(e => e.hasSubtitles);
+  }
 }

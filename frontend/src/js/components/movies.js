@@ -80,6 +80,14 @@ export default Vue.component('movies', {
         this.setQueryStringBool("hd", value);
       }
     },
+    onlyShowWithSubtitles: {
+      get() {
+        return this.getQueryStringBool("subs");
+      },
+      set(value){
+        this.setQueryStringBool("subs", value);
+      }
+    },
     filteredMovies() {
       let results = this.movies.filter(m => {
         return (
@@ -91,6 +99,10 @@ export default Vue.component('movies', {
 
       if(this.cleaningMode || this.onlyShowWithLargeVersion){
         results = results.filter(m => m.hasLargeVersion);
+      }
+
+      if(this.onlyShowWithSubtitles){
+        results = results.filter(m => m.hasSubtitles);
       }
 
       results = results
