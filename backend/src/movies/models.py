@@ -102,13 +102,16 @@ class Episode(models.Model):
             return self.NOT_CONVERTED
 
     def __getattribute__(self, attr) -> Path | str | None:
-        if attr.endswith("_path"):
-            filename = getattr(self, attr.removesuffix("_path") + "_filename")
-            return settings.MOVIE_LIBRARY_PATH / filename
-        elif attr.endswith("_url"):
-            filename = getattr(self, attr.removesuffix("_url") + "_filename")
-            return f"{settings.MOVIE_LIBRARY_URL}/{filename}"
-        return super().__getattribute__(attr)
+        try:
+            return super().__getattribute__(attr)
+        except AttributeError as e:
+            if attr.endswith("_path"):
+                filename = getattr(self, attr.removesuffix("_path") + "_filename")
+                return settings.MOVIE_LIBRARY_PATH / filename
+            elif attr.endswith("_url"):
+                filename = getattr(self, attr.removesuffix("_url") + "_filename")
+                return f"{settings.MOVIE_LIBRARY_URL}/{filename}"
+            raise e
 
 
 @receiver(pre_delete, sender=Episode)
