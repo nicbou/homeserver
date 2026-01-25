@@ -182,7 +182,6 @@ class DeleteLargeVideoView(PermissionRequiredMixin, View):
         try:
             episode = Episode.objects.get(pk=episode_id)
             episode.large_video_path.unlink(missing_ok=True)
-            episode.large_video_path.hardlink_to(episode.small_video_path)
         except Episode.DoesNotExist:
             message = "Episode does not exist."
             logger.error(f"Failed to replace original of episode #{episode_id}. {message}")

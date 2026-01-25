@@ -26,6 +26,7 @@ def convert_to_small_h264(input_file: Path, output_file: Path):
     """
     Converts a video to a format that can be played on the web
     """
+    output_file.unlink(missing_ok=True)
     return subprocess.check_output(
         [
             ffmpeg_path,
@@ -68,7 +69,8 @@ def convert_to_small_h264(input_file: Path, output_file: Path):
 
 
 def convert_to_large_h264(input_file: Path, output_file: Path):
-    large_video_height = 2160
+    large_video_max_height = 2160
+    output_file.unlink(missing_ok=True)
     return subprocess.check_output(
         [
             ffmpeg_path,
@@ -89,7 +91,7 @@ def convert_to_large_h264(input_file: Path, output_file: Path):
             "-codec:v",  # Video: H.264 codec, best compatibility
             "libx264",
             "-filter:v",  # Video: Downscale to correct resolution, but do not upscale
-            f"scale=-2:min(ih\\,{large_video_height})",
+            f"scale=-2:min(ih\\,{large_video_max_height})",
             "-movflags",  # Enable skipping and instant streaming
             "+faststart+frag_keyframe+empty_moov",
             "-threads",  # Multithreading
@@ -188,6 +190,7 @@ def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
 
 def convert_subtitles_to_vtt(input_file: Path):
     output_file = Path(input_file).with_suffix(".vtt")
+    output_file.unlink(missing_ok=True)
     ffmpeg_command = [ffmpeg_path, "-y", "-loglevel", "error", "-i", str(input_file), str(output_file)]
     try:
         logger.info(f"Converting {input_file} subtitles to .vtt")
@@ -250,6 +253,7 @@ def extract_subtitles(input_file: Path):
 
         for suffix in (".srt", ".vtt"):
             subs_output_file = input_file.with_suffix(f".{language_code}{suffix}")
+            subs_output_file.unlink(missing_ok=True)
             logger.info(f"Extracting {language_code} subtitles to {str(subs_output_file)}")
             ffmpeg_command.extend(["-map", f"0:{stream_index}", str(subs_output_file)])
 
