@@ -126,7 +126,7 @@ export default Vue.component('movies', {
   },
   methods: {
     getQueryStringBool(key, defaultVal=false){
-      if(defaultVal === "true"){
+      if(defaultVal === true){
         return this.$route.query[key] === "1" ? true : false;
       }
       return this.$route.query[key] === "0" ? false : true;
@@ -233,6 +233,8 @@ export default Vue.component('movies', {
           <div class="icons">
             <star :movie="movie"></star>
             <i class="fas fa-check-circle" title="Seen" v-if="movie.isWatched"></i>
+            <i class="far fa-closed-captioning" title="Subtitles" v-if="movie.hasSubtitles"></i>
+            <i class="fas fa-plus-square" title="HD" v-if="movie.hasLargeVersion"></i>
           </div>
         </div>
       </div>
