@@ -55,7 +55,7 @@ def convert_to_small_h264(input_file: Path, output_file: Path):
             "-filter:v",  # Video: Downscale to correct resolution, but do not upscale
             f"scale=-2:min(ih\\,{small_video_height})",
             "-movflags",  # Enable skipping and instant streaming
-            "+faststart+frag_keyframe+empty_moov",
+            "faststart",
             "-threads",  # Multithreading
             "0",
             "-loglevel",
@@ -93,7 +93,7 @@ def convert_to_large_h264(input_file: Path, output_file: Path):
             "-filter:v",  # Video: Downscale to correct resolution, but do not upscale
             f"scale=-2:min(ih\\,{large_video_max_height})",
             "-movflags",  # Enable skipping and instant streaming
-            "+faststart+frag_keyframe+empty_moov",
+            "faststart",
             "-threads",  # Multithreading
             "0",
             "-loglevel",
