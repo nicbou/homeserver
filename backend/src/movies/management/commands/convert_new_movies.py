@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from movies.convert import get_movies_to_convert, convert_video, get_subtitles_to_convert, convert_subtitles_to_vtt
+from movies.convert import get_videos_to_process, process_video
 import logging
 import time
 
@@ -13,15 +13,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         while True:
-            for movie_path in get_movies_to_convert(settings.MOVIE_LIBRARY_PATH):
+            for movie_path in get_videos_to_process(settings.MOVIE_LIBRARY_PATH):
                 try:
-                    convert_video(movie_path)
+                    process_video(movie_path)
                 except:
                     logger.exception(f"Could not convert video {str(movie_path)}")
-
-            for subtitles_path in get_subtitles_to_convert(settings.MOVIE_LIBRARY_PATH):
-                try:
-                    convert_subtitles_to_vtt(subtitles_path)
-                except:
-                    logger.exception(f"Could not convert subtitles {str(subtitles_path)}")
             time.sleep(30)
