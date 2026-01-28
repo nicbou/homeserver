@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 ffmpeg_path = "/usr/bin/ffmpeg"
 subtitle_languages = ("eng", "fre", "ger")  # ISO 639-2/B language codes
-small_video_bitrate = 3_000_000
-small_video_height = 720
+max_video_bitrate = 8_000_000
+max_video_height = 1080
 
 
 def get_videos_to_process(input_dir: Path) -> Iterable[Path]:
@@ -21,11 +21,11 @@ def get_videos_to_process(input_dir: Path) -> Iterable[Path]:
         for path in input_dir.iterdir()
         if path.is_file()
         and path.stem.endswith(".original")
-        and not path.with_name(path.stem.removesuffix(".original") + ".small.mp4").exists()
+        and not path.with_name(path.stem.removesuffix(".original") + ".converted.mp4").exists()
     ]
 
 
-def convert_for_streaming(input_file: Path, output_file: Path, reduce_size=False):
+def convert_for_streaming(input_file: Path, output_file: Path):
     output_file.unlink(missing_ok=True)
 
     metadata = get_video_metadata(input_file)
@@ -49,29 +49,25 @@ def convert_for_streaming(input_file: Path, output_file: Path, reduce_size=False
     ffmpeg_params.extend(["-map", "0:v"])  # Video: map all streams
     ffmpeg_params.extend(["-map_chapters", "-1"])  # Chapters metadata: remove
 
-    if metadata["has_aac_audio"] and metadata["has_h264_video"] and not reduce_size:
-        logger.info(f"Audio and video streams in {input_file.name} are already ok; copying instead of converting.")
+    # Audio
+    ffmpeg_params.extend(["-codec:a", "aac"])  # Best compatibility
+    ffmpeg_params.extend(["-b:a", "128k"])  # Note: if the bitrate is smaller, it will be stretched
+    ffmpeg_params.extend(["-ac", "2"])  # Stereo
+    ffmpeg_params.extend(["-ar", "44100"])  # Audio sampling rate
+    ffmpeg_params.extend(["-af", "aresample=async=1"])  # Sync audio with video
 
-        # Copy the streams since they're already in the right format
-        ffmpeg_params.extend(["-codec:a", "copy"])
+    # Video
+    if metadata["has_h264_video"]:
+        logger.info(f"Video stream in {input_file.name} is already ok; copying instead of converting.")
         ffmpeg_params.extend(["-codec:v", "copy"])
     else:
-        # Audio
-        ffmpeg_params.extend(["-codec:a", "aac"])  # Best compatibility
-        ffmpeg_params.extend(["-b:a", "128k"])  # Note: if the bitrate is smaller, it will be stretched
-        ffmpeg_params.extend(["-ac", "2"])  # Stereo
-        ffmpeg_params.extend(["-ar", "44100"])  # Audio sampling rate
-        ffmpeg_params.extend(["-af", "aresample=async=1"])  # Sync audio with video
-
-        # Video
         ffmpeg_params.extend(["-codec:v", "libx264"])  # Best compatibility
         ffmpeg_params.extend(["-crf", "23"])
-        ffmpeg_params.extend(["-fps_mode", "cfr"])  # Enforce constant frame rate, because Airplay does not like VFR
-
-        if reduce_size:
-            ffmpeg_params.extend(["-filter:v", f"scale=-2:min(ih\\,{small_video_height})"])  # Limit resolution
-            ffmpeg_params.extend(["-maxrate", str(small_video_bitrate)])  # Limit bitrate
-            ffmpeg_params.extend(["-bufsize", str(small_video_bitrate * 1.5)])
+        ffmpeg_params.extend(["-fps_mode", "cfr"])  # Constant frame rate for better compatibility
+        ffmpeg_params.extend(["-filter:v", f"scale=-2:min(ih\\,{max_video_height})"])  # Limit resolution
+        ffmpeg_params.extend(["-maxrate", str(max_video_bitrate)])  # Limit bitrate
+        ffmpeg_params.extend(["-bufsize", str(max_video_bitrate * 1.5)])
+        ffmpeg_params.extend(["-vf", "format=yuv420p"])  # Prevent 10-bit HDR content and unusual pixel formats
 
     # Include all subtitles, converted for maximum compatibility
     if metadata["subtitle_streams"]:
@@ -149,43 +145,30 @@ def process_video(input_file: Path):
     Converts an input file to a video that can be streamed in a web browser.
     Extracts subtitles to separate files.
 
-    The converted movie has the same name, but with a .small.mp4 and .large.mp4 extension
+    The converted movie has the same name, but with a .converted.mp4 extension
 
     While it converts, it has the .converting.* extension.
     """
     base_name = input_file.stem.rstrip(".original")
     tmp_file = input_file.with_name(base_name + ".converting.mp4")
-    large_output_file = input_file.with_name(base_name + ".large.mp4")
-    small_output_file = input_file.with_name(base_name + ".small.mp4")
+    output_file = input_file.with_name(base_name + ".converted.mp4")
     subtitle_file_template = str(input_file.with_name(base_name + ".{language_code}.{extension}"))
 
     original_metadata = get_video_metadata(input_file)
     subtitle_streams_str = ", ".join([s["language"] for s in original_metadata["subtitle_streams"]]) or "None"
     logger.info(
         f"Processing {str(input_file)}:\n"
-        f"- Output file: {large_output_file.name} then {small_output_file.name}\n"
+        f"- Output file: {output_file.name}\n"
         f"- Format: {original_metadata['format']}\n"
         f"- Duration: {original_metadata['duration']}\n"
         f"- Bitrate: {original_metadata['total_bitrate']}\n"
         f"- Subtitles: {subtitle_streams_str}\n"
     )
 
-    logger.info(f"Converting {input_file.name} to {large_output_file.name}")
+    logger.info(f"Converting {input_file.name} to {output_file.name}")
     convert_for_streaming(input_file, tmp_file)
-    large_output_file.unlink(missing_ok=True)
-    tmp_file.rename(large_output_file)
-
-    large_video_bitrate = get_video_metadata(large_output_file)["total_bitrate"]
-    logger.info(f"Bitrate of {large_output_file.name} is {large_video_bitrate}")
-
-    if large_video_bitrate <= small_video_bitrate * 1.25:
-        logger.info(f"Converting {large_output_file.name} to {small_output_file.name}")
-        convert_for_streaming(large_output_file, tmp_file, reduce_size=True)
-        small_output_file.unlink(missing_ok=True)
-        tmp_file.rename(small_output_file)
-    else:
-        logger.info(f"Renaming {large_output_file.name} to {small_output_file.name} because it's small enough.")
-        large_output_file.rename(small_output_file)
+    output_file.unlink(missing_ok=True)
+    tmp_file.rename(output_file)
 
     logger.info(f"Extracting .srt and .vtt subtitles from {input_file.name}")
     extract_subtitles(input_file, subtitle_file_template)

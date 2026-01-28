@@ -68,20 +68,16 @@ class Episode(models.Model):
         return self.base_filename(f".original{original_extension}")
 
     @property
-    def cover_filename(self) -> Path:
-        return self.base_filename(".jpg", episode_number=False)
-
-    @property
     def temporary_video_filename(self) -> Path:
         return self.base_filename(".converting.mp4")
 
     @property
-    def small_video_filename(self) -> Path:
-        return self.base_filename(".small.mp4")
+    def converted_video_filename(self) -> Path:
+        return self.base_filename(".converted.mp4")
 
     @property
-    def large_video_filename(self) -> Path:
-        return self.base_filename(".large.mp4")
+    def cover_filename(self) -> Path:
+        return self.base_filename(".jpg", episode_number=False)
 
     def subtitles_filename(self, extension=".srt", language_code="eng") -> Path:
         return self.base_filename(f".{language_code}{extension}")
@@ -96,7 +92,7 @@ class Episode(models.Model):
     def conversion_status(self):
         if self.temporary_video_path.exists():
             return self.CONVERTING
-        elif self.small_video_path.exists():
+        elif self.converted_video_path.exists():
             return self.CONVERTED
         else:
             return self.NOT_CONVERTED

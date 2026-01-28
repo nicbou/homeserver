@@ -72,7 +72,7 @@ export default Vue.component('movies', {
         this.setQueryStringBool("inprogress", value);
       }
     },
-    onlyShowWithLargeVersion: {
+    onlyShowWithOriginalVersion: {
       get() {
         return this.getQueryStringBool("hd", true);
       },
@@ -97,8 +97,8 @@ export default Vue.component('movies', {
         );
       });
 
-      if(this.cleaningMode || this.onlyShowWithLargeVersion){
-        results = results.filter(m => m.hasLargeVersion);
+      if(this.cleaningMode || this.onlyShowWithOriginalVersion){
+        results = results.filter(m => m.hasOriginalVersion);
       }
 
       if(this.onlyShowWithSubtitles){
@@ -173,9 +173,9 @@ export default Vue.component('movies', {
         }),
       });
     },
-    deleteLargeVideos(movie) {
-      movie.episodeList.filter(e => e.hasLargeVersion).forEach(episode => {
-        this.$store.dispatch('movies/deleteLargeVideo', {
+    deleteOriginalVideos(movie) {
+      movie.episodeList.filter(e => e.hasOriginalVersion).forEach(episode => {
+        this.$store.dispatch('movies/deleteOriginalVideo', {
           tmdbId: movie.tmdbId,
           episodeId: episode.id,
         });
@@ -214,7 +214,7 @@ export default Vue.component('movies', {
           <i class="fas fa-broom"></i> Cleaning mode
         </label>
         <label class="input">
-          <input type="checkbox" v-model="onlyShowWithLargeVersion">
+          <input type="checkbox" v-model="onlyShowWithOriginalVersion">
           <i class="fas fa-plus-square"></i>
           HD
         </label>
@@ -229,12 +229,12 @@ export default Vue.component('movies', {
       <div class="covers">
         <div class="cover" v-for="movie in filteredMovies" :key="movie.tmdbId">
           <progress v-if="movie.percentSeen && movie.percentSeen !== 100" :value="movie.percentSeen" :max="100"/>
-          <img @click="cleaningMode ? deleteLargeVideos(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
+          <img @click="cleaningMode ? deleteOriginalVideos(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <div class="icons">
             <star :movie="movie"></star>
             <i class="fas fa-check-circle" title="Seen" v-if="movie.isWatched"></i>
             <i class="far fa-closed-captioning" title="Subtitles" v-if="movie.hasSubtitles"></i>
-            <i class="fas fa-plus-square" title="HD" v-if="movie.hasLargeVersion"></i>
+            <i class="fas fa-plus-square" title="HD" v-if="movie.hasOriginalVersion"></i>
           </div>
         </div>
       </div>

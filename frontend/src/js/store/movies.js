@@ -25,8 +25,8 @@ export default {
         Vue.delete(state.movies, tmdbId);
       }
     },
-    DELETE_LARGE_VERSION(state, {tmdbId, episodeId}) {
-      state.movies[tmdbId].episodeMap[episodeId].hasLargeVersion = false;
+    DELETE_ORIGINAL_VERSION(state, {tmdbId, episodeId}) {
+      state.movies[tmdbId].episodeMap[episodeId].hasOriginalVersion = false;
     },
     MARK_EPISODE_WATCHED(state, {tmdbId, episodeId}) {
       state.movies[tmdbId].episodeMap[episodeId].lastWatched = new Date();
@@ -84,9 +84,9 @@ export default {
       context.commit('DELETE_EPISODE', {tmdbId, episodeId});
       return await MoviesService.delete(episodeId);
     },
-    async deleteLargeVideo(context, {tmdbId, episodeId}) {
-      context.commit('DELETE_LARGE_VERSION', {tmdbId, episodeId});
-      return await MoviesService.deleteLargeVideo(episodeId);
+    async deleteOriginalVideo(context, {tmdbId, episodeId}) {
+      context.commit('DELETE_ORIGINAL_VERSION', {tmdbId, episodeId});
+      return await MoviesService.deleteOriginalVideo(episodeId);
     },
     async setEpisodeProgress(context, {tmdbId, episodeId, progress}) {
       context.commit('SET_EPISODE_PROGRESS', {tmdbId, episodeId, progress});

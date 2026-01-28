@@ -52,12 +52,12 @@ class MovieListView(View):
                         "duration": episode.duration,
                         "id": episode.id,
                         "lastWatched": watch_status.last_watched if watch_status else None,
-                        "largeVideoUrl": episode.large_video_url,
+                        "originalVideoUrl": episode.original_video_url,
                         "season": episode.season,
                         "episode": episode.episode,
                         "progress": watch_status.stopped_at if watch_status else 0,
                         "releaseYear": episode.release_year,
-                        "hasLargeVersion": episode.large_video_path.exists(),
+                        "hasOriginalVersion": episode.original_video_path.exists(),
                         "hasSubtitles": episode.subtitles_path(".vtt", "eng").exists(),
                     }
                 )
@@ -134,10 +134,9 @@ class MovieListView(View):
                     episode.triage_path = episode_triage_path
 
                     # If it replaces an existing episode
-                    episode.original_path.unlink(missing_ok=True)
-                    episode.original_path.hardlink_to(episode.triage_path)
-                    episode.small_video_path.unlink(missing_ok=True)
-                    episode.large_video_path.unlink(missing_ok=True)
+                    episode.original_video_path.unlink(missing_ok=True)
+                    episode.original_video_path.hardlink_to(episode.triage_path)
+                    episode.converted_video_path.unlink(missing_ok=True)
                     episode.save()
 
                 # Create hard link to subtitle files in the movie library
@@ -148,10 +147,12 @@ class MovieListView(View):
                     subtitles_triage_path = settings.TRIAGE_PATH / triage_options[f"subtitlesFile{json_language}"]
                     assert subtitles_triage_path.exists()
 
-                    subtitles_original_path: Path = episode.subtitles_path(".srt", sub_language)
-                    logger.info(f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_original_path)}"')
-                    subtitles_original_path.unlink(missing_ok=True)
-                    subtitles_original_path.hardlink_to(subtitles_triage_path)
+                    subtitles_original_video_path: Path = episode.subtitles_path(".srt", sub_language)
+                    logger.info(
+                        f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_original_video_path)}"'
+                    )
+                    subtitles_original_video_path.unlink(missing_ok=True)
+                    subtitles_original_video_path.hardlink_to(subtitles_triage_path)
 
                 conversion_queue.append(episode)
 
@@ -172,17 +173,17 @@ class MovieListView(View):
             logger.error(f"Could not download file at {url}.")
 
 
-class DeleteLargeVideoView(PermissionRequiredMixin, View):
+class DeleteOriginalVideoView(PermissionRequiredMixin, View):
     permission_required = "authentication.movies_manage"
 
     def delete(self, request, *args, **kwargs):
         """
-        Delete the large version of the video and replace it with a hard link to the small one
+        Delete the original version of the video and keep the converted version
         """
         episode_id = kwargs.get("id")
         try:
             episode = Episode.objects.get(pk=episode_id)
-            episode.large_video_path.unlink(missing_ok=True)
+            episode.original_video_path.unlink(missing_ok=True)
         except Episode.DoesNotExist:
             message = "Episode does not exist."
             logger.error(f"Failed to replace original of episode #{episode_id}. {message}")

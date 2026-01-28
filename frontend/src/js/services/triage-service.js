@@ -35,7 +35,7 @@ export default class {
         episode.episode = null;
         episode.conversionStatus = ConversionStatus.NOT_CONVERTED;
         episode.lastWatched = null;
-        episode.largeVideoUrl = null;
+        episode.originalVideoUrl = null;
         episode.releaseYear = releaseDate ? parseInt(releaseDate.substring(0,4)) : null;
         episode.progress = 0;
         episode.duration = null;

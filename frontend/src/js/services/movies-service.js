@@ -20,12 +20,12 @@ export default class {
           episode.episode = jsonEpisode.episode;
           episode.conversionStatus = jsonEpisode.conversionStatus;
           episode.lastWatched = jsonEpisode.lastWatched ? moment(jsonEpisode.lastWatched) : null;
-          episode.largeVideoUrl = jsonEpisode.largeVideoUrl;
+          episode.originalVideoUrl = jsonEpisode.originalVideoUrl;
           episode.releaseYear = jsonEpisode.releaseYear;
           episode.progress = jsonEpisode.progress;
           episode.duration = jsonEpisode.duration;
           episode.dateAdded = moment(jsonEpisode.dateAdded);
-          episode.hasLargeVersion = jsonEpisode.hasLargeVersion;
+          episode.hasOriginalVersion = jsonEpisode.hasOriginalVersion;
           episode.hasSubtitles = jsonEpisode.hasSubtitles;
           episodes[episode.id] = episode;
           return episodes;
@@ -115,8 +115,8 @@ export default class {
     return fetch(`/api/episodes/${id}/`, {method: 'DELETE'}).then(r => r.json());
   }
 
-  static deleteLargeVideo(id) {
-    return fetch(`/api/episodes/${id}/large/`, {method: 'DELETE'}).then(r => r.json());
+  static deleteOriginalVideo(id) {
+    return fetch(`/api/episodes/${id}/original/`, {method: 'DELETE'}).then(r => r.json());
   }
 
   static async subtitlesExist(episode){

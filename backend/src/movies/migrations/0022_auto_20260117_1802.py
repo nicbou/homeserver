@@ -9,7 +9,7 @@ def rename_files(apps, schema_editor):
         if file_path.is_dir() or file_path.suffix.lower() == ".jpg":
             continue
 
-        # .converted.mp4 -> .small.mp4
+        # .converting.mp4 -> .small.mp4
         elif file_path.name.endswith(".converted.mp4"):
             new_name = file_path.name.replace(".converted.mp4", ".small.mp4")
             logging.info(file_path.name + " ->>> " + new_name)

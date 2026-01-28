@@ -55,12 +55,8 @@ export class Episode {
     return this.conversionStatus === ConversionStatus.CONVERTED;
   }
 
-  get smallVideoUrl(){
-    return this.largeVideoUrl.replace('.large.mp4', '.small.mp4');
-  }
-
   subtitlesUrl(format, language){
-    return this.largeVideoUrl.replace('.large.mp4', `.${language}.${format}`);
+    return this.convertedVideoUrl.replace('.converted.mp4', `.${language}.${format}`);
   }
 }
 
@@ -142,8 +138,8 @@ export class Movie {
     return Object.values(this.episodeMap).sort(episodeSorter);
   }
 
-  get hasLargeVersion() {
-    return this.episodeList.some(e => e.hasLargeVersion);
+  get hasOriginalVersion() {
+    return this.episodeList.some(e => e.hasOriginalVersion);
   }
 
   get hasSubtitles() {
