@@ -55,6 +55,10 @@ export class Episode {
     return this.conversionStatus === ConversionStatus.CONVERTED;
   }
 
+  get convertedVideoUrl(){
+    return this.originalVideoUrl.replace(/\.original\.[^.]+$/, '.converted.mp4');
+  }
+
   subtitlesUrl(format, language){
     return this.convertedVideoUrl.replace('.converted.mp4', `.${language}.${format}`);
   }

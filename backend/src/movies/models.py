@@ -63,7 +63,7 @@ class Episode(models.Model):
         )
 
     @property
-    def original_filename(self):
+    def original_video_filename(self):
         original_extension = Path(self.triage_path).suffix
         return self.base_filename(f".original{original_extension}")
 
