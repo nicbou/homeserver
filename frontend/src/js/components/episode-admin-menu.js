@@ -30,7 +30,7 @@ export default Vue.component('admin-menu', {
     deleteOriginalVideo(episode) {
       this.movie.episodeList.filter(e => e.hasOriginalVersion && (!episode || e.id === episode.id)).forEach(episode => {
         this.$store.dispatch('movies/deleteOriginalVideo', {
-          tmdbId: movie.tmdbId,
+          tmdbId: this.movie.tmdbId,
           episodeId: episode.id,
         });
       });
