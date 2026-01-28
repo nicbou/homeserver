@@ -65,7 +65,7 @@ def convert_for_streaming(input_file: Path, output_file: Path, reduce_size=False
 
         # Video
         ffmpeg_params.extend(["-codec:v", "libx264"])  # Best compatibility
-        ffmpeg_params.extend(["-crf", "24" if reduce_size else "21"])
+        ffmpeg_params.extend(["-crf", "23"])
         ffmpeg_params.extend(["-fps_mode", "cfr"])  # Enforce constant frame rate, because Airplay does not like VFR
 
         if reduce_size:
