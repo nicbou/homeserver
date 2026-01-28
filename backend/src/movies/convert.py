@@ -57,7 +57,7 @@ def convert_for_streaming(input_file: Path, output_file: Path):
     )
 
     # Video
-    if metadata["has_compatible_video"]:
+    if has_compatible_video:
         logger.info(f"Video stream in {input_file.name} is already ok; copying instead of converting.")
         ffmpeg_params.extend(["-codec:v", "copy"])
     else:
