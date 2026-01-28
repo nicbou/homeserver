@@ -170,7 +170,7 @@ def process_video(input_file: Path):
     large_video_bitrate = get_video_metadata(large_output_file)["total_bitrate"]
     logger.info(f"Bitrate of {large_output_file.name} is {large_video_bitrate}")
 
-    if large_video_bitrate >= small_video_bitrate * 1.25:
+    if large_video_bitrate <= small_video_bitrate * 1.25:
         logger.info(f"Converting {large_output_file.name} to {small_output_file.name}")
         convert_for_streaming(large_output_file, tmp_file, reduce_size=True)
         small_output_file.unlink(missing_ok=True)
