@@ -108,8 +108,8 @@ def get_video_metadata(file: Path) -> dict[str, Any]:
         ).decode("utf-8")
     )
 
-    audio_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "subtitle"]
-    video_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "subtitle"]
+    audio_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "audio"]
+    video_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "video"]
     subtitle_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "subtitle"]
 
     ignored_subtitle_codecs = ("dvd_subtitle", "hdmv_pgs_subtitle")
