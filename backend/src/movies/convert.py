@@ -46,18 +46,18 @@ def convert_for_streaming(input_file: Path, output_file: Path):
     ]
 
     ffmpeg_params.extend(["-map", "0:a"])  # Audio: map all streams
-    ffmpeg_params.extend(["-map", "0:v"])  # Video: map all streams
+    ffmpeg_params.extend(["-map", "0:v:0"])  # Video: only map one stream
     ffmpeg_params.extend(["-map_chapters", "-1"])  # Chapters metadata: remove
 
-    # Audio
-    ffmpeg_params.extend(["-codec:a", "aac"])  # Best compatibility
-    ffmpeg_params.extend(["-b:a", "128k"])  # Note: if the bitrate is smaller, it will be stretched
-    ffmpeg_params.extend(["-ac", "2"])  # Stereo
-    ffmpeg_params.extend(["-ar", "44100"])  # Audio sampling rate
-    ffmpeg_params.extend(["-af", "aresample=async=1"])  # Sync audio with video
+    has_compatible_audio = all(
+        [s["codec_name"] == "aac" and s["sample_rate"] in ("44100", "48000") for s in metadata["audio_streams"]]
+    )
+    has_compatible_video = (
+        metadata["video_streams"][0]["pix_fmt"] == "yuv420p" and metadata["video_streams"][0]["codec_name"] == "h264"
+    )
 
     # Video
-    if metadata["has_h264_video"]:
+    if metadata["has_compatible_video"]:
         logger.info(f"Video stream in {input_file.name} is already ok; copying instead of converting.")
         ffmpeg_params.extend(["-codec:v", "copy"])
     else:
@@ -69,10 +69,21 @@ def convert_for_streaming(input_file: Path, output_file: Path):
         ffmpeg_params.extend(["-bufsize", str(max_video_bitrate * 1.5)])
         ffmpeg_params.extend(["-vf", "format=yuv420p"])  # Prevent 10-bit HDR content and unusual pixel formats
 
+    # Audio
+    if has_compatible_audio and has_compatible_video:  # Compatible audio still needs to be synced with video
+        logger.info(f"Audio stream in {input_file.name} is already ok; copying instead of converting.")
+        ffmpeg_params.extend(["-codec:a", "copy"])
+    else:
+        ffmpeg_params.extend(["-codec:a", "aac"])  # Best compatibility
+        ffmpeg_params.extend(["-b:a", "128k"])  # Note: if the bitrate is smaller, it will be stretched
+        ffmpeg_params.extend(["-ac", "2"])  # Stereo
+        ffmpeg_params.extend(["-ar", "44100"])  # Audio sampling rate
+        ffmpeg_params.extend(["-filter:a", "aresample=async=1"])  # Sync audio with video
+
     # Include all subtitles, converted for maximum compatibility
-    if metadata["subtitle_streams"]:
+    if metadata["supported_subtitle_streams"]:
         ffmpeg_params.extend(["-codec:s", "mov_text"])
-        for stream in metadata["subtitle_streams"]:
+        for stream in metadata["supported_subtitle_streams"]:
             ffmpeg_params.extend(["-map", f"0:{stream['index']}"])
 
     # Add the moov atom to enable streaming
@@ -89,7 +100,7 @@ def get_video_metadata(file: Path) -> dict[str, Any]:
                 "-v",
                 "error",
                 "-show_entries",
-                "format=format_name,duration:stream=index,bit_rate,width,height,codec_name:stream_tags=language,title",
+                "format:streams",
                 "-of",
                 "json",
                 str(file),
@@ -97,46 +108,25 @@ def get_video_metadata(file: Path) -> dict[str, Any]:
         ).decode("utf-8")
     )
 
-    subtitle_streams = json.loads(
-        subprocess.check_output(
-            [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "stream=index,width,codec_name:stream_tags=language,title",
-                "-select_streams",
-                "s",  # select subtitle streams only
-                "-of",
-                "json",
-                str(file),
-            ],
-        ).decode("utf-8")
-    )["streams"]
+    audio_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "subtitle"]
+    video_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "subtitle"]
+    subtitle_streams = [s for s in ffprobe_output["streams"] if s["codec_type"] == "subtitle"]
 
-    ignored_subtitle_codecs = (
-        "dvd_subtitle",
-        "hdmv_pgs_subtitle",
-    )
+    ignored_subtitle_codecs = ("dvd_subtitle", "hdmv_pgs_subtitle")
     supported_subtitle_streams = [
-        {
-            "index": s["index"],
-            "codec_name": s["codec_name"],
-            "language": s["tags"]["language"],
-            "title": s["tags"].get("title"),
-        }
+        s
         for s in subtitle_streams
-        if "width" not in s  # No image-based subtitles
-        and s["codec_name"] not in ignored_subtitle_codecs  # No unsupported codecs
+        if "width" not in s and s["codec_name"] not in ignored_subtitle_codecs  # No bitmap subs and unsupported codecs
     ]
 
     return {
         "format": ffprobe_output["format"]["format_name"],
         "total_bitrate": sum(int(s.get("bit_rate", 0)) for s in ffprobe_output["streams"]),
         "duration": int(Decimal(ffprobe_output["format"]["duration"])),
-        "subtitle_streams": supported_subtitle_streams,
-        "has_aac_audio": any(s.get("codec_name") == "aac" for s in ffprobe_output["streams"]),
-        "has_h264_video": any(s.get("codec_name") == "h264" for s in ffprobe_output["streams"]),
+        "audio_streams": audio_streams,
+        "video_streams": video_streams,
+        "subtitle_streams": subtitle_streams,
+        "supported_subtitle_streams": supported_subtitle_streams,
     }
 
 
@@ -154,15 +144,17 @@ def process_video(input_file: Path):
     output_file = input_file.with_name(base_name + ".converted.mp4")
     subtitle_file_template = str(input_file.with_name(base_name + ".{language_code}.{extension}"))
 
-    original_metadata = get_video_metadata(input_file)
-    subtitle_streams_str = ", ".join([s["language"] for s in original_metadata["subtitle_streams"]]) or "None"
+    metadata = get_video_metadata(input_file)
+    subtitle_streams_str = ", ".join([s["tags"]["language"] for s in metadata["subtitle_streams"]])
+    supported_subtitle_streams_str = ", ".join([s["tags"]["language"] for s in metadata["supported_subtitle_streams"]])
     logger.info(
         f"Processing {str(input_file)}:\n"
         f"- Output file: {output_file.name}\n"
-        f"- Format: {original_metadata['format']}\n"
-        f"- Duration: {original_metadata['duration']}\n"
-        f"- Bitrate: {original_metadata['total_bitrate']}\n"
-        f"- Subtitles: {subtitle_streams_str}\n"
+        f"- Format: {metadata['format']}\n"
+        f"- Duration: {metadata['duration']}\n"
+        f"- Bitrate: {metadata['total_bitrate']}\n"
+        f"- Subtitles: {subtitle_streams_str or 'None'}\n"
+        f"    - Supported subtitles: {supported_subtitle_streams_str or 'None'}"
     )
 
     logger.info(f"Converting {input_file.name} to {output_file.name}")
@@ -203,15 +195,16 @@ def extract_subtitles(input_file: Path, subtitle_file_template: str):
     ]
 
     processed_languages = set()  # If multiple streams have the same language, only process the first one
-    for stream in get_video_metadata(input_file)["subtitle_streams"]:
-        if stream["language"] not in subtitle_languages and stream["language"] not in processed_languages:
-            logger.info(f"Ignoring {stream['language']} subtitles in {input_file.name}")
+    for stream in get_video_metadata(input_file)["supported_subtitle_streams"]:
+        lang = stream["tags"]["language"]
+        if lang not in subtitle_languages and lang not in processed_languages:
+            logger.info(f"Ignoring {lang} subtitles in {input_file.name}")
             continue
 
-        processed_languages.add(stream["language"])
+        processed_languages.add(lang)
         for extension in ("srt", "vtt"):
-            subtitle_file = subtitle_file_template.format(language_code=stream["language"], extension=extension)
-            logger.info(f"Extracting {stream['language']} subtitles to {subtitle_file}")
+            subtitle_file = subtitle_file_template.format(language_code=lang, extension=extension)
+            logger.info(f"Extracting {lang} subtitles to {subtitle_file}")
             codec = {"vtt": "webvtt", "srt": "srt"}[extension]
             ffmpeg_command.extend(["-map", f"0:{stream['index']}", "-codec:s", codec, subtitle_file])
 
