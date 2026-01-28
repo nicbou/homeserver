@@ -45,7 +45,7 @@ export default Vue.component('admin-menu', {
     <div>
       <button class="button" v-if="canDelete && episode" @click="deleteEpisode(episode)"><i class="fas fa-trash-alt"></i> Delete this episode</button>
       <button class="button" v-if="canDelete && episode" @click="deleteSeason"><i class="fas fa-trash-alt"></i> Delete this season</button>
-      <button class="button" v-if="canDelete && (!episode || episode.hasOriginalVersion)" @click="deleteOriginalVideo(episode)"><i class="fas fa-trash-alt"></i> Delete original, keep converted version</button>
+      <button class="button" v-if="canDelete && movie.hasOriginalVersion && (!episode || episode.hasOriginalVersion)" @click="deleteOriginalVideo(episode)"><i class="fas fa-trash-alt"></i> Delete original, keep converted version</button>
       <button class="button" v-if="canDelete && isTvShow" @click="deleteAllEpisodes"><i class="fas fa-trash-alt"></i> Delete all episodes</button>
       <button class="button" v-if="canDelete && !isTvShow" @click="deleteAllEpisodes"><i class="fas fa-trash-alt"></i> Delete this movie</button>
     </div>
