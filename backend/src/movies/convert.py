@@ -16,7 +16,13 @@ small_video_height = 720
 
 
 def get_videos_to_process(input_dir: Path) -> Iterable[Path]:
-    return [path for path in input_dir.iterdir() if path.is_file() and path.stem.endswith(".original")]
+    return [
+        path
+        for path in input_dir.iterdir()
+        if path.is_file()
+        and path.stem.endswith(".original")
+        and not path.with_name(path.stem.removesuffix(".original") + ".small.mp4").exists()
+    ]
 
 
 def convert_for_streaming(input_file: Path, output_file: Path, reduce_size=False):
@@ -185,7 +191,6 @@ def process_video(input_file: Path):
     extract_subtitles(input_file, subtitle_file_template)
 
     logger.info(f"Conversion finished. Deleting original at {input_file.name}.")
-    input_file.unlink(missing_ok=True)
 
 
 def convert_subtitles_to_vtt(input_file: Path):
