@@ -74,10 +74,10 @@ export default Vue.component('movies', {
     },
     onlyShowWithOriginalVersion: {
       get() {
-        return this.getQueryStringBool("hd", true);
+        return this.getQueryStringBool("orig", true);
       },
       set(value){
-        this.setQueryStringBool("hd", value, true);
+        this.setQueryStringBool("orig", value, true);
       }
     },
     onlyShowWithSubtitles: {
@@ -216,7 +216,7 @@ export default Vue.component('movies', {
         <label class="input">
           <input type="checkbox" v-model="onlyShowWithOriginalVersion">
           <i class="fas fa-plus-square"></i>
-          HD
+          Orignal version
         </label>
         <label class="input">
           <input type="checkbox" v-model="onlyShowWithSubtitles">
@@ -234,7 +234,6 @@ export default Vue.component('movies', {
             <star :movie="movie"></star>
             <i class="fas fa-check-circle" title="Seen" v-if="movie.isWatched"></i>
             <i class="far fa-closed-captioning" title="Subtitles" v-if="movie.hasSubtitles"></i>
-            <i class="fas fa-plus-square" title="HD" v-if="movie.hasOriginalVersion"></i>
           </div>
         </div>
       </div>
