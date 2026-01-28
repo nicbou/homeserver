@@ -44,6 +44,8 @@ def convert_for_streaming(input_file: Path, output_file: Path, reduce_size=False
     ffmpeg_params.extend(["-map_chapters", "-1"])  # Chapters metadata: remove
 
     if metadata["has_aac_audio"] and metadata["has_h264_video"] and not reduce_size:
+        logger.info(f"Audio and video streams in {input_file.name} are already ok; copying instead of converting.")
+
         # Copy the streams since they're already in the right format
         ffmpeg_params.extend(["-codec:a", "copy"])
         ffmpeg_params.extend(["-codec:v", "copy"])
@@ -61,8 +63,8 @@ def convert_for_streaming(input_file: Path, output_file: Path, reduce_size=False
         ffmpeg_params.extend(["-fps_mode", "cfr"])  # Enforce constant frame rate, because Airplay does not like VFR
 
         if reduce_size:
-            ffmpeg_params.extend(["-filter:v", f"scale=-2:min(ih\\,{small_video_height})"])  # Cap resolution
-            ffmpeg_params.extend(["-maxrate", str(small_video_bitrate)])  # Desired bitrate
+            ffmpeg_params.extend(["-filter:v", f"scale=-2:min(ih\\,{small_video_height})"])  # Limit resolution
+            ffmpeg_params.extend(["-maxrate", str(small_video_bitrate)])  # Limit bitrate
             ffmpeg_params.extend(["-bufsize", str(small_video_bitrate * 1.5)])
 
     # Include all subtitles, converted for maximum compatibility
