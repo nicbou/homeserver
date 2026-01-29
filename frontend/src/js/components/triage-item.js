@@ -21,18 +21,24 @@ export default Vue.component('triage-item', {
   data(){
     return {
       description: '',
-      episode: null,
       highlightedSuggestion: null,
-      query: '',
+      query: this.file.suggestedTitle || '',
       saved: false,
       savingInProgress: false,
-      season: null,
+      season: this.file.suggestedSeason || null,
+      episode: this.file.suggestedEpisode || null,
       selectedMovie: null,
       selectedSubtitlesEn: null,
       selectedSubtitlesDe: null,
       selectedSubtitlesFr: null,
       suggestions: [],
       suggestionsVisible: false,
+    }
+  },
+  async mounted(){
+    if(this.query){
+      this.suggestions = (await TriageService.getSuggestions(this.query)).slice(0, 10);
+      this.selectedMovie = this.suggestions[0] || null;
     }
   },
   computed: {
@@ -44,8 +50,9 @@ export default Vue.component('triage-item', {
     },
     richFilename(){
       const faded = '<span class="faded">$&</span>';
-      const parts = this.file.split('/').filter(Boolean);
-      const path = '<span class="faded">' + parts.slice(0, -1).join('/') + '</span>';
+      const parts = this.file.path.split('/').filter(Boolean);
+      const joinedParts = parts.slice(0, -1).join('/').trim();
+      const path = joinedParts ? '<span class="faded">' + joinedParts + '</span>' : '';
       let filename = parts.at(-1);
 
       // Non-title words
@@ -92,7 +99,9 @@ export default Vue.component('triage-item', {
 
       filename = filename.replaceAll('.', faded);
 
-      return `${path}<br><strong>${filename}</strong>`;
+      let linebreak = (path && filename) ? '<br>' : '';
+
+      return `${path}${linebreak}<strong>${filename}</strong>`;
     },
     fullTitle(){
       if (this.selectedMovie) {
@@ -114,22 +123,6 @@ export default Vue.component('triage-item', {
     }
   },
   watch: {
-    file: {
-      immediate: true,
-      handler(newFile) {
-        const seasonRegex = /S([0-9]+)/i;
-        const seasonMatch = newFile.match(seasonRegex);
-        const episodeRegex = /[0-9 \.]E([0-9]+)/i;
-        const episodeMatch = newFile.match(episodeRegex);
-
-        if (episodeMatch) {
-          this.episode = Number(episodeMatch[1]);
-          if (seasonMatch) {
-            this.season = Number(seasonMatch[1]);
-          }
-        }
-      },
-    },
     query(newQuery) {
       this.getResults(newQuery);
     },
@@ -198,7 +191,7 @@ export default Vue.component('triage-item', {
       await MoviesService.save(
         this.selectedMovie,
         {
-          movieFile: this.file, 
+          movieFile: this.file.path, 
           subtitlesFileEn: this.selectedSubtitlesEn || null, 
           subtitlesFileDe: this.selectedSubtitlesDe || null, 
           subtitlesFileFr: this.selectedSubtitlesFr || null, 

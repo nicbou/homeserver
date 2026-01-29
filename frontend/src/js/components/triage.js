@@ -12,8 +12,6 @@ export default Vue.component('triage', {
   },
   async created(){
     const data = await TriageService.getFilesToTriage();
-    data.movies.sort();
-    data.subtitles.sort();
     this.subtitleFiles = data.subtitles;
     this.movieFiles = data.movies;
     this.loading = false;

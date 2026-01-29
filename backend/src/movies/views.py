@@ -10,6 +10,7 @@ from typing import List
 import datetime
 import json
 import logging
+import PTN
 import requests
 
 
@@ -231,8 +232,16 @@ class TriageListView(PermissionRequiredMixin, View):
 
         return JsonResponse(
             {
-                "movies": [str(f.relative_to(settings.TRIAGE_PATH)) for f in untriaged_videos],
-                "subtitles": subtitles_in_triage_dir,
+                "movies": [
+                    {
+                        "suggestedTitle": PTN.parse(str(f.relative_to(settings.TRIAGE_PATH))).get("title"),
+                        "suggestedSeason": PTN.parse(str(f.relative_to(settings.TRIAGE_PATH))).get("season"),
+                        "suggestedEpisode": PTN.parse(str(f.relative_to(settings.TRIAGE_PATH))).get("episode"),
+                        "path": str(f.relative_to(settings.TRIAGE_PATH)),
+                    }
+                    for f in sorted(untriaged_videos)
+                ],
+                "subtitles": sorted(subtitles_in_triage_dir),
             }
         )
 
