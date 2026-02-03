@@ -145,8 +145,10 @@ def process_video(input_file: Path):
     subtitle_file_template = str(input_file.with_name(base_name + ".{language_code}.{extension}"))
 
     metadata = get_video_metadata(input_file)
-    subtitle_streams_str = ", ".join([s["tags"]["language"] for s in metadata["subtitle_streams"]])
-    supported_subtitle_streams_str = ", ".join([s["tags"]["language"] for s in metadata["supported_subtitle_streams"]])
+    subtitle_streams_str = ", ".join([s["tags"].get("language", "unknown") for s in metadata["subtitle_streams"]])
+    supported_subtitle_streams_str = ", ".join(
+        [s["tags"].get("language", "unknown") for s in metadata["supported_subtitle_streams"]]
+    )
     logger.info(
         f"Processing {str(input_file)}:\n"
         f"- Output file: {output_file.name}\n"
@@ -196,7 +198,7 @@ def extract_subtitles(input_file: Path, subtitle_file_template: str):
 
     processed_languages = set()  # If multiple streams have the same language, only process the first one
     for stream in get_video_metadata(input_file)["supported_subtitle_streams"]:
-        lang = stream["tags"]["language"]
+        lang = stream["tags"].get("language", "unknown")
         if lang not in subtitle_languages and lang not in processed_languages:
             logger.info(f"Ignoring {lang} subtitles in {input_file.name}")
             continue
