@@ -122,7 +122,7 @@ export default Vue.component('triage-item', {
       return null;
     },
     directDownloadUrl(){
-      return '/triage' + this.file
+      return '/triage' + this.file.path
     }
   },
   watch: {
