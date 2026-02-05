@@ -220,7 +220,11 @@ class TriageListView(PermissionRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         files_in_triage_dir = list(settings.TRIAGE_PATH.rglob("*"))
-        videos_in_triage_dir = set(f for f in files_in_triage_dir if f.suffix.lower() in settings.VIDEO_EXTENSIONS)
+        videos_in_triage_dir = set(
+            f
+            for f in files_in_triage_dir
+            if f.suffix.lower() in settings.VIDEO_EXTENSIONS and not f.stem.lower().endswith("sample")
+        )
         triaged_paths = set(Path(f) for f in Episode.objects.values_list("triage_path", flat=True))
         untriaged_videos = videos_in_triage_dir.difference(triaged_paths)
 
