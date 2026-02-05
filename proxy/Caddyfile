@@ -38,6 +38,12 @@
         file_server
     }
 
+    handle /triage/* {
+        uri strip_prefix /triage
+        root * /var/www/movies/triage
+        file_server
+    }
+
     handle /files/* {
         uri strip_prefix /files
         root * /var/www/files

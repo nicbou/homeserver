@@ -120,6 +120,9 @@ export default Vue.component('triage-item', {
         return this.suggestions[this.highlightedSuggestion].coverUrl;
       }
       return null;
+    },
+    directDownloadUrl(){
+      return '/triage' + this.file
     }
   },
   watch: {
@@ -283,6 +286,9 @@ export default Vue.component('triage-item', {
           <div class="button-group horizontal">
             <button class="button main" @click="addToLibrary" :disabled="!selectedMovie || savingInProgress">
               <i class="fa fa-spinner fa-spin" v-if="savingInProgress"></i> Add to library
+            </button>
+            <a class="button main" :href="directDownloadUrl">
+              <i class="fas fa-download"></i> Download
             </button>
             <button class="button" @click="selectedMovie = null; highlightedSuggestion = null;" :disabled="!selectedMovie || savingInProgress">
               Clear form
