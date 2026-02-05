@@ -60,6 +60,7 @@ services:
       - "timeline_persistence:/var/www/timeline:ro"
       - "django_staticfiles:/var/www/movies/django-static:ro"
       - "${MOVIE_LIBRARY_PATH}/library:/var/www/movies/library:ro"
+      - "${MOVIE_LIBRARY_PATH}/triage:/var/www/movies/triage:ro"
       - "caddy_data:/data"
       - "caddy_config:/config"
       - "${CLOUD_FILES_PATH}:/var/www/files"

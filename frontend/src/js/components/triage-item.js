@@ -289,7 +289,7 @@ export default Vue.component('triage-item', {
             </button>
             <a class="button main" :href="directDownloadUrl">
               <i class="fas fa-download"></i> Download
-            </button>
+            </a>
             <button class="button" @click="selectedMovie = null; highlightedSuggestion = null;" :disabled="!selectedMovie || savingInProgress">
               Clear form
             </button>
