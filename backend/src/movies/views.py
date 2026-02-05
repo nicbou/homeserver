@@ -238,9 +238,9 @@ class TriageListView(PermissionRequiredMixin, View):
             {
                 "movies": [
                     {
-                        "suggestedTitle": PTN.parse(str(f.relative_to(settings.TRIAGE_PATH))).get("title"),
-                        "suggestedSeason": PTN.parse(str(f.relative_to(settings.TRIAGE_PATH))).get("season"),
-                        "suggestedEpisode": PTN.parse(str(f.relative_to(settings.TRIAGE_PATH))).get("episode"),
+                        "suggestedTitle": PTN.parse(f.name).get("title"),
+                        "suggestedSeason": PTN.parse(f.name).get("season"),
+                        "suggestedEpisode": PTN.parse(f.name).get("episode"),
                         "path": str(f.relative_to(settings.TRIAGE_PATH)),
                     }
                     for f in sorted(untriaged_videos)
