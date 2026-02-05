@@ -287,7 +287,7 @@ export default Vue.component('triage-item', {
             <button class="button main" @click="addToLibrary" :disabled="!selectedMovie || savingInProgress">
               <i class="fa fa-spinner fa-spin" v-if="savingInProgress"></i> Add to library
             </button>
-            <a class="button main" :href="directDownloadUrl">
+            <a class="button" :href="directDownloadUrl" download>
               <i class="fas fa-download"></i> Download
             </a>
             <button class="button" @click="selectedMovie = null; highlightedSuggestion = null;" :disabled="!selectedMovie || savingInProgress">
