@@ -49,10 +49,10 @@ export default Vue.component('episode-list-item', {
         </button>
         <span class="title">Episode {{ episode.episode }}</span>
         <div class="button-group horizontal">
-          <button class="button icon-only" v-if="episode.isConverting" title="Video is converting for web playback">
+          <button class="button icon-only" v-if="!episode.isConverted" title="Video is converting for web playback">
             <i class="fa fa-spinner fa-spin"></i>
           </button>
-          <router-link title="Play in browser" class="button icon-only" :to="{ name: 'episode', params: { tmdbId: movie.tmdbId, episodeId: episode.id }}">
+          <router-link v-if="episode.isConverted" title="Play in browser" class="button icon-only" :to="{ name: 'episode', params: { tmdbId: movie.tmdbId, episodeId: episode.id }}">
             <i class="fas fa-play"></i>
           </router-link>
           <button title="Download movie and subtitles" class="button icon-only" :class="{selected: downloadMenuVisible}" @click="downloadMenuVisible = !downloadMenuVisible;adminMenuVisible = false">
