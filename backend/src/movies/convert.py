@@ -25,6 +25,17 @@ def get_videos_to_process(input_dir: Path) -> Iterable[Path]:
     ]
 
 
+def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
+    """
+    User-uploaded .srt subtitles that don't have matching .vtt subtitles
+    """
+    return [
+        path
+        for path in input_dir.iterdir()
+        if path.is_file() and path.suffix == ".srt" and not path.with_suffix(".vtt").exists()
+    ]
+
+
 def convert_for_streaming(input_file: Path, output_file: Path):
     output_file.unlink(missing_ok=True)
 
@@ -166,6 +177,10 @@ def process_video(input_file: Path):
 
     logger.info(f"Extracting .srt and .vtt subtitles from {input_file.name}")
     extract_subtitles(input_file, subtitle_file_template)
+
+    for srt_file in get_subtitles_to_convert(input_file.parent):
+        if srt_file.name.startswith(base_name):
+            convert_subtitles_to_vtt(srt_file)
 
     logger.info(f"Conversion finished. Deleting original at {input_file.name}.")
 
