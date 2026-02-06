@@ -132,6 +132,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATABASE_PATH,
+        "OPTIONS": {
+            "timeout": 20,  # Longer timeout prevents "Database is locked" errors
+        },
     }
 }
 LANGUAGE_CODE = "en-us"
