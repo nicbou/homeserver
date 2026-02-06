@@ -1,4 +1,4 @@
-import { WatchStatus } from './../models/movies.js';
+import { ConversionStatus, WatchStatus } from './../models/movies.js';
 import SpinnerComponent from './spinner.js';
 import StarComponent from './star.js';
 
@@ -10,6 +10,7 @@ export default Vue.component('movies', {
       cleaningMode: false,
       isAdmin: false,
       showFilters: false,
+      ConversionStatus,
     }
   },
   computed: {
@@ -232,8 +233,9 @@ export default Vue.component('movies', {
           <img @click="cleaningMode ? deleteOriginalVideos(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <div class="icons">
             <star :movie="movie"></star>
-            <i class="fas fa-check-circle" title="Seen" v-if="movie.isWatched"></i>
-            <i class="far fa-closed-captioning" title="Subtitles" v-if="movie.hasSubtitles"></i>
+            <i title="Converting for web playback" class="far fa-hourglass" v-if="movie.conversionStatus !== ConversionStatus.CONVERTED"></i>
+            <i title="Already watched" class="fas fa-check-circle" v-if="movie.isWatched"></i>
+            <i title="Has subtitles" class="far fa-closed-captioning" v-if="movie.hasSubtitles"></i>
           </div>
         </div>
       </div>
