@@ -119,15 +119,15 @@ export default class {
     return fetch(`/api/episodes/${id}/original/`, {method: 'DELETE'}).then(r => r.json());
   }
 
-  static async subtitlesExist(episode){
+  static async subtitlesExist(episode, fileType='srt'){
     function fileExists(url) {
       return fetch(url, {method: 'HEAD', cache: 'no-cache'}).then(r => r.ok).catch(err => false)
     };
 
     const [enSubsExist, frSubsExist, deSubsExist] = await Promise.all([
-      fileExists(episode.subtitlesUrl('srt', 'eng')),
-      fileExists(episode.subtitlesUrl('srt', 'fre')),
-      fileExists(episode.subtitlesUrl('srt', 'ger'))
+      fileExists(episode.subtitlesUrl(fileType, 'eng')),
+      fileExists(episode.subtitlesUrl(fileType, 'fre')),
+      fileExists(episode.subtitlesUrl(fileType, 'ger'))
     ]);
 
     return {

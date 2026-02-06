@@ -64,7 +64,7 @@ export default Vue.component('episode', {
     this.movie = await this.$store.dispatch('movies/getMovie', this.$route.params.tmdbId);
     this.episode = this.movie.episodeMap[this.$route.params.episodeId];
 
-    MoviesService.subtitlesExist(this.episode).then(availableSubtitles => {
+    MoviesService.subtitlesExist(this.episode, 'vtt').then(availableSubtitles => {
       this.subtitlesExistEn = availableSubtitles.en;
       this.subtitlesExistFr = availableSubtitles.fr;
       this.subtitlesExistDe = availableSubtitles.de;
