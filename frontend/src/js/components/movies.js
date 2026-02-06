@@ -233,7 +233,7 @@ export default Vue.component('movies', {
           <img @click="cleaningMode ? deleteOriginalVideos(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
           <div class="icons">
             <star :movie="movie"></star>
-            <i title="Converting for web playback" class="far fa-hourglass" v-if="movie.conversionStatus !== ConversionStatus.CONVERTED"></i>
+            <i title="Converting for web playback" class="fa fa-spinner fa-spin" v-if="movie.conversionStatus !== ConversionStatus.CONVERTED"></i>
             <i title="Already watched" class="fas fa-check-circle" v-if="movie.isWatched"></i>
             <i title="Has subtitles" class="far fa-closed-captioning" v-if="movie.hasSubtitles"></i>
           </div>
