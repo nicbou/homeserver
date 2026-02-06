@@ -189,6 +189,7 @@ def extract_subtitles(input_file: Path, subtitle_file_template: str):
     """
     ffmpeg_command = [
         ffmpeg_path,
+        "-fix_sub_duration",
         "-y",
         "-loglevel",
         "error",
