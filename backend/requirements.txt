@@ -1,5 +1,5 @@
 # Backend requirements
-Django==6.0.3
+Django==6.0.5
 gpxpy==1.6.2
 gunicorn==23.0.0
 pytz
