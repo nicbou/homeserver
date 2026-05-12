@@ -48,6 +48,7 @@ export default Vue.component('episode-list-item', {
           <i class="fas fa-check-circle"></i>
         </button>
         <span class="title">Episode {{ episode.episode }}</span>
+        <i title="Has subtitles" class="far fa-closed-captioning" v-if="episode.hasSubtitles"></i>
         <div class="button-group horizontal">
           <button class="button icon-only" v-if="!episode.isConverted" title="Video is converting for web playback">
             <i class="fa fa-spinner fa-spin"></i>
