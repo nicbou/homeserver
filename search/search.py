@@ -36,6 +36,8 @@ search_engines = {
     "dict": "https://www.google.com/search?q=dictionary#dobs={query}",
     "de": "https://www.dict.cc/?s={query}",
     "deepl": "https://www.deepl.com/translator#de/en/{query_raw}",
+    "deeplw": "https://www.deepl.com/de/write#de/en/{query_raw}",
+    "dw": "https://www.deepl.com/de/write#de/en/{query_raw}",
     "g": "https://allaboutberlin.com/glossary/{query}",
     "gmail": "https://mail.google.com/mail/u/0/#search/{query}",
     "gmaps": "https://maps.google.com/maps?q={query}",
