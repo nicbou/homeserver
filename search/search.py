@@ -24,7 +24,7 @@ default = "https://www.google.com/search?q={query}"
 
 search_engines = {
     "*": "https://www.google.com/search?btnI=I'm+Feeling+Lucky&q={query}",
-    "archive": "https://web.archive.org/web/20300101000000/{query_raw}",
+    "archive": "https://web.archive.org/web/20400101000000/{query_raw}",
     "aufenthg": "https://www.gesetze-im-internet.de/aufenthg_2004/__{query}.html",
     "aufenthv": "https://www.gesetze-im-internet.de/aufenthv/__41.html",
     "bing": "https://www.bing.com/search?q={query}",
