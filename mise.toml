@@ -15,7 +15,6 @@ pre-commit = "latest"
 
 [tasks.setup]
 description = "Install local dependencies to run the project"
-alias = "i"
 run = """
 uv pip install -r backend/requirements.txt
 uv pip install -r requirements-dev.txt
@@ -27,7 +26,6 @@ mise generate git-pre-commit --hook=pre-push --write --task=pre-push
 
 [tasks.dev]
 description = "Serve the frontend and the backend in docker."
-alias = "d"
 run = """
 echo "Starting docker daemon"
 if ! docker info >/dev/null 2>&1; then
@@ -75,7 +73,6 @@ run = "pyright ."
 
 [tasks.lint]
 description = "Run various linters for the project"
-alias = "l"
 run = """
 mise shellcheck
 # mise pyright
@@ -99,7 +96,6 @@ rsync -avz -e 'ssh -p2200' root@home.nicolasbouliane.com:/media/external2/movies
 
 [tasks.format]
 description = "Automatically format the code"
-alias = "f"
 run = "ruff format"
 
 [tasks.pre-commit]
