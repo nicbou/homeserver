@@ -4,6 +4,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 from gps_logger.views import GpsLoggerView
 from movies.views import (
+    SystemStatsView,
     EpisodeProgressView,
     MovieListView,
     EpisodeView,
@@ -22,6 +23,7 @@ urlpatterns = [
     path("api/movies/<int:id>/star/", EpisodeStarView.as_view()),
     path("api/movies/<int:id>/unstar/", EpisodeUnstarView.as_view()),
     path("api/movies/triage/", TriageListView.as_view()),
+    path("api/system/", SystemStatsView.as_view()),
     path("api/episodes/<int:id>/", EpisodeView.as_view()),
     path("api/episodes/<int:id>/original/", DeleteOriginalVideoView.as_view()),
     path("api/episodes/<int:id>/progress/", EpisodeProgressView.as_view()),

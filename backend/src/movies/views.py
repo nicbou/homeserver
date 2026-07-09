@@ -250,6 +250,22 @@ class TriageListView(PermissionRequiredMixin, View):
         )
 
 
+class SystemStatsView(PermissionRequiredMixin, View):
+    permission_required = "authentication.movies_manage"
+
+    def get(self, request, *args, **kwargs):
+        import shutil
+
+        stats = shutil.disk_usage(settings.TRIAGE_PATH)
+        return JsonResponse(
+            {
+                "total": stats.total,
+                "used": stats.used,
+                "free": stats.free,
+            }
+        )
+
+
 class EpisodeWatchedView(View):
     def post(self, request, *args, **kwargs):
         episode_id = kwargs.get("id")

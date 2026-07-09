@@ -9,6 +9,7 @@ export default class {
     return fetch('/api/movies/triage/').then(r => r.json());
   }
 
+
   static async getSuggestions(query) {
     query = query.trim();
     if (query.length === 0) {
