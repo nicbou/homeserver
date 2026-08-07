@@ -230,7 +230,8 @@ export default Vue.component('movies', {
       <div class="covers">
         <div class="cover" v-for="movie in filteredMovies" :key="movie.tmdbId">
           <progress v-if="movie.percentSeen && movie.percentSeen !== 100" :value="movie.percentSeen" :max="100"/>
-          <img @click="cleaningMode ? deleteOriginalVideos(movie) : openMovie(movie)" :src="movie.coverUrl" loading="lazy"/>
+          <img @click="cleaningMode ? deleteOriginalVideos(movie) : openMovie(movie)" :src="movie.coverUrl" :alt="movie.title" loading="lazy"/>
+          <span class="cover-title" v-text="movie.title"></span>
           <div class="icons">
             <star :movie="movie"></star>
             <i title="Converting for web playback" class="fa fa-spinner fa-spin" v-if="movie.conversionStatus !== ConversionStatus.CONVERTED"></i>
