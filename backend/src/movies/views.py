@@ -242,13 +242,8 @@ class TriageListView(PermissionRequiredMixin, View):
 
         ignored_paths = {Path(f) for f in IgnoredTriageFile.objects.values_list("path", flat=True)}
 
-        # Unset triage paths that no longer exist
-        stale_triage_paths = triaged_paths - files_in_triage_dir
-        if stale_triage_paths:
-            Episode.objects.filter(triage_path__in=[str(p) for p in stale_triage_paths]).update(triage_path=None)
-        stale_ignored_paths = ignored_paths - files_in_triage_dir
-
         # Remove ignored paths that no longer exist
+        stale_ignored_paths = ignored_paths - files_in_triage_dir
         if stale_ignored_paths:
             IgnoredTriageFile.objects.filter(path__in=[str(p) for p in stale_ignored_paths]).delete()
 
