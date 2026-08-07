@@ -159,6 +159,7 @@ class MovieListView(View):
                     logger.info(f'Copying subtitles "{subtitles_triage_path!s}" to "{subtitles_original_video_path!s}"')
                     subtitles_original_video_path.unlink(missing_ok=True)
                     subtitles_original_video_path.hardlink_to(subtitles_triage_path)
+                    IgnoredTriageFile.objects.get_or_create(path=str(subtitles_triage_path))
 
                 conversion_queue.append(episode)
 
@@ -253,7 +254,7 @@ class TriageListView(PermissionRequiredMixin, View):
         subtitles_in_triage_dir = [
             str(f.relative_to(settings.TRIAGE_PATH))
             for f in files_in_triage_dir
-            if f.suffix.lower() in settings.SUBTITLE_EXTENSIONS
+            if f.suffix.lower() in settings.SUBTITLE_EXTENSIONS and f not in ignored_paths
         ]
 
         def serialize_triage_item(f, ignored):
