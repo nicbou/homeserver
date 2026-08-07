@@ -189,6 +189,14 @@ export default Vue.component('triage-item', {
         document.getElementById(`${this._uid}-season`).focus();
       }
     },
+    async ignoreFile(){
+      await TriageService.ignoreFile(this.file.path);
+      this.$set(this.file, 'ignored', true);
+    },
+    async unignoreFile(){
+      await TriageService.unignoreFile(this.file.path);
+      this.$set(this.file, 'ignored', false);
+    },
     async addToLibrary(){
       this.savingInProgress = true;
       await MoviesService.save(
@@ -290,8 +298,11 @@ export default Vue.component('triage-item', {
             <a class="button" :href="directDownloadUrl" download>
               <i class="fas fa-download"></i> Download
             </a>
-            <button class="button" @click="selectedMovie = null; highlightedSuggestion = null;" :disabled="!selectedMovie || savingInProgress">
-              Clear form
+            <button v-if="!file.ignored" class="button" @click="ignoreFile" :disabled="savingInProgress">
+              Ignore file
+            </button>
+            <button v-else class="button" @click="unignoreFile" :disabled="savingInProgress">
+              Un-ignore file
             </button>
           </div>
         </div>

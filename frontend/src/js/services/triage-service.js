@@ -9,6 +9,28 @@ export default class {
     return fetch('/api/movies/triage/').then(r => r.json());
   }
 
+  static ignoreFile(path) {
+    return fetch(
+      '/api/movies/triage/ignore/',
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({path}),
+      }
+    ).then(r => r.json());
+  }
+
+  static unignoreFile(path) {
+    return fetch(
+      '/api/movies/triage/ignore/',
+      {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({path}),
+      }
+    ).then(r => r.json());
+  }
+
 
   static async getSuggestions(query) {
     query = query.trim();

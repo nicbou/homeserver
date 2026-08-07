@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Episode, EpisodeWatchStatus, StarredMovie
+from .models import Episode, EpisodeWatchStatus, IgnoredTriageFile, StarredMovie
 
 
 @admin.register(Episode)
@@ -15,3 +15,8 @@ class EpisodeWatchStatusAdmin(admin.ModelAdmin):
 @admin.register(StarredMovie)
 class StarredMovieAdmin(admin.ModelAdmin):
     list_display = ("tmdb_id", "user")
+
+
+@admin.register(IgnoredTriageFile)
+class IgnoredTriageFileAdmin(admin.ModelAdmin):
+    list_display = ("path",)

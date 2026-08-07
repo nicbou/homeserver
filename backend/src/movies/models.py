@@ -127,6 +127,13 @@ def episode_delete(sender, instance: Episode, **kwargs):
             logger.warning(f"Could not delete file {str(path)}")
 
 
+class IgnoredTriageFile(models.Model):
+    path = models.CharField(max_length=300, unique=True)
+
+    def __str__(self):
+        return self.path
+
+
 class EpisodeWatchStatus(models.Model):
     episode = models.ForeignKey(Episode, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

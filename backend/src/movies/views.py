@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
-from .models import Episode, EpisodeWatchStatus, StarredMovie
+import datetime
+import json
+import logging
+from pathlib import Path
+
+import PTN
+import requests
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db import transaction
 from django.http import JsonResponse
 from django.views import View
-from pathlib import Path
-from typing import List
-import datetime
-import json
-import logging
-import PTN
-import requests
 
+from .models import Episode, EpisodeWatchStatus, IgnoredTriageFile, StarredMovie
 
 logger = logging.getLogger(__name__)
 
@@ -73,14 +72,18 @@ class MovieListView(View):
         """
         if not request.user.has_perm("authentication.movies_manage"):
             return JsonResponse(
-                {"result": "failure", "message": "You do not have the permission to access this feature"}, status=403
+                {
+                    "result": "failure",
+                    "message": "You do not have the permission to access this feature",
+                },
+                status=403,
             )
 
         payload = json.loads(request.body)
 
         with transaction.atomic():
             # Create the episodes
-            episodes: List[Episode] = []
+            episodes: list[Episode] = []
             for json_episode in payload.get("episodes", []):
                 episode = Episode.objects.get_or_create(
                     tmdb_id=payload.get("tmdbId"),
@@ -141,7 +144,11 @@ class MovieListView(View):
                     episode.save()
 
                 # Create hard link to subtitle files in the movie library
-                for json_language, sub_language in (("En", "eng"), ("De", "ger"), ("Fr", "fre")):
+                for json_language, sub_language in (
+                    ("En", "eng"),
+                    ("De", "ger"),
+                    ("Fr", "fre"),
+                ):
                     if not triage_options.get(f"subtitlesFile{json_language}"):
                         continue
 
@@ -149,9 +156,7 @@ class MovieListView(View):
                     assert subtitles_triage_path.exists()
 
                     subtitles_original_video_path: Path = episode.subtitles_path(".srt", sub_language)
-                    logger.info(
-                        f'Copying subtitles "{str(subtitles_triage_path)}" to "{str(subtitles_original_video_path)}"'
-                    )
+                    logger.info(f'Copying subtitles "{subtitles_triage_path!s}" to "{subtitles_original_video_path!s}"')
                     subtitles_original_video_path.unlink(missing_ok=True)
                     subtitles_original_video_path.hardlink_to(subtitles_triage_path)
 
@@ -198,7 +203,11 @@ class EpisodeView(PermissionRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         if not request.user.has_perm("authentication.movies_manage"):
             return JsonResponse(
-                {"result": "failure", "message": "You do not have the permission to access this feature"}, status=403
+                {
+                    "result": "failure",
+                    "message": "You do not have the permission to access this feature",
+                },
+                status=403,
             )
 
         episode_id = kwargs.get("id")
@@ -219,14 +228,32 @@ class TriageListView(PermissionRequiredMixin, View):
     permission_required = "authentication.movies_manage"
 
     def get(self, request, *args, **kwargs):
-        files_in_triage_dir = list(settings.TRIAGE_PATH.rglob("*"))
-        videos_in_triage_dir = set(
+        files_in_triage_dir = set(settings.TRIAGE_PATH.rglob("*"))
+
+        videos_in_triage_dir = {
             f
             for f in files_in_triage_dir
             if f.suffix.lower() in settings.VIDEO_EXTENSIONS and not f.stem.lower().endswith("sample")
-        )
-        triaged_paths = set(Path(f) for f in Episode.objects.values_list("triage_path", flat=True))
-        untriaged_videos = videos_in_triage_dir.difference(triaged_paths)
+        }
+
+        triaged_paths = {
+            Path(f) for f in Episode.objects.exclude(triage_path=None).values_list("triage_path", flat=True)
+        }
+
+        ignored_paths = {Path(f) for f in IgnoredTriageFile.objects.values_list("path", flat=True)}
+
+        # Unset triage paths that no longer exist
+        stale_triage_paths = triaged_paths - files_in_triage_dir
+        if stale_triage_paths:
+            Episode.objects.filter(triage_path__in=[str(p) for p in stale_triage_paths]).update(triage_path=None)
+        stale_ignored_paths = ignored_paths - files_in_triage_dir
+
+        # Remove ignored paths that no longer exist
+        if stale_ignored_paths:
+            IgnoredTriageFile.objects.filter(path__in=[str(p) for p in stale_ignored_paths]).delete()
+
+        videos_to_triage = videos_in_triage_dir - triaged_paths - ignored_paths
+        ignored_videos = videos_in_triage_dir & ignored_paths
 
         subtitles_in_triage_dir = [
             str(f.relative_to(settings.TRIAGE_PATH))
@@ -234,20 +261,55 @@ class TriageListView(PermissionRequiredMixin, View):
             if f.suffix.lower() in settings.SUBTITLE_EXTENSIONS
         ]
 
+        def serialize_triage_item(f, ignored):
+            parsed_title = PTN.parse(f.name)
+            return {
+                "suggestedTitle": parsed_title.get("title"),
+                "suggestedSeason": parsed_title.get("season"),
+                "suggestedEpisode": parsed_title.get("episode"),
+                "path": str(f.relative_to(settings.TRIAGE_PATH)),
+                "ignored": ignored,
+            }
+
         return JsonResponse(
             {
-                "movies": [
-                    {
-                        "suggestedTitle": PTN.parse(f.name).get("title"),
-                        "suggestedSeason": PTN.parse(f.name).get("season"),
-                        "suggestedEpisode": PTN.parse(f.name).get("episode"),
-                        "path": str(f.relative_to(settings.TRIAGE_PATH)),
-                    }
-                    for f in sorted(untriaged_videos)
-                ],
+                "movies": [serialize_triage_item(f, False) for f in sorted(videos_to_triage)]
+                + [serialize_triage_item(f, True) for f in sorted(ignored_videos)],
                 "subtitles": sorted(subtitles_in_triage_dir),
             }
         )
+
+
+class TriageIgnoreView(PermissionRequiredMixin, View):
+    """
+    Mark a triage file as ignored so it stops appearing in the triage list,
+    or un-ignore a previously ignored file.
+    """
+
+    permission_required = "authentication.movies_manage"
+
+    def post(self, request, *args, **kwargs):
+        payload = json.loads(request.body)
+        relative_path = payload.get("path")
+        if not relative_path:
+            return JsonResponse({"result": "failure", "message": "`path` is required"}, status=400)
+
+        absolute_path = settings.TRIAGE_PATH / Path(relative_path)
+        if not absolute_path.exists():
+            return JsonResponse({"result": "failure", "message": "File does not exist"}, status=404)
+
+        IgnoredTriageFile.objects.get_or_create(path=str(absolute_path))
+        return JsonResponse({"result": "success"})
+
+    def delete(self, request, *args, **kwargs):
+        payload = json.loads(request.body)
+        relative_path = payload.get("path")
+        if not relative_path:
+            return JsonResponse({"result": "failure", "message": "`path` is required"}, status=400)
+
+        absolute_path = settings.TRIAGE_PATH / Path(relative_path)
+        IgnoredTriageFile.objects.filter(path=str(absolute_path)).delete()
+        return JsonResponse({"result": "success"})
 
 
 class SystemStatsView(PermissionRequiredMixin, View):
@@ -331,8 +393,15 @@ class EpisodeProgressView(View):
             return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
         except KeyError:
             return JsonResponse(
-                {"result": "failure", "message": "`progress` is missing from request payload"}, status=400
+                {
+                    "result": "failure",
+                    "message": "`progress` is missing from request payload",
+                },
+                status=400,
             )
         except ValueError:
-            return JsonResponse({"result": "failure", "message": "`progress` must be an integer"}, status=400)
+            return JsonResponse(
+                {"result": "failure", "message": "`progress` must be an integer"},
+                status=400,
+            )
         return JsonResponse({"result": "success"})
