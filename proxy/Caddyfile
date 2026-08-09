@@ -19,6 +19,11 @@
         file_server
     }
 
+    handle /vacuum* {
+        uri strip_prefix /vacuum
+        reverse_proxy 192.168.0.32:80
+    }
+
     handle /search* {
         uri strip_prefix /search
         reverse_proxy search:80
