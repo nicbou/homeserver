@@ -50,7 +50,7 @@ services:
       - TZ=Europe/Berlin
     restart: unless-stopped
   proxy:
-    image: caddy:2.7-alpine
+    image: caddy:2.11-alpine
     environment:
       - SSL_DOMAIN
       - SSL_EMAIL

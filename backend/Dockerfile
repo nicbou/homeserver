@@ -1,4 +1,4 @@
-FROM ubuntu:25.10
+FROM ubuntu:26.10
 MAINTAINER Nicolas Bouliane
 
 # mediainfo: To check if videos are streamable
