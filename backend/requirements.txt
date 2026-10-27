@@ -1,8 +1,8 @@
 # Backend requirements
-Django==6.0.5
+Django==6.1.2
 gpxpy==1.6.2
-gunicorn==26.0.0
+gunicorn==26.2.0
 pytz
-requests==2.34.0
-python-dateutil~=2.9
+requests==2.34.2
+python-dateutil~=3.0
 parse-torrent-title~=2.8
