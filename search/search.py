@@ -20,7 +20,7 @@ def json_format(input):
         return f"Invalid JSON: {e.msg}"
 
 
-default = "https://www.google.com/search?q={query}"
+default = "https://duckduckgo.com/?q={query}"
 
 search_engines = {
     "*": "https://www.google.com/search?btnI=I'm+Feeling+Lucky&q={query}",
@@ -38,7 +38,7 @@ search_engines = {
     "deepl": "https://www.deepl.com/translator#de/en/{query_raw}",
     "deeplw": "https://www.deepl.com/de/write#de/en/{query_raw}",
     "dw": "https://www.deepl.com/de/write#de/en/{query_raw}",
-    "g": "https://allaboutberlin.com/glossary/{query}",
+    "g": "https://www.google.com/search?q={query}",
     "gmail": "https://mail.google.com/mail/u/0/#search/{query}",
     "gmaps": "https://maps.google.com/maps?q={query}",
     "gpt": "https://chat.openai.com/?q={query}",
