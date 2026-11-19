@@ -109,6 +109,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 matches = re.match(regex, keyword)
                 if matches:
                     url = command.format(*(matches.groups() + (subquery,)))
+                    break
 
         self.redirect(url, query=query, private=is_private)
 
