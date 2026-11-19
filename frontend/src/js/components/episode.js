@@ -4,7 +4,6 @@ import { MediaType } from './../models/movies.js';
 export default Vue.component('episode', {
   data(){
     return {
-      socket: null,
       ignorePlayerEvents: false,
       movie: null,
       episode: null,
@@ -106,9 +105,6 @@ export default Vue.component('episode', {
   beforeDestroy(){
     clearInterval(this.progressInterval);
     this.saveProgress();
-    if(this.socket) {
-      this.socket.close();
-    }
   },
   template: `
     <div v-if="episode" class="container">
