@@ -8,7 +8,7 @@ import re
 import urllib.parse
 
 
-permission_checks = (("^/torrents", "authentication.torrents"),)
+PERMISSION_CHECKS = (("^/torrents", "authentication.torrents"),)
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def check_auth(request):
     parsed_url = urlparse(original_url)
 
     if request.user.is_authenticated:
-        for url_matcher, permission in permission_checks:
+        for url_matcher, permission in PERMISSION_CHECKS:
             if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
                 return login_response
 
