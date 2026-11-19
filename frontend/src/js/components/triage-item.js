@@ -110,7 +110,7 @@ export default Vue.component('triage-item', {
         }
         return this.selectedMovie.title;
       }
-      return this.movieFile;
+      return this.file.suggestedTitle || '';
     },
     coverUrl(){
       if (this.selectedMovie) {
