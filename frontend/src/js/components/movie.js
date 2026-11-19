@@ -11,7 +11,6 @@ export default Vue.component('movie', {
       isAdmin: false,
       downloadMenuVisible: false,
       adminMenuVisible: false,
-      downloadMenuVisible: false,
     }
   },
   async mounted(){
