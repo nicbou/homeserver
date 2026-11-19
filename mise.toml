@@ -29,7 +29,9 @@ description = "Serve the frontend and the backend in docker."
 run = """
 echo "Starting docker daemon"
 if ! docker info >/dev/null 2>&1; then
-  open -a Docker;
+  if [ "$(uname)" = "Darwin" ]; then
+    open -a Docker;
+  fi
 fi
 
 echo "Waiting for docker daemon to be ready"
