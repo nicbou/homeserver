@@ -174,7 +174,7 @@ class MovieListView(View):
         return JsonResponse({"result": "success"})
 
     def download_file(self, url: str, filename: Path):
-        req = requests.get(url, stream=True)
+        req = requests.get(url, stream=True, timeout=10)
         if req.status_code == 200:
             with filename.open("wb") as cover_file:
                 for chunk in req:
