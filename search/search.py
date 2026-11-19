@@ -1,6 +1,6 @@
 from datetime import datetime
 from hashlib import md5
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse, quote_plus, unquote
 import csv
@@ -161,5 +161,5 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    httpd = HTTPServer(("0.0.0.0", 80), SimpleHTTPRequestHandler)
+    httpd = ThreadingHTTPServer(("0.0.0.0", 80), SimpleHTTPRequestHandler)
     httpd.serve_forever()
