@@ -160,5 +160,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes(wrapper.format(text), "UTF-8"))
 
 
-httpd = HTTPServer(("0.0.0.0", 80), SimpleHTTPRequestHandler)
-httpd.serve_forever()
+if __name__ == "__main__":
+    httpd = HTTPServer(("0.0.0.0", 80), SimpleHTTPRequestHandler)
+    httpd.serve_forever()
