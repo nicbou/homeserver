@@ -153,7 +153,9 @@ class MovieListView(View):
                         continue
 
                     subtitles_triage_path = settings.TRIAGE_PATH / triage_options[f"subtitlesFile{json_language}"]
-                    assert subtitles_triage_path.exists()
+                    if not subtitles_triage_path.exists():
+                        logger.warning(f"Subtitles file does not exist at {subtitles_triage_path!s}; skipping")
+                        continue
 
                     subtitles_original_video_path: Path = episode.subtitles_path(".srt", sub_language)
                     logger.info(f'Copying subtitles "{subtitles_triage_path!s}" to "{subtitles_original_video_path!s}"')
