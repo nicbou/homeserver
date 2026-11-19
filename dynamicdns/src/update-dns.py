@@ -3,6 +3,7 @@ from time import sleep
 import requests
 import logging
 import os
+import sys
 
 logging.basicConfig(
     **{
@@ -76,4 +77,4 @@ while True:
         sleep(30 * 60)
     else:
         logger.error("DIGITALOCEAN_TOKEN environment variable is not set. Exiting.")
-        exit()
+        sys.exit(1)
