@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import shutil
 from pathlib import Path
 
 import PTN
@@ -314,8 +315,6 @@ class SystemStatsView(PermissionRequiredMixin, View):
     permission_required = "authentication.movies_manage"
 
     def get(self, request, *args, **kwargs):
-        import shutil
-
         stats = shutil.disk_usage(settings.TRIAGE_PATH)
         return JsonResponse(
             {
