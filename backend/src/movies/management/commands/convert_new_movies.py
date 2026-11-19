@@ -16,6 +16,6 @@ class Command(BaseCommand):
             for movie_path in get_videos_to_process(settings.MOVIE_LIBRARY_PATH):
                 try:
                     process_video(movie_path)
-                except:
+                except Exception:
                     logger.exception(f"Could not convert video {str(movie_path)}")
             time.sleep(30)

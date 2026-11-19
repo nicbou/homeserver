@@ -33,7 +33,7 @@ def log_position(
     try:
         with gpx_path.open("r") as gpx_file:
             gpx = gpxpy.parse(gpx_file)
-    except:
+    except Exception:
         gpx = gpxpy.gpx.GPX()
         gpx.tracks.append(gpxpy.gpx.GPXTrack())
         gpx.tracks[-1].segments.append(gpxpy.gpx.GPXTrackSegment())

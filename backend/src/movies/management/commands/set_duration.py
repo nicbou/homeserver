@@ -18,6 +18,6 @@ class Command(BaseCommand):
             try:
                 episode.duration = get_video_metadata(episode.converted_video_path)["duration"]
                 logger.info(f"Duration: {episode.duration}")
-            except:
+            except Exception:
                 logger.exception("Could not get episode duration")
             episode.save()

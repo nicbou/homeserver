@@ -72,7 +72,7 @@ while True:
     if os.environ.get("DIGITALOCEAN_TOKEN"):
         try:
             update_dns()
-        except:
+        except Exception:
             logger.exception("Could not update DNS. Trying again later.")
         sleep(30 * 60)
     else:
