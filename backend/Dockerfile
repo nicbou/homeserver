@@ -1,5 +1,4 @@
 FROM ubuntu:26.10
-MAINTAINER Nicolas Bouliane
 
 # mediainfo: To check if videos are streamable
 # netcat: To wait for database to be available when starting the backend
