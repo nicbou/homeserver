@@ -75,7 +75,6 @@ run = "pyright ."
 description = "Run various linters for the project"
 run = """
 mise shellcheck
-# mise pyright
 mise ruff
 """
 
