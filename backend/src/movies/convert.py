@@ -150,7 +150,7 @@ def process_video(input_file: Path):
 
     While it converts, it has the .converting.* extension.
     """
-    base_name = input_file.stem.rstrip(".original")
+    base_name = input_file.stem.removesuffix(".original")
     tmp_file = input_file.with_name(base_name + ".converting.mp4")
     output_file = input_file.with_name(base_name + ".converted.mp4")
     subtitle_file_template = str(input_file.with_name(base_name + ".{language_code}.{extension}"))
