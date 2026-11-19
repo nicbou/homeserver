@@ -52,7 +52,8 @@ class GpsLoggerView(View):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            if data["_type"] == "location":
+            payload_type = data.get("_type")
+            if payload_type == "location":
                 log_position(
                     time=datetime.fromtimestamp(data["tst"], tz=timezone.utc),
                     latitude=data["lat"],
@@ -61,6 +62,8 @@ class GpsLoggerView(View):
                     accuracy=data.get("acc"),
                     source=data.get("topic", ""),
                 )
+            else:
+                logger.info(f"Ignoring OwnTracks payload of type {payload_type!r}")
             return JsonResponse({"status": "ok"})
         except json.JSONDecodeError:
             return JsonResponse({"status": "failure", "message": "Invalid JSON"}, status=400)
