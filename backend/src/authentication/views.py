@@ -55,7 +55,7 @@ def check_auth(request):
 class JSONPermissionsView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            JsonResponse({"result": "failure", "message": "Not authenticated"}, status=401)
+            return JsonResponse({"result": "failure", "message": "Not authenticated"}, status=401)
 
         return JsonResponse(
             {
