@@ -21,6 +21,16 @@ def fail(message: str, status: int = 400) -> JsonResponse:
     return JsonResponse({"result": "failure", "message": message}, status=status)
 
 
+def download_file(url: str, filename: Path):
+    req = requests.get(url, stream=True, timeout=10)
+    if req.status_code == 200:
+        with filename.open("wb") as cover_file:
+            for chunk in req:
+                cover_file.write(chunk)
+    else:
+        logger.error(f"Could not download file at {url}.")
+
+
 class MovieListView(View):
     def get(self, request, *args, **kwargs):
         """
@@ -167,18 +177,9 @@ class MovieListView(View):
             # Download the cover URL if necessary
             new_cover_url = payload.get("coverUrl")
             if new_cover_url and new_cover_url != episodes[0].cover_url:
-                self.download_file(new_cover_url, episodes[0].cover_path)
+                download_file(new_cover_url, episodes[0].cover_path)
 
         return JsonResponse({"result": "success"})
-
-    def download_file(self, url: str, filename: Path):
-        req = requests.get(url, stream=True, timeout=10)
-        if req.status_code == 200:
-            with filename.open("wb") as cover_file:
-                for chunk in req:
-                    cover_file.write(chunk)
-        else:
-            logger.error(f"Could not download file at {url}.")
 
 
 class DeleteOriginalVideoView(PermissionRequiredMixin, View):
