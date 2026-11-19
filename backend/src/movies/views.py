@@ -1,4 +1,3 @@
-import datetime
 import json
 import logging
 import shutil
@@ -10,6 +9,7 @@ from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db import transaction
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views import View
 
 from .models import Episode, EpisodeWatchStatus, IgnoredTriageFile, StarredMovie
@@ -331,7 +331,7 @@ class EpisodeWatchedView(View):
         try:
             episode = Episode.objects.get(pk=episode_id)
             watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, episode=episode)[0]
-            watch_status.last_watched = datetime.date.today()
+            watch_status.last_watched = timezone.localdate()
             watch_status.save()
         except Episode.DoesNotExist:
             return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
