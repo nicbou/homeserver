@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from django.conf import settings
 from django.http import JsonResponse
@@ -55,7 +55,7 @@ class GpsLoggerView(View):
             data = json.loads(request.body)
             if data["_type"] == "location":
                 log_position(
-                    time=datetime.utcfromtimestamp(data["tst"]),
+                    time=datetime.fromtimestamp(data["tst"], tz=timezone.utc),
                     latitude=Decimal(data["lat"]),
                     longitude=Decimal(data["lon"]),
                     elevation=data.get("alt"),
