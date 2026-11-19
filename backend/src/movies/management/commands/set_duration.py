@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 from movies.convert import get_video_metadata
 from movies.models import Episode
 import logging
-import time
 
 
 logger = logging.getLogger(__name__)
@@ -22,4 +21,3 @@ class Command(BaseCommand):
             except:
                 logger.exception("Could not get episode duration")
             episode.save()
-        time.sleep(30)
