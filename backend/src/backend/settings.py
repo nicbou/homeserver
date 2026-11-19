@@ -129,7 +129,10 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATABASE_PATH,
         "OPTIONS": {
-            "timeout": 20,  # Longer timeout prevents "Database is locked" errors
+            # WAL lets readers and the single writer coexist without blocking
+            # each other, which matters with multiple gunicorn workers.
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+            "timeout": 20,
         },
     }
 }
