@@ -9,7 +9,7 @@ import subprocess
 
 logger = logging.getLogger(__name__)
 
-ffmpeg_path = "/usr/bin/ffmpeg"
+ffmpeg_path = "ffmpeg"
 subtitle_languages = ("eng", "fre", "ger")  # ISO 639-2/B language codes
 max_video_bitrate = 8_000_000
 max_video_height = 1080
