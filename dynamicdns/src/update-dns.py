@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 domain = os.environ.get("DOMAIN")
-subdomains = [sd.strip() for sd in os.environ.get("SUBDOMAINS", "").split(",")]
+subdomains = [sd.strip() for sd in os.environ.get("SUBDOMAINS", "").split(",") if sd.strip()]
 
 headers = {
     "Authorization": f"Bearer {os.environ.get('DIGITALOCEAN_TOKEN', '')}",
