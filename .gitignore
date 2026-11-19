@@ -4,3 +4,6 @@ __pycache__
 *.pyc
 .ruff_cache/
 .pytest_cache/
+*.db
+hs.sublime-project
+hs.sublime-workspace
