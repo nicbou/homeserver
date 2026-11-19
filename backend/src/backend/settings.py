@@ -36,7 +36,7 @@ SUBTITLE_EXTENSIONS = (".srt", ".vtt")
 
 LOGIN_REDIRECT_URL = "/"
 
-SECRET_KEY = os.environ.get("BACKEND_SECRET_KEY", False)
+SECRET_KEY = os.environ["BACKEND_SECRET_KEY"]
 
 DEBUG = os.environ.get("BACKEND_DEBUG", False) == "1"
 
