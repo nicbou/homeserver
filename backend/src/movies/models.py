@@ -53,8 +53,8 @@ class Episode(models.Model):
 
         return Path(
             filename.format(
-                season="S{}".format(self.season) if self.season else "",
-                episode="E{}".format(self.episode) if self.episode else "",
+                season=f"S{self.season}" if self.season else "",
+                episode=f"E{self.episode}" if self.episode else "",
                 year=self.release_year,
                 title=self.title.replace("/", "-").replace(":", ","),
             )
@@ -139,7 +139,7 @@ class EpisodeWatchStatus(models.Model):
     last_watched = models.DateField(default=None, blank=True, null=True)
 
     def __str__(self):
-        return "{} for user {}".format(self.episode.title, self.user)
+        return f"{self.episode.title} for user {self.user}"
 
     class Meta:
         unique_together = (("episode", "user"),)
@@ -150,7 +150,7 @@ class StarredMovie(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{} for user {}".format(self.tmdb_id, self.user)
+        return f"{self.tmdb_id} for user {self.user}"
 
     class Meta:
         unique_together = (("tmdb_id", "user"),)
