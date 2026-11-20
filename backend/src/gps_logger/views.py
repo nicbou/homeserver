@@ -67,6 +67,6 @@ class GpsLoggerView(View):
             return JsonResponse({"status": "ok"})
         except json.JSONDecodeError:
             return JsonResponse({"status": "failure", "message": "Invalid JSON"}, status=400)
-        except Exception:
+        except Exception as e:
             logger.exception("Error while logging geolocation")
-            return JsonResponse({"status": "failure"}, status=500)
+            return JsonResponse({"status": "failure", "message": str(e)}, status=500)
