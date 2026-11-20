@@ -41,25 +41,6 @@ def convert_for_streaming(input_file: Path, output_file: Path):
 
     metadata = get_video_metadata(input_file)
 
-    ffmpeg_params = [
-        ffmpeg_path,
-        "-i",
-        str(input_file),
-        "-preset",  # Slower conversion, smaller output file
-        "slow",
-        "-threads",  # Multithreading
-        "0",
-        "-loglevel",  # Suppress warnings and info
-        "error",
-        "-y",  # Don't ask for user input
-        "-f",  # Use mp4 container
-        "mp4",
-    ]
-
-    ffmpeg_params.extend(["-map", "0:a"])  # Audio: map all streams
-    ffmpeg_params.extend(["-map", "0:v:0"])  # Video: only map one stream
-    ffmpeg_params.extend(["-map_chapters", "-1"])  # Chapters metadata: remove
-
     has_compatible_audio = all(
         [s["codec_name"] == "aac" and s["sample_rate"] in ("44100", "48000") for s in metadata["audio_streams"]]
     )
@@ -67,40 +48,57 @@ def convert_for_streaming(input_file: Path, output_file: Path):
         metadata["video_streams"][0]["pix_fmt"] == "yuv420p" and metadata["video_streams"][0]["codec_name"] == "h264"
     )
 
-    # Video
     if has_compatible_video:
         logger.info(f"Video stream in {input_file.name} is already ok; copying instead of converting.")
-        ffmpeg_params.extend(["-codec:v", "copy"])
+        video_params = ["-codec:v", "copy"]
     else:
-        ffmpeg_params.extend(["-codec:v", "libx264"])  # Best compatibility
-        ffmpeg_params.extend(["-crf", "23"])
-        ffmpeg_params.extend(["-fps_mode", "cfr"])  # Constant frame rate for better compatibility
-        ffmpeg_params.extend(["-filter:v", f"scale=-2:min(ih\\,{max_video_height})"])  # Limit resolution
-        ffmpeg_params.extend(["-maxrate", str(max_video_bitrate)])  # Limit bitrate
-        ffmpeg_params.extend(["-bufsize", str(max_video_bitrate * 1.5)])
-        ffmpeg_params.extend(["-vf", "format=yuv420p"])  # Prevent 10-bit HDR content and unusual pixel formats
+        video_params = [
+            "-codec:v", "libx264",
+            "-crf", "23",
+            "-fps_mode", "cfr",
+            "-filter:v", f"scale=-2:min(ih\\,{max_video_height})",
+            "-maxrate", str(max_video_bitrate),
+            "-bufsize", str(max_video_bitrate * 1.5),
+            "-vf", "format=yuv420p",
+        ]
 
-    # Audio
     if has_compatible_audio and has_compatible_video:  # Compatible audio still needs to be synced with video
         logger.info(f"Audio stream in {input_file.name} is already ok; copying instead of converting.")
-        ffmpeg_params.extend(["-codec:a", "copy"])
+        audio_params = ["-codec:a", "copy"]
     else:
-        ffmpeg_params.extend(["-codec:a", "aac"])  # Best compatibility
-        ffmpeg_params.extend(["-b:a", "128k"])  # Note: if the bitrate is smaller, it will be stretched
-        ffmpeg_params.extend(["-ac", "2"])  # Stereo
-        ffmpeg_params.extend(["-ar", "44100"])  # Audio sampling rate
-        ffmpeg_params.extend(["-filter:a", "aresample=async=1"])  # Sync audio with video
+        audio_params = [
+            "-codec:a", "aac",
+            "-b:a", "128k",
+            "-ac", "2",
+            "-ar", "44100",
+            "-filter:a", "aresample=async=1",
+        ]
 
-    # Include all subtitles, converted for maximum compatibility
+    subtitle_params = []
     if metadata["supported_subtitle_streams"]:
-        ffmpeg_params.extend(["-codec:s", "mov_text"])
+        subtitle_params = ["-codec:s", "mov_text"]
         for stream in metadata["supported_subtitle_streams"]:
-            ffmpeg_params.extend(["-map", f"0:{stream['index']}"])
+            subtitle_params += ["-map", f"0:{stream['index']}"]
 
-    # Add the moov atom to enable streaming
-    ffmpeg_params.extend(["-movflags", "+faststart"])
+    ffmpeg_params = [
+        ffmpeg_path,
+        "-i", str(input_file),
+        "-preset", "slow",
+        "-threads", "0",
+        "-loglevel", "error",
+        "-y",
+        "-f", "mp4",
+        "-map", "0:a",
+        "-map", "0:v:0",
+        "-map_chapters", "-1",
+        *video_params,
+        *audio_params,
+        *subtitle_params,
+        "-movflags", "+faststart",
+        str(output_file),
+    ]
 
-    return subprocess.check_output([*ffmpeg_params, str(output_file)])
+    return subprocess.check_output(ffmpeg_params)
 
 
 def get_video_metadata(file: Path) -> dict[str, Any]:
