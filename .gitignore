@@ -1,5 +1,6 @@
 .DS_Store
 .env
+.venv
 __pycache__
 *.pyc
 .ruff_cache/
@@ -7,3 +8,4 @@ __pycache__
 *.db
 hs.sublime-project
 hs.sublime-workspace
+node_modules
