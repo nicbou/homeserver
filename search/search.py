@@ -1,6 +1,6 @@
 from datetime import datetime
 from hashlib import md5
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse, quote_plus, unquote
 import csv
@@ -109,6 +109,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 matches = re.match(regex, keyword)
                 if matches:
                     url = command.format(*(matches.groups() + (subquery,)))
+                    break
 
         self.redirect(url, query=query, private=is_private)
 
@@ -159,5 +160,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes(wrapper.format(text), "UTF-8"))
 
 
-httpd = HTTPServer(("0.0.0.0", 80), SimpleHTTPRequestHandler)
-httpd.serve_forever()
+if __name__ == "__main__":
+    httpd = ThreadingHTTPServer(("0.0.0.0", 80), SimpleHTTPRequestHandler)
+    httpd.serve_forever()

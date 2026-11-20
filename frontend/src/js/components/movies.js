@@ -106,8 +106,6 @@ export default Vue.component('movies', {
         results = results.filter(m => m.hasSubtitles);
       }
 
-      results = results
-
       if(this.query) {
         const lowerCaseQuery = this.query.toLocaleLowerCase();
         return results.filter(movie => {

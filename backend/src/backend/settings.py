@@ -36,7 +36,7 @@ SUBTITLE_EXTENSIONS = (".srt", ".vtt")
 
 LOGIN_REDIRECT_URL = "/"
 
-SECRET_KEY = os.environ.get("BACKEND_SECRET_KEY", False)
+SECRET_KEY = os.environ["BACKEND_SECRET_KEY"]
 
 DEBUG = os.environ.get("BACKEND_DEBUG", False) == "1"
 
@@ -122,10 +122,6 @@ TEMPLATES = [
     },
 ]
 
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-]
-
 ROOT_URLCONF = "backend.urls"
 WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {
@@ -133,14 +129,16 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATABASE_PATH,
         "OPTIONS": {
-            "timeout": 20,  # Longer timeout prevents "Database is locked" errors
+            # WAL lets readers and the single writer coexist without blocking
+            # each other, which matters with multiple gunicorn workers.
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+            "timeout": 20,
         },
     }
 }
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 USE_X_FORWARDED_HOST = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -3,6 +3,7 @@ from time import sleep
 import requests
 import logging
 import os
+import sys
 
 logging.basicConfig(
     **{
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 domain = os.environ.get("DOMAIN")
-subdomains = [sd.strip() for sd in os.environ.get("SUBDOMAINS", "").split(",")]
+subdomains = [sd.strip() for sd in os.environ.get("SUBDOMAINS", "").split(",") if sd.strip()]
 
 headers = {
     "Authorization": f"Bearer {os.environ.get('DIGITALOCEAN_TOKEN', '')}",
@@ -24,9 +25,9 @@ headers = {
 
 
 def update_dns():
-    current_ip = requests.get("http://ipinfo.io/ip").text
+    current_ip = requests.get("http://ipinfo.io/ip", timeout=10).text
     all_records_url = f"https://api.digitalocean.com/v2/domains/{domain}/records?per_page=200"
-    all_records = requests.get(url=all_records_url, headers=headers).json()
+    all_records = requests.get(url=all_records_url, headers=headers, timeout=10).json()
     a_records = [r for r in all_records["domain_records"] if r["type"] == "A" and r["name"] in subdomains]
 
     existing_subdomains = set()
@@ -36,7 +37,7 @@ def update_dns():
         if record["name"] in existing_subdomains:
             logger.warning(f"{record['name']}.{domain}: Found duplicate A record")
             try:
-                r = requests.delete(url=record_url, headers=headers)
+                r = requests.delete(url=record_url, headers=headers, timeout=10)
                 r.raise_for_status()
             except HTTPError:
                 logger.exception(f"{record['name']}.{domain}: Could not delete duplicate A record.")
@@ -55,6 +56,7 @@ def update_dns():
                         "name": record["name"],
                         "data": current_ip,
                     },
+                    timeout=10,
                 )
                 r.raise_for_status()
             except HTTPError:
@@ -71,9 +73,9 @@ while True:
     if os.environ.get("DIGITALOCEAN_TOKEN"):
         try:
             update_dns()
-        except:
+        except Exception:
             logger.exception("Could not update DNS. Trying again later.")
         sleep(30 * 60)
     else:
         logger.error("DIGITALOCEAN_TOKEN environment variable is not set. Exiting.")
-        exit()
+        sys.exit(1)

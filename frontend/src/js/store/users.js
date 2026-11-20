@@ -13,7 +13,7 @@ export default {
       if (context.state.userSettingsPromise === null) {
         const userSettingsPromise = fetch('/auth/info/')
           .then(r => r.json())
-          .catch(err => []);
+          .catch(err => ({}));
         context.commit('SET_USERSETTINGS_PROMISE', userSettingsPromise);
       }
       return context.state.userSettingsPromise;

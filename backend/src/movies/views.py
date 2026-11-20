@@ -1,6 +1,6 @@
-import datetime
 import json
 import logging
+import shutil
 from pathlib import Path
 
 import PTN
@@ -9,11 +9,26 @@ from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db import transaction
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views import View
 
 from .models import Episode, EpisodeWatchStatus, IgnoredTriageFile, StarredMovie
 
 logger = logging.getLogger(__name__)
+
+
+def failure_response(message: str, status: int = 400) -> JsonResponse:
+    return JsonResponse({"result": "failure", "message": message}, status=status)
+
+
+def download_file(url: str, filename: Path):
+    req = requests.get(url, stream=True, timeout=10)
+    if req.status_code == 200:
+        with filename.open("wb") as cover_file:
+            for chunk in req:
+                cover_file.write(chunk)
+    else:
+        logger.error(f"Could not download file at {url}.")
 
 
 class MovieListView(View):
@@ -71,13 +86,7 @@ class MovieListView(View):
         Create or update a movie/show with a list of episodes.
         """
         if not request.user.has_perm("authentication.movies_manage"):
-            return JsonResponse(
-                {
-                    "result": "failure",
-                    "message": "You do not have the permission to access this feature",
-                },
-                status=403,
-            )
+            return failure_response("You do not have the permission to access this feature", status=403)
 
         payload = json.loads(request.body)
 
@@ -153,7 +162,9 @@ class MovieListView(View):
                         continue
 
                     subtitles_triage_path = settings.TRIAGE_PATH / triage_options[f"subtitlesFile{json_language}"]
-                    assert subtitles_triage_path.exists()
+                    if not subtitles_triage_path.exists():
+                        logger.warning(f"Subtitles file does not exist at {subtitles_triage_path!s}; skipping")
+                        continue
 
                     subtitles_original_video_path: Path = episode.subtitles_path(".srt", sub_language)
                     logger.info(f'Copying subtitles "{subtitles_triage_path!s}" to "{subtitles_original_video_path!s}"')
@@ -166,18 +177,9 @@ class MovieListView(View):
             # Download the cover URL if necessary
             new_cover_url = payload.get("coverUrl")
             if new_cover_url and new_cover_url != episodes[0].cover_url:
-                self.download_file(new_cover_url, episodes[0].cover_path)
+                download_file(new_cover_url, episodes[0].cover_path)
 
         return JsonResponse({"result": "success"})
-
-    def download_file(self, url: str, filename: Path):
-        req = requests.get(url, stream=True)
-        if req.status_code == 200:
-            with filename.open("wb") as cover_file:
-                for chunk in req:
-                    cover_file.write(chunk)
-        else:
-            logger.error(f"Could not download file at {url}.")
 
 
 class DeleteOriginalVideoView(PermissionRequiredMixin, View):
@@ -192,9 +194,8 @@ class DeleteOriginalVideoView(PermissionRequiredMixin, View):
             episode = Episode.objects.get(pk=episode_id)
             episode.original_video_path.unlink(missing_ok=True)
         except Episode.DoesNotExist:
-            message = "Episode does not exist."
-            logger.error(f"Failed to replace original of episode #{episode_id}. {message}")
-            return JsonResponse({"result": "failure", "message": message}, status=404)
+            logger.error(f"Failed to replace original of episode #{episode_id}. Episode does not exist.")
+            return failure_response("Episode does not exist.", status=404)
         return JsonResponse({"result": "success"})
 
 
@@ -203,13 +204,7 @@ class EpisodeView(PermissionRequiredMixin, View):
 
     def delete(self, request, *args, **kwargs):
         if not request.user.has_perm("authentication.movies_manage"):
-            return JsonResponse(
-                {
-                    "result": "failure",
-                    "message": "You do not have the permission to access this feature",
-                },
-                status=403,
-            )
+            return failure_response("You do not have the permission to access this feature", status=403)
 
         episode_id = kwargs.get("id")
         try:
@@ -217,7 +212,7 @@ class EpisodeView(PermissionRequiredMixin, View):
             logger.info(f"Deleted episode #{episode_id}.")
         except Episode.DoesNotExist:
             logger.warning(f"Could not delete episode #{episode_id}. Episode does not exist.")
-            return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
+            return failure_response("Episode does not exist", status=404)
         return JsonResponse({"result": "success"})
 
 
@@ -288,11 +283,11 @@ class TriageIgnoreView(PermissionRequiredMixin, View):
         payload = json.loads(request.body)
         relative_path = payload.get("path")
         if not relative_path:
-            return JsonResponse({"result": "failure", "message": "`path` is required"}, status=400)
+            return failure_response("`path` is required")
 
         absolute_path = settings.TRIAGE_PATH / Path(relative_path)
         if not absolute_path.exists():
-            return JsonResponse({"result": "failure", "message": "File does not exist"}, status=404)
+            return failure_response("File does not exist", status=404)
 
         IgnoredTriageFile.objects.get_or_create(path=str(absolute_path))
         return JsonResponse({"result": "success"})
@@ -301,7 +296,7 @@ class TriageIgnoreView(PermissionRequiredMixin, View):
         payload = json.loads(request.body)
         relative_path = payload.get("path")
         if not relative_path:
-            return JsonResponse({"result": "failure", "message": "`path` is required"}, status=400)
+            return failure_response("`path` is required")
 
         absolute_path = settings.TRIAGE_PATH / Path(relative_path)
         IgnoredTriageFile.objects.filter(path=str(absolute_path)).delete()
@@ -312,8 +307,6 @@ class SystemStatsView(PermissionRequiredMixin, View):
     permission_required = "authentication.movies_manage"
 
     def get(self, request, *args, **kwargs):
-        import shutil
-
         stats = shutil.disk_usage(settings.TRIAGE_PATH)
         return JsonResponse(
             {
@@ -330,10 +323,10 @@ class EpisodeWatchedView(View):
         try:
             episode = Episode.objects.get(pk=episode_id)
             watch_status = EpisodeWatchStatus.objects.get_or_create(user=request.user, episode=episode)[0]
-            watch_status.last_watched = datetime.date.today()
+            watch_status.last_watched = timezone.localdate()
             watch_status.save()
         except Episode.DoesNotExist:
-            return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
+            return failure_response("Episode does not exist", status=404)
         return JsonResponse({"result": "success"})
 
 
@@ -347,7 +340,7 @@ class EpisodeUnwatchedView(View):
         except EpisodeWatchStatus.DoesNotExist:
             pass
         except Episode.DoesNotExist:
-            return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
+            return failure_response("Episode does not exist", status=404)
         return JsonResponse({"result": "success"})
 
 
@@ -359,7 +352,7 @@ class EpisodeStarView(View):
             star = StarredMovie.objects.get_or_create(user=request.user, tmdb_id=episode.tmdb_id)[0]
             star.save()
         except Episode.DoesNotExist:
-            return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
+            return failure_response("Episode does not exist", status=404)
         return JsonResponse({"result": "success"})
 
 
@@ -372,7 +365,7 @@ class EpisodeUnstarView(View):
         except StarredMovie.DoesNotExist:
             pass
         except Episode.DoesNotExist:
-            return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
+            return failure_response("Episode does not exist", status=404)
         return JsonResponse({"result": "success"})
 
 
@@ -386,18 +379,9 @@ class EpisodeProgressView(View):
             watch_status.stopped_at = int(payload["progress"])
             watch_status.save()
         except Episode.DoesNotExist:
-            return JsonResponse({"result": "failure", "message": "Episode does not exist"}, status=404)
+            return failure_response("Episode does not exist", status=404)
         except KeyError:
-            return JsonResponse(
-                {
-                    "result": "failure",
-                    "message": "`progress` is missing from request payload",
-                },
-                status=400,
-            )
+            return failure_response("`progress` is missing from request payload")
         except ValueError:
-            return JsonResponse(
-                {"result": "failure", "message": "`progress` must be an integer"},
-                status=400,
-            )
+            return failure_response("`progress` must be an integer")
         return JsonResponse({"result": "success"})

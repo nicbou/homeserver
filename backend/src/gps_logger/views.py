@@ -1,5 +1,4 @@
-from datetime import datetime
-from decimal import Decimal
+from datetime import datetime, timezone
 from django.conf import settings
 from django.http import JsonResponse
 from django.views import View
@@ -14,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 def log_position(
     time: datetime,
-    latitude: Decimal,
-    longitude: Decimal,
+    latitude: float,
+    longitude: float,
     elevation: int,
     accuracy: int,  # Available but unused
     source: str,
@@ -34,7 +33,7 @@ def log_position(
     try:
         with gpx_path.open("r") as gpx_file:
             gpx = gpxpy.parse(gpx_file)
-    except:
+    except Exception:
         gpx = gpxpy.gpx.GPX()
         gpx.tracks.append(gpxpy.gpx.GPXTrack())
         gpx.tracks[-1].segments.append(gpxpy.gpx.GPXTrackSegment())
@@ -55,9 +54,9 @@ class GpsLoggerView(View):
             data = json.loads(request.body)
             if data["_type"] == "location":
                 log_position(
-                    time=datetime.utcfromtimestamp(data["tst"]),
-                    latitude=Decimal(data["lat"]),
-                    longitude=Decimal(data["lon"]),
+                    time=datetime.fromtimestamp(data["tst"], tz=timezone.utc),
+                    latitude=data["lat"],
+                    longitude=data["lon"],
                     elevation=data.get("alt"),
                     accuracy=data.get("acc"),
                     source=data.get("topic", ""),
