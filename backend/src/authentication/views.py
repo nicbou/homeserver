@@ -4,52 +4,46 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.views import View
 from urllib.parse import urlparse
 import logging
-import re
 import urllib.parse
 
-
-PERMISSION_CHECKS = (("^/torrents", "authentication.torrents"),)
 
 logger = logging.getLogger(__name__)
 
 
 def check_auth(request):
     original_url = request.META.get("HTTP_X_FORWARDED_URI")
-    login_url = "/auth/?next=" + urllib.parse.quote_plus(original_url)
+    login_url = "/auth/?next=" + urllib.parse.quote_plus(original_url or "")
 
     continue_response = HttpResponse()
     login_response = HttpResponseRedirect(login_url, status=302)
 
     if not original_url:
         return login_response
-    elif original_url.startswith("/auth/"):
+    if original_url.startswith("/auth/"):
         return continue_response
 
-    parsed_url = urlparse(original_url)
+    path = urlparse(original_url).path
 
     if request.user.is_authenticated:
-        for url_matcher, permission in PERMISSION_CHECKS:
-            if re.match(url_matcher, original_url) and not request.user.has_perm(permission):
-                return login_response
-
-        if parsed_url.path.startswith(("/timeline", "/files", "/vacuum")) and not request.user.is_superuser:
+        if path.startswith("/torrents") and not request.user.has_perm("authentication.torrents"):
             return login_response
-
+        if path.startswith(("/timeline", "/files", "/vacuum")) and not request.user.is_superuser:
+            return login_response
         return continue_response
-    else:
-        # Enable unauthenticated access to movie files, for Apple TV and Chromecast to work
-        if parsed_url.path.startswith("/movies/"):
-            return continue_response
 
-        # Also accept basic auth as a fallback. OwnTracks uses basic auth for GPS pings.
-        auth_header = request.META.get("HTTP_AUTHORIZATION")
-        if not auth_header or not auth_header.startswith("Basic "):
-            return login_response
+    # Enable unauthenticated access to movie files, for Apple TV and Chromecast to work
+    if path.startswith("/movies/"):
+        return continue_response
 
-        encoded = auth_header.split(" ", 1)[1].strip()
-        username, password = b64decode(encoded).decode("utf-8").split(":", 1)
-        user = authenticate(request, username=username, password=password)
-        return continue_response if user else login_response
+    # Also accept basic auth as a fallback. OwnTracks uses basic auth for GPS pings.
+    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    if not auth_header.startswith("Basic "):
+        return login_response
+
+    encoded = auth_header.split(" ", 1)[1].strip()
+    username, password = b64decode(encoded).decode("utf-8").split(":", 1)
+    user = authenticate(request, username=username, password=password)
+    return continue_response if user else login_response
 
 
 class JSONPermissionsView(View):
