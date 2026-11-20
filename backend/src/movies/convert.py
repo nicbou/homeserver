@@ -36,11 +36,10 @@ def get_subtitles_to_convert(input_dir: Path) -> Iterable[Path]:
     ]
 
 
-def convert_for_streaming(input_file: Path, output_file: Path, metadata: dict[str, Any] | None = None):
+def convert_for_streaming(input_file: Path, output_file: Path):
     output_file.unlink(missing_ok=True)
 
-    if metadata is None:
-        metadata = get_video_metadata(input_file)
+    metadata = get_video_metadata(input_file)
 
     ffmpeg_params = [
         ffmpeg_path,
@@ -172,12 +171,12 @@ def process_video(input_file: Path):
     )
 
     logger.info(f"Converting {input_file.name} to {output_file.name}")
-    convert_for_streaming(input_file, tmp_file, metadata=metadata)
+    convert_for_streaming(input_file, tmp_file)
     output_file.unlink(missing_ok=True)
     tmp_file.rename(output_file)
 
     logger.info(f"Extracting .srt and .vtt subtitles from {input_file.name}")
-    extract_subtitles(input_file, subtitle_file_template, metadata=metadata)
+    extract_subtitles(input_file, subtitle_file_template)
 
     for srt_file in get_subtitles_to_convert(input_file.parent):
         if srt_file.name.startswith(base_name):
@@ -198,14 +197,11 @@ def convert_subtitles_to_vtt(input_file: Path):
         raise
 
 
-def extract_subtitles(input_file: Path, subtitle_file_template: str, metadata: dict[str, Any] | None = None):
+def extract_subtitles(input_file: Path, subtitle_file_template: str):
     """
     Extract subs to .srt and .vtt files
     https://nicolasbouliane.com/blog/ffmpeg-extract-subtitles
     """
-    if metadata is None:
-        metadata = get_video_metadata(input_file)
-
     ffmpeg_command = [
         ffmpeg_path,
         "-fix_sub_duration",
@@ -217,7 +213,7 @@ def extract_subtitles(input_file: Path, subtitle_file_template: str, metadata: d
     ]
 
     processed_languages = set()  # If multiple streams have the same language, only process the first one
-    for stream in metadata["supported_subtitle_streams"]:
+    for stream in get_video_metadata(input_file)["supported_subtitle_streams"]:
         lang = stream["tags"].get("language", "unknown")
         if lang not in subtitle_languages and lang not in processed_languages:
             logger.info(f"Ignoring {lang} subtitles in {input_file.name}")
