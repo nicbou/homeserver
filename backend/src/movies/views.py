@@ -1,6 +1,7 @@
 import json
 import logging
 import shutil
+from collections import defaultdict
 from pathlib import Path
 
 import PTN
@@ -36,14 +37,12 @@ class MovieListView(View):
         """
         Return all movies/shows and their episodes as a nested list
         """
-        episodes_by_tmdb_id = {}
-
         watch_statuses = {wp.episode_id: wp for wp in EpisodeWatchStatus.objects.filter(user=request.user)}
         starred_movies = {s.tmdb_id: s for s in StarredMovie.objects.filter(user=request.user)}
+        library_files = {f.name for f in settings.MOVIE_LIBRARY_PATH.iterdir() if f.is_file()}
 
+        episodes_by_tmdb_id: dict[str, list[Episode]] = defaultdict(list)
         for episode in Episode.objects.all():
-            if not episodes_by_tmdb_id.get(episode.tmdb_id):
-                episodes_by_tmdb_id[episode.tmdb_id] = []
             episodes_by_tmdb_id[episode.tmdb_id].append(episode)
 
         json_movies = []
@@ -72,8 +71,8 @@ class MovieListView(View):
                         "episode": episode.episode,
                         "progress": watch_status.stopped_at if watch_status else 0,
                         "releaseYear": episode.release_year,
-                        "hasOriginalVersion": episode.original_video_path.exists(),
-                        "hasSubtitles": episode.subtitles_path(".vtt", "eng").exists(),
+                        "hasOriginalVersion": str(episode.original_video_filename) in library_files,
+                        "hasSubtitles": str(episode.subtitles_filename(".vtt", "eng")) in library_files,
                     }
                 )
 
