@@ -20,7 +20,7 @@ def get_videos_to_process(input_dir: Path) -> Iterable[Path]:
         path
         for path in input_dir.iterdir()
         if path.is_file()
-        and ".original" in path.suffixes
+        and path.stem.endswith(".original")
         and not path.with_name(path.stem.removesuffix(".original") + ".converted.mp4").exists()
     ]
 
